@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Player;
@@ -23,72 +22,56 @@ public class PlayerService {
 
   private float moveMultiplier = 1f;
 
-  private float stateTime;
+  private float feetStateTime;
+
+  private float topStateTime;
 
   private float speed = 1f;
 
-  private float feetAngle = 0;
+  private float moveDirectionAngle = 0;
 
-  private float topAngle = 0;
+  private float modelFrontAngle = 0;
 
   public PlayerService() {
     initPlayer();
     posX = 500;
     posY = 500;
   }
+
   private Player player;
 
-  public void updateStateTime(){
-    if (CharacterFeetStatus.RUN.equals(player.getFeetStatus())){
-      stateTime += Gdx.graphics.getDeltaTime();
+  public void updateStateTime() {
+    if (CharacterFeetStatus.RUN.equals(player.getFeetStatus())) {
+      feetStateTime += Gdx.graphics.getDeltaTime();
     }
-
+    topStateTime += Gdx.graphics.getDeltaTime();
   }
 
-  private void rotateFeetTo(float angle) {
-    float v = (angle - feetAngle);
-    v = v < 0 ? 360 + v : v;
-
-    if (feetAngle != angle) {
-      if (v <= 180) {
-        if (feetAngle < 0) {
-          feetAngle = 358;
-        }
-        feetAngle = feetAngle - 2;
-      } else if (v > 180) {
-        if (feetAngle > 360) {
-          feetAngle = 2;
-        }
-        feetAngle = feetAngle + 2;
-      }
-    }
-  }
-
-  public void rotateTop(){
+  public void rotateModel() {
     float xInput = Gdx.input.getX();
     float yInput = (Gdx.graphics.getHeight() - Gdx.input.getY());
 
-    topAngle = MathUtils.radiansToDegrees * MathUtils.atan2(yInput - posY, xInput - posX) + 20;
+    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(yInput - posY, xInput - posX) + 20;
   }
 
   public void moveLeft() {
     posX = posX - (speed * moveMultiplier);
-    rotateFeetTo(0);
+    moveDirectionAngle = 220;
   }
 
   public void moveRight() {
     posX = posX + (1 * moveMultiplier);
-    rotateFeetTo(180);
+    moveDirectionAngle = 40;
   }
 
   public void moveUp() {
     posY = posY + (1 * moveMultiplier);
-    rotateFeetTo(270);
+    moveDirectionAngle = 130;
   }
 
   public void moveDown() {
     posY = posY - (1 * moveMultiplier);
-    rotateFeetTo(90);
+    moveDirectionAngle = 300;
   }
 
   public void drawPlayer(SpriteBatch batch) {
@@ -97,36 +80,46 @@ public class PlayerService {
   }
 
   private void drawFeetSprite(SpriteBatch batch) {
-    Sprite sprite = new Sprite(getActualFrame(stateTime));
-    sprite.setX(posX+(20f/player.getZoomMultiplier()));
-    sprite.setY(posY+(30f/player.getZoomMultiplier()));
-    sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    sprite.setRotation(topAngle);
+    Sprite sprite = new Sprite(getActualFrame(feetStateTime));
+    sprite.setX(posX + (20f / player.getZoomMultiplier()));
+    sprite.setY(posY + (30f / player.getZoomMultiplier()));
+    sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
+    sprite.setRotation(modelFrontAngle-20);
     sprite.draw(batch);
   }
 
   private void drawTopSprite(SpriteBatch batch) {
-    Sprite sprite = new Sprite(getActualFrameTop(stateTime));
+    Sprite sprite = new Sprite(getActualFrameTop(topStateTime));
     sprite.setX(posX);
     sprite.setY(posY);
     sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    sprite.setRotation(topAngle);
+    sprite.setRotation(modelFrontAngle-20);
     sprite.draw(batch);
   }
 
   private Texture getActualFrame(float stateTime) {
-//    if (player.getFeetStatus() == CharacterFeetStatus.WALK) {
-//      return player.getWalkAnimation().getKeyFrame(stateTime, true);
-//    } else if (player.getFeetStatus() == CharacterFeetStatus.RUN) {
-//      return player.getRunAnimation().getKeyFrame(stateTime, true);
-//    } else if (player.getFeetStatus() == CharacterFeetStatus.STRAFE_LEFT) {
-//      return player.getStrafeLeftAnimation().getKeyFrame(stateTime, true);
-//    } else if (player.getFeetStatus() == CharacterFeetStatus.STRAFE_RIGHT) {
-//      return player.getStrafeRightAnimation().getKeyFrame(stateTime, true);
-//    }
-//    return player.getIdle().getKeyFrame(stateTime, true);
+    float v = modelFrontAngle + 360+20;
+    v = angleMathAdd(v);
+    if (angleMathAdd(45 + v) > moveDirectionAngle && moveDirectionAngle >= angleMathAdd(v - 45)) {
+      return player.getRunAnimation().getKeyFrame(stateTime, true);
+    } else if (angleMathAdd(135 + v) > moveDirectionAngle && moveDirectionAngle >= angleMathAdd(v + 45)) {
+      return player.getStrafeRightAnimation().getKeyFrame(stateTime, true);
+    } else if (angleMathAdd( v -45) > moveDirectionAngle && moveDirectionAngle >= angleMathAdd(v - 135)) {
+      return player.getStrafeLeftAnimation().getKeyFrame(stateTime, true);
+    } else {
+      return player.getRunAnimation().getKeyFrame(stateTime, true);
+    }
+  }
 
-    return player.getRunAnimation().getKeyFrame(stateTime, true);
+  private float angleMathAdd(float v) {
+    if (v < 0) {
+      return v + 360;
+    } else if (v > 360) {
+      return v - 360;
+    } else if (v == 360) {
+      return 0;
+    }
+    return v;
   }
 
   public Texture getActualFrameTop(float stateTime) {
@@ -175,12 +168,12 @@ public class PlayerService {
     this.moveMultiplier = moveMultiplier;
   }
 
-  public float getStateTime() {
-    return stateTime;
+  public float getFeetStateTime() {
+    return feetStateTime;
   }
 
-  public void setStateTime(float stateTime) {
-    this.stateTime = stateTime;
+  public void setFeetStateTime(float feetStateTime) {
+    this.feetStateTime = feetStateTime;
   }
 
   public Player getPlayer() {
@@ -191,20 +184,39 @@ public class PlayerService {
     this.player = player;
   }
 
-  public float getFeetAngle() {
-    return feetAngle;
+  public float getTopStateTime() {
+    return topStateTime;
   }
 
-  public void setFeetAngle(float feetAngle) {
-    this.feetAngle = feetAngle;
+  public void setTopStateTime(float topStateTime) {
+    this.topStateTime = topStateTime;
   }
 
-  public float getTopAngle() {
-    return topAngle;
+  public float getSpeed() {
+    return speed;
   }
 
-  public void setTopAngle(float topAngle) {
-    this.topAngle = topAngle;
+  public void setSpeed(float speed) {
+    this.speed = speed;
   }
 
+  public float getFeetDirectionAngle() {
+    return moveDirectionAngle;
+  }
+
+  public void setFeetDirectionAngle(float feetDirectionAngle) {
+    this.moveDirectionAngle = feetDirectionAngle;
+  }
+
+  public float getModelFrontAngle() {
+    return modelFrontAngle;
+  }
+
+  public void setModelFrontAngle(float modelFrontAngle) {
+    this.modelFrontAngle = modelFrontAngle;
+  }
+
+  public void changeTopStatus(CharacterTopStatus status) {
+    player.setTopStatus(status);
+  }
 }

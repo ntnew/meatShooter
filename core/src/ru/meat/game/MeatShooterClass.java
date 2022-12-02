@@ -12,9 +12,12 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import java.util.ArrayList;
+import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
+import ru.meat.game.model.CharacterTopStatus;
+import ru.meat.game.model.Enemy;
+import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.PlayerService;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
@@ -25,11 +28,12 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   OrthographicCamera camera;
   TiledMapRenderer tiledMapRenderer;
   private PlayerService playerService;
+  private EnemyService enemyService;
 
+   private float stateTime;
+
+  private List<Enemy> enemies = new ArrayList<>();
   SpriteBatch spriteBatch;
-
-
-
 
 
   public MeatShooterClass(InputProcessor inputProcessor) {
@@ -41,6 +45,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 //    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
     playerService = new PlayerService();
+    enemyService = new EnemyService();
 
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
@@ -54,25 +59,37 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
     Gdx.input.setInputProcessor(this);
     spriteBatch = new SpriteBatch();
+    camera.position.set(1600,1000,0);
+
+
+    enemies.add(new Enemy(50,50));
   }
 
   @Override
   public void render() {
 
-    playerService.rotateTop();
+    playerService.rotateModel();
 
     handleKey();
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+    stateTime += Gdx.graphics.getDeltaTime();
     playerService.updateStateTime();
+//    enemyService.updateStateTime();
     camera.update();
+
     tiledMapRenderer.setView(camera);
     tiledMapRenderer.render();
 
+    enemies.parallelStream().forEach( enemy -> {
+      enemyService.move(playerService.getPosX(), playerService.getPosY(), enemy);
+    });
+
     spriteBatch.begin();
     playerService.drawPlayer(spriteBatch);
+    enemies.parallelStream().forEach(enemy -> enemyService.drawEnemySprite(spriteBatch,enemy, stateTime));
+
     spriteBatch.end();
   }
 
@@ -93,8 +110,10 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
         Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.D)) {
       playerService.changeFeetStatus(CharacterFeetStatus.RUN);
+      playerService.changeTopStatus(CharacterTopStatus.MOVE);
     } else {
       playerService.changeFeetStatus(CharacterFeetStatus.IDLE);
+      playerService.changeTopStatus(CharacterTopStatus.IDLE);
     }
   }
 

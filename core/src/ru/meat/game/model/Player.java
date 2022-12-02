@@ -1,22 +1,14 @@
 package ru.meat.game.model;
 
-import static ru.meat.game.utils.FilesUtils.compareTwoFilenames;
-import static ru.meat.game.utils.FilesUtils.convertBoolToInt;
-import static ru.meat.game.utils.GDXUtils.resizeTexture;
+import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import ru.meat.game.utils.GDXUtils;
 
 public class Player {
+
   private final int zoomMultiplier = 3;
+  private final float frameDuration = 0.03f;
 
   private Animation<Texture> walkAnimation;
   private Animation<Texture> idle;
@@ -39,32 +31,22 @@ public class Player {
       topStatus = CharacterTopStatus.IDLE;
       feetStatus = CharacterFeetStatus.IDLE;
 
-      this.walkAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/walk/");
-      this.idle = initAnimationFrames("./assets/Top_Down_survivor/feet/idle/");
-      this.runAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/run/");
-      this.strafeLeftAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_left/");
-      this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/");
+      this.walkAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/walk/", zoomMultiplier, frameDuration);
+      this.idle = initAnimationFrames("./assets/Top_Down_survivor/feet/idle/", zoomMultiplier, frameDuration);
+      this.runAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/run/", zoomMultiplier, frameDuration);
+      this.strafeLeftAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_left/", zoomMultiplier, frameDuration);
+      this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
 
-      this.handgunIdleAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/idle/");
-      this.handgunMoveAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/move/");
-      this.handgunMeleeAttackAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/meleeattack/");
-      this.handgunShootAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/shoot/");
-      this.handgunReloadAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/reload/");
+      this.handgunIdleAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/idle/", zoomMultiplier,frameDuration);
+      this.handgunMoveAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/move/", zoomMultiplier,frameDuration);
+      this.handgunMeleeAttackAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/meleeattack/",
+          zoomMultiplier,frameDuration);
+      this.handgunShootAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/shoot/", zoomMultiplier,frameDuration);
+      this.handgunReloadAnimation = initAnimationFrames("./assets/Top_Down_survivor/handgun/reload/", zoomMultiplier,frameDuration);
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
-
-  private Animation<Texture> initAnimationFrames(String animationFilesPath) throws IOException {
-    Texture[] collect = Files.walk(Paths.get(animationFilesPath))
-        .filter(Files::isRegularFile)
-        .sorted((x, y) -> convertBoolToInt(compareTwoFilenames(x, y)))
-        .map(file -> resizeTexture(Gdx.files.internal(file.toAbsolutePath().toString()), zoomMultiplier))
-        .toArray(Texture[]::new);
-
-    return new Animation<>(0.025f, collect);
-  }
-
 
 
   public Animation<Texture> getWalkAnimation() {

@@ -2,16 +2,21 @@ package ru.meat.game.model;
 
 import static ru.meat.game.utils.FilesUtils.compareTwoFilenames;
 import static ru.meat.game.utils.FilesUtils.convertBoolToInt;
+import static ru.meat.game.utils.GDXUtils.resizeTexture;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import ru.meat.game.utils.GDXUtils;
 
 public class Player {
+  private final int zoomMultiplier = 3;
 
   private Animation<Texture> walkAnimation;
   private Animation<Texture> idle;
@@ -26,8 +31,14 @@ public class Player {
   private Animation<Texture> handgunReloadAnimation;
 
 
+  private CharacterTopStatus topStatus;
+  private CharacterFeetStatus feetStatus;
+
   public Player() {
     try {
+      topStatus = CharacterTopStatus.IDLE;
+      feetStatus = CharacterFeetStatus.IDLE;
+
       this.walkAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/walk/");
       this.idle = initAnimationFrames("./assets/Top_Down_survivor/feet/idle/");
       this.runAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/run/");
@@ -48,7 +59,7 @@ public class Player {
     Texture[] collect = Files.walk(Paths.get(animationFilesPath))
         .filter(Files::isRegularFile)
         .sorted((x, y) -> convertBoolToInt(compareTwoFilenames(x, y)))
-        .map(file -> new Texture(Gdx.files.internal(file.toAbsolutePath().toString())))
+        .map(file -> resizeTexture(Gdx.files.internal(file.toAbsolutePath().toString()), zoomMultiplier))
         .toArray(Texture[]::new);
 
     return new Animation<>(0.025f, collect);
@@ -141,5 +152,25 @@ public class Player {
   public void setHandgunReloadAnimation(
       Animation<Texture> handgunReloadAnimation) {
     this.handgunReloadAnimation = handgunReloadAnimation;
+  }
+
+  public CharacterTopStatus getTopStatus() {
+    return topStatus;
+  }
+
+  public void setTopStatus(CharacterTopStatus topStatus) {
+    this.topStatus = topStatus;
+  }
+
+  public CharacterFeetStatus getFeetStatus() {
+    return feetStatus;
+  }
+
+  public void setFeetStatus(CharacterFeetStatus feetStatus) {
+    this.feetStatus = feetStatus;
+  }
+
+  public int getZoomMultiplier() {
+    return zoomMultiplier;
   }
 }

@@ -10,6 +10,16 @@ import ru.meat.game.model.EnemyStatus;
 
 public class EnemyService {
 
+
+  public Enemy createZombieEnemy(float x, float y) {
+    return new Enemy(x, y, 40, 3, 100, 0.7f,
+        "./assets/export/move/",
+        "./assets/export/idle/",
+        "./assets/export/attack/",
+        null,
+        0, 0);
+  }
+
   public void updateStateTime() {
     stateTime += Gdx.graphics.getDeltaTime();
   }
@@ -33,13 +43,13 @@ public class EnemyService {
 
   private Texture getActualFrame(float stateTime, Enemy enemy) {
     if (enemy.getStatus().equals(EnemyStatus.IDLE)) {
-      return enemy.getIdle().getKeyFrame(stateTime);
+      return enemy.getIdleAnimation().getKeyFrame(stateTime);
     } else if (enemy.getStatus().equals(EnemyStatus.MOVE)) {
       return enemy.getWalkAnimation().getKeyFrame(stateTime);
     } else if (enemy.getStatus().equals(EnemyStatus.ATTACK)) {
-      return enemy.getAttack().getKeyFrame(stateTime, true);
+      return enemy.getAttackAnimation().getKeyFrame(stateTime, true);
     }
-    return enemy.getIdle().getKeyFrame(stateTime);
+    return enemy.getIdleAnimation().getKeyFrame(stateTime);
   }
 
   public void move(float x, float y, Enemy enemy) {

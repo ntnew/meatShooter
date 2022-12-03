@@ -12,6 +12,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import java.util.ArrayList;
 import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
@@ -19,6 +20,7 @@ import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Enemy;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.PlayerService;
+import ru.meat.game.utils.GDXUtils;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
 
@@ -62,7 +64,15 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     camera.position.set(1600,1000,0);
 
 
-    enemies.add(new Enemy(50,50));
+    enemies.add(enemyService.createZombieEnemy(50f,50f));
+    enemies.add(enemyService.createZombieEnemy(100f,100f));
+            enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+
   }
 
   @Override
@@ -88,7 +98,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     spriteBatch.begin();
     playerService.drawPlayer(spriteBatch);
-    enemies.parallelStream().forEach(enemy -> enemyService.drawEnemySprite(spriteBatch,enemy, stateTime));
+    enemies.forEach(enemy -> enemyService.drawEnemySprite(spriteBatch,enemy, stateTime));
 
     spriteBatch.end();
   }

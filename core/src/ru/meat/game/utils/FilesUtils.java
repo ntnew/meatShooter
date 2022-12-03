@@ -22,12 +22,17 @@ public class FilesUtils {
   }
 
 
-  public static Animation<Texture> initAnimationFrames(String animationFilesPath, int zoomMultiplier, float frameDuration) throws IOException {
-    Texture[] collect = Files.walk(Paths.get(animationFilesPath))
-        .filter(Files::isRegularFile)
-        .sorted((x, y) -> convertBoolToInt(compareTwoFilenames(x, y)))
-        .map(file -> resizeTexture(Gdx.files.internal(file.toAbsolutePath().toString()), zoomMultiplier))
-        .toArray(Texture[]::new);
+  public static Animation<Texture> initAnimationFrames(String animationFilesPath, int zoomMultiplier, float frameDuration) {
+    Texture[] collect = new Texture[0];
+    try {
+      collect = Files.walk(Paths.get(animationFilesPath))
+          .filter(Files::isRegularFile)
+          .sorted((x, y) -> convertBoolToInt(compareTwoFilenames(x, y)))
+          .map(file -> resizeTexture(Gdx.files.internal(file.toAbsolutePath().toString()), zoomMultiplier))
+          .toArray(Texture[]::new);
+    } catch (NullPointerException | IOException e) {
+      e.printStackTrace();
+    }
 
     return new Animation<>(frameDuration, collect);
   }

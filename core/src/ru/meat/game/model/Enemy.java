@@ -8,61 +8,97 @@ import ru.meat.game.utils.FilesUtils;
 
 public class Enemy {
 
+  /**
+   * Дальность атаки
+   */
   private float attackRange = 40;
+
   private float enemyPing = 10;
 
+  /**
+   * делитель размера модельки
+   */
   private int zoom = 3;
 
-  private int hp;
+  /**
+   * Здоровье
+   */
+  private int hp = 1;
 
+  /**
+   * Максимальная скорость
+   */
   private float speed = 0.7f;
 
+  /**
+   * размер шага по оси X, меняется постоянно
+   */
   private float speedX = 1;
+  /**
+   * размер шага по оси У, меняется постоянно
+   */
   private float speedY = 1;
-
-  private float posX;
-  private float posY;
+  /**
+   * Позиции
+   */
+  private float posX = 50;
+  private float posY = 50;
 
   private Animation<Texture> walkAnimation;
-  private Animation<Texture> idle;
-  private Animation<Texture> attack;
+  private Animation<Texture> idleAnimation;
+  private Animation<Texture> attackAnimation;
+  private Animation<Texture> dieAnimation;
 
+  /**
+   * Статус действия модельки
+   */
   private EnemyStatus status;
 
   private final float frameDuration = 0.05f;
-  private final float attackFrameDuration = 0.18f;
+  private final float attackFrameDuration = 0.1f;
 
+
+  /**
+   * Угол поворота модельки, меняется в зависимости от направления движения
+   */
   private float animationAngle = 0;
 
   public Enemy(float posX, float posY) {
     this.posX = posX;
     this.posY = posY;
-    try {
-      attack = FilesUtils.initAnimationFrames("./assets/export/attack/", zoom, frameDuration);
-      walkAnimation = FilesUtils.initAnimationFrames("./assets/export/move/", zoom, frameDuration);
-      idle = FilesUtils.initAnimationFrames("./assets/export/idle/", zoom, frameDuration);
-      idle.setPlayMode(PlayMode.LOOP);
-      walkAnimation.setPlayMode(PlayMode.LOOP);
-      attack.setPlayMode(PlayMode.NORMAL);
-      hp = 100;
-      status = EnemyStatus.IDLE;
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    attackAnimation = FilesUtils.initAnimationFrames("./assets/export/attack/", zoom, frameDuration);
+    walkAnimation = FilesUtils.initAnimationFrames("./assets/export/move/", zoom, frameDuration);
+    idleAnimation = FilesUtils.initAnimationFrames("./assets/export/idle/", zoom, frameDuration);
+    idleAnimation.setPlayMode(PlayMode.LOOP);
+    walkAnimation.setPlayMode(PlayMode.LOOP);
+    attackAnimation.setPlayMode(PlayMode.NORMAL);
+    hp = 100;
+    status = EnemyStatus.IDLE;
   }
 
-  public Enemy() {
-    try {
-      attack = FilesUtils.initAnimationFrames("./assets/export/attack/", zoom, attackFrameDuration);
-      walkAnimation = FilesUtils.initAnimationFrames("./assets/export/move/", zoom, frameDuration);
-      idle = FilesUtils.initAnimationFrames("./assets/export/idle/", zoom, frameDuration);
-      idle.setPlayMode(PlayMode.LOOP);
-      walkAnimation.setPlayMode(PlayMode.LOOP);
-      hp = 100;
-      status = EnemyStatus.IDLE;
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+
+  public Enemy(float posX, float posY, float attackRange, int zoom, int hp, float speed,
+      String pathToWalkAnimation, String pathToIdleAnimation, String pathToAttackAnimation, String pathToDieAnimation,
+      float animationAngle, float enemyPing) {
+    this.attackRange = attackRange;
+    this.enemyPing = enemyPing;
+    this.zoom = zoom;
+    this.hp = hp;
+    this.speed = speed;
+    this.speedX = 0;
+    this.speedY = 0;
+    this.posX = posX;
+    this.posY = posY;
+    this.attackAnimation = FilesUtils.initAnimationFrames(pathToAttackAnimation, zoom, attackFrameDuration);
+    this.walkAnimation = FilesUtils.initAnimationFrames(pathToWalkAnimation, zoom, frameDuration);
+    this.idleAnimation = FilesUtils.initAnimationFrames(pathToIdleAnimation, zoom, frameDuration);
+    this.dieAnimation = FilesUtils.initAnimationFrames(pathToDieAnimation, zoom, frameDuration);
+    this.status = EnemyStatus.IDLE;
+    this.animationAngle = animationAngle;
+
+    idleAnimation.setPlayMode(PlayMode.LOOP);
+    walkAnimation.setPlayMode(PlayMode.LOOP);
+    attackAnimation.setPlayMode(PlayMode.NORMAL);
   }
 
   public void setPosition(float x, float y) {
@@ -95,20 +131,20 @@ public class Enemy {
     this.walkAnimation = walkAnimation;
   }
 
-  public Animation<Texture> getIdle() {
-    return idle;
+  public Animation<Texture> getIdleAnimation() {
+    return idleAnimation;
   }
 
-  public void setIdle(Animation<Texture> idle) {
-    this.idle = idle;
+  public void setIdleAnimation(Animation<Texture> idleAnimation) {
+    this.idleAnimation = idleAnimation;
   }
 
-  public Animation<Texture> getAttack() {
-    return attack;
+  public Animation<Texture> getAttackAnimation() {
+    return attackAnimation;
   }
 
-  public void setAttack(Animation<Texture> attack) {
-    this.attack = attack;
+  public void setAttackAnimation(Animation<Texture> attackAnimation) {
+    this.attackAnimation = attackAnimation;
   }
 
   public float getPosX() {
@@ -185,5 +221,17 @@ public class Enemy {
 
   public void setAttackRange(float attackRange) {
     this.attackRange = attackRange;
+  }
+
+  public Animation<Texture> getDieAnimation() {
+    return dieAnimation;
+  }
+
+  public void setDieAnimation(Animation<Texture> dieAnimation) {
+    this.dieAnimation = dieAnimation;
+  }
+
+  public float getAttackFrameDuration() {
+    return attackFrameDuration;
   }
 }

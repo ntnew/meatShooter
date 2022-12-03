@@ -20,7 +20,6 @@ import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Enemy;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.PlayerService;
-import ru.meat.game.utils.GDXUtils;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
 
@@ -93,8 +92,10 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     tiledMapRenderer.render();
 
     enemies.parallelStream().forEach( enemy -> {
-      enemyService.move(playerService.getPosX(), playerService.getPosY(), enemy);
+      enemyService.doSomething(playerService.getPosX(), playerService.getPosY(), enemy);
     });
+
+    enemyService.correctDistanceBetweenEnemies(enemies);
 
     spriteBatch.begin();
     playerService.drawPlayer(spriteBatch);

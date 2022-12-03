@@ -3,7 +3,6 @@ package ru.meat.game.model;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
-import java.io.IOException;
 import ru.meat.game.utils.FilesUtils;
 
 public class Enemy {
@@ -13,7 +12,24 @@ public class Enemy {
    */
   private float attackRange = 40;
 
-  private float enemyPing = 10;
+  private float enemyPing = 100;
+  private float enemyPingCounter = 0;
+
+  /**
+   * Направление
+   */
+  private PairOfFloat destination;
+
+  /**
+   * Направление
+   */
+  private PairOfFloat floatDestination;
+
+
+  /**
+   * скорость поворота
+   */
+  private PairOfFloat turnSpeed = new PairOfFloat(2f,2f);
 
   /**
    * делитель размера модельки
@@ -79,7 +95,7 @@ public class Enemy {
 
   public Enemy(float posX, float posY, float attackRange, int zoom, int hp, float speed,
       String pathToWalkAnimation, String pathToIdleAnimation, String pathToAttackAnimation, String pathToDieAnimation,
-      float animationAngle, float enemyPing) {
+      float animationAngle, float enemyPing, PairOfFloat playerCoord) {
     this.attackRange = attackRange;
     this.enemyPing = enemyPing;
     this.zoom = zoom;
@@ -99,6 +115,13 @@ public class Enemy {
     idleAnimation.setPlayMode(PlayMode.LOOP);
     walkAnimation.setPlayMode(PlayMode.LOOP);
     attackAnimation.setPlayMode(PlayMode.NORMAL);
+    if (playerCoord != null) {
+      this.destination = playerCoord;
+    } else {
+      this.destination = new PairOfFloat(posX, posY);
+      this.floatDestination = new PairOfFloat(posX, posY);
+      this.enemyPingCounter = this.enemyPing;
+    }
   }
 
   public void setPosition(float x, float y) {
@@ -233,5 +256,37 @@ public class Enemy {
 
   public float getAttackFrameDuration() {
     return attackFrameDuration;
+  }
+
+  public float getEnemyPingCounter() {
+    return enemyPingCounter;
+  }
+
+  public void setEnemyPingCounter(float enemyPingCounter) {
+    this.enemyPingCounter = enemyPingCounter;
+  }
+
+  public PairOfFloat getDestination() {
+    return destination;
+  }
+
+  public void setDestination(PairOfFloat destination) {
+    this.destination = destination;
+  }
+
+  public PairOfFloat getTurnSpeed() {
+    return turnSpeed;
+  }
+
+  public void setTurnSpeed(PairOfFloat turnSpeed) {
+    this.turnSpeed = turnSpeed;
+  }
+
+  public PairOfFloat getFloatDestination() {
+    return floatDestination;
+  }
+
+  public void setFloatDestination(PairOfFloat floatDestination) {
+    this.floatDestination = floatDestination;
   }
 }

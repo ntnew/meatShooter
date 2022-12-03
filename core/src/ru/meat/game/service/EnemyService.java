@@ -1,12 +1,14 @@
 package ru.meat.game.service;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import java.util.List;
 import ru.meat.game.model.Enemy;
 import ru.meat.game.model.EnemyStatus;
+import ru.meat.game.model.PairOfFloat;
+import ru.meat.game.utils.GDXUtils;
 
 public class EnemyService {
 
@@ -17,19 +19,29 @@ public class EnemyService {
         "./assets/export/idle/",
         "./assets/export/attack/",
         null,
-        0, 0);
+        0, 100, null);
   }
 
-  public void updateStateTime() {
-    stateTime += Gdx.graphics.getDeltaTime();
+  public void correctDistanceBetweenEnemies(List<Enemy> enemies) {
+//    for (int i = 0; i < enemies.size(); i++) {
+//      Enemy enemy = enemies.get(i);
+//      for (int i1 = 0; i1 < enemies.size(); i1++) {
+//        if (i != i1) {
+//          Enemy enemy2 = enemies.get(i1);
+//          float cat1 = enemy.getPosX() - enemy2.getPosX();
+//          float cat2 = enemy.getPosY() - enemy2.getPosY();
+//          float gip = (float) Math.sqrt(cat1 * cat1 + cat2 + cat2);
+//          if (gip < 20) {
+//            enemy2.setPosX(cat1 < 0 ? enemy2.getPosX() - 1 : enemy2.getPosX() + 1);
+//            enemy2.setPosY(cat1 < 0 ? enemy2.getPosY() - 1 : enemy2.getPosY() + 1);
+//
+//          }
+//        }
+//      }
+//    }
   }
-
-  ;
-
-  private float stateTime;
 
   public EnemyService() {
-
   }
 
   public void drawEnemySprite(SpriteBatch batch, Enemy enemy, float stateTime) {
@@ -48,22 +60,39 @@ public class EnemyService {
       return enemy.getWalkAnimation().getKeyFrame(stateTime);
     } else if (enemy.getStatus().equals(EnemyStatus.ATTACK)) {
       return enemy.getAttackAnimation().getKeyFrame(stateTime, true);
+    } else if (enemy.getStatus().equals(EnemyStatus.DIE)) {
+      return enemy.getDieAnimation().getKeyFrame(stateTime, true);
     }
     return enemy.getIdleAnimation().getKeyFrame(stateTime);
   }
 
-  public void move(float x, float y, Enemy enemy) {
+  /**
+   * Метод действия врага, если расстояние до игрока меньше расстояния атаки, то атакует, else идёт
+   *
+   * @param x     x координата игрока
+   * @param y     у координата игрока
+   * @param enemy враг
+   */
+  public void doSomething(float x, float y, Enemy enemy) {
     if (Math.sqrt((x - enemy.getPosX()) * (x - enemy.getPosX()) + (y - enemy.getPosY()) * (y - enemy.getPosY()))
         < enemy.getAttackRange()) {
       enemy.setStatus(EnemyStatus.ATTACK);
     } else {
-      defineSpeedXandY(x, y, enemy);
       enemy.setStatus(EnemyStatus.MOVE);
+      enemy.setEnemyPingCounter(enemy.getEnemyPingCounter() + 1);
+      if (GDXUtils.findGipotenuza(enemy.getPosX()-x, enemy.getPosY()-y) < 400) {
+        enemy.setDestination(new PairOfFloat(x,y));
+      } else if (enemy.getEnemyPingCounter() > enemy.getEnemyPing()){
+        enemy.setEnemyPingCounter(0);
+        enemy.setDestination(new PairOfFloat(MathUtils.random(x - 50, x + 50),MathUtils.random(y - 50, y + 50)));
+      } else {
 
-      rotateModel(x - enemy.getPosX(), y - enemy.getPosY(), enemy);
-
+      }
+      defineSpeedXandY(enemy);
+      rotateModel(enemy.getFloatDestination().getX() - enemy.getPosX(), enemy.getFloatDestination().getY() - enemy.getPosY(), enemy);
       enemy.setPosX(enemy.getPosX() + enemy.getSpeedX());
       enemy.setPosY(enemy.getPosY() + enemy.getSpeedY());
+
     }
   }
 
@@ -73,7 +102,26 @@ public class EnemyService {
   }
 
 
-  public void defineSpeedXandY(float x, float y, Enemy enemy) {
+  public void defineSpeedXandY( Enemy enemy) {
+    float x;
+    float y;
+    if (enemy.getFloatDestination().getX()>enemy.getDestination().getX()) {
+      x = enemy.getFloatDestination().getX()  - enemy.getTurnSpeed().getX();
+    } else if (enemy.getFloatDestination().getX()  < enemy.getDestination().getX()){
+      x = enemy.getFloatDestination().getX() + enemy.getTurnSpeed().getX();
+    } else {
+      x = enemy.getDestination().getX();
+    }
+
+    if (enemy.getFloatDestination().getY() > enemy.getDestination().getY()) {
+      y = enemy.getFloatDestination().getY()  - enemy.getTurnSpeed().getY();
+    } else if ( enemy.getFloatDestination().getY() < enemy.getDestination().getY()){
+      y = enemy.getFloatDestination().getY() + enemy.getTurnSpeed().getY();
+    } else {
+      y = enemy.getDestination().getY();
+    }
+
+    enemy.setFloatDestination(new PairOfFloat(x,y));
     float catetPrilezjaschiy = x - enemy.getPosX();
     float catetProtivo = y - enemy.getPosY();
     float gip = (float) Math.sqrt(catetPrilezjaschiy * catetPrilezjaschiy + catetProtivo * catetProtivo);

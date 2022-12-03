@@ -26,4 +26,8 @@ public class GDXUtils {
     pixmap100.dispose();
     return texture2;
   }
+
+  public static float findGipotenuza(float catet1, float catet2){
+   return (float) Math.sqrt(catet1 * catet1 + catet2 * catet2);
+  }
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.physics.box2d.World;
 import java.util.List;
 import ru.meat.game.model.Enemy;
 import ru.meat.game.model.EnemyStatus;
@@ -13,13 +14,15 @@ import ru.meat.game.utils.GDXUtils;
 public class EnemyService {
 
 
-  public Enemy createZombieEnemy(float x, float y) {
-    return new Enemy(x, y, 40, 3, 100, 0.7f,
+  public Enemy createZombieEnemy(float x, float y, World world) {
+    Enemy enemy =  new Enemy(x, y, 40, 3, 100, 0.7f,
         "./assets/export/move/",
         "./assets/export/idle/",
         "./assets/export/attack/",
         null,
         0, 100, null);
+    enemy.setBox(GDXUtils.createCircleForEnemy(world,40, 100));
+    return enemy;
   }
 
   public void correctDistanceBetweenEnemies(List<Enemy> enemies) {
@@ -84,7 +87,7 @@ public class EnemyService {
         enemy.setDestination(new PairOfFloat(x,y));
       } else if (enemy.getEnemyPingCounter() > enemy.getEnemyPing()){
         enemy.setEnemyPingCounter(0);
-        enemy.setDestination(new PairOfFloat(MathUtils.random(x - 50, x + 50),MathUtils.random(y - 50, y + 50)));
+        enemy.setDestination(new PairOfFloat(MathUtils.random(x - 500, x + 500),MathUtils.random(y - 500, y + 500)));
       } else {
 
       }

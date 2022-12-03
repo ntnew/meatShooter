@@ -11,7 +11,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.4'
         classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.16'
-        
+
 
     }
 }
@@ -53,7 +53,10 @@ project(":desktop") {
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
-        
+        // https://mvnrepository.com/artifact/org.projectlombok/lombok
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
+        annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
     }
 }
 
@@ -124,5 +127,8 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        // https://mvnrepository.com/artifact/org.projectlombok/lombok
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
+        annotationProcessor 'org.projectlombok:lombok:1.18.22'
     }
 }

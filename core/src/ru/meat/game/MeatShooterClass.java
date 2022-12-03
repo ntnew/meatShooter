@@ -13,6 +13,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
@@ -36,6 +38,8 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   private List<Enemy> enemies = new ArrayList<>();
   SpriteBatch spriteBatch;
 
+  World world;
+
 
   public MeatShooterClass(InputProcessor inputProcessor) {
     this.inputProcessor = inputProcessor;
@@ -43,6 +47,9 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   @Override
   public void create() {
+    world = new World(new Vector2(0, 0), true);
+  //  world.setContactListener(new MyContactListener(world));
+
 //    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
     playerService = new PlayerService();
@@ -63,14 +70,14 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     camera.position.set(1600,1000,0);
 
 
-    enemies.add(enemyService.createZombieEnemy(50f,50f));
-    enemies.add(enemyService.createZombieEnemy(100f,100f));
+    enemies.add(enemyService.createZombieEnemy(50f,50f, world));
+    enemies.add(enemyService.createZombieEnemy(100f,100f, world));
             enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
+        MathUtils.random(0, Gdx.graphics.getHeight()), world));
     enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
+        MathUtils.random(0, Gdx.graphics.getHeight()), world));
     enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
+        MathUtils.random(0, Gdx.graphics.getHeight()), world));
 
   }
 

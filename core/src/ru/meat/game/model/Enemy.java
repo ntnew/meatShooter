@@ -3,9 +3,16 @@ package ru.meat.game.model;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
+import com.badlogic.gdx.physics.box2d.Body;
+import lombok.Builder;
+import lombok.Data;
 import ru.meat.game.utils.FilesUtils;
 
+@Data
+//@Builder
 public class Enemy {
+
+  private Body box;
 
   /**
    * Дальность атаки
@@ -79,20 +86,6 @@ public class Enemy {
    */
   private float animationAngle = 0;
 
-  public Enemy(float posX, float posY) {
-    this.posX = posX;
-    this.posY = posY;
-    attackAnimation = FilesUtils.initAnimationFrames("./assets/export/attack/", zoom, frameDuration);
-    walkAnimation = FilesUtils.initAnimationFrames("./assets/export/move/", zoom, frameDuration);
-    idleAnimation = FilesUtils.initAnimationFrames("./assets/export/idle/", zoom, frameDuration);
-    idleAnimation.setPlayMode(PlayMode.LOOP);
-    walkAnimation.setPlayMode(PlayMode.LOOP);
-    attackAnimation.setPlayMode(PlayMode.NORMAL);
-    hp = 100;
-    status = EnemyStatus.IDLE;
-  }
-
-
   public Enemy(float posX, float posY, float attackRange, int zoom, int hp, float speed,
       String pathToWalkAnimation, String pathToIdleAnimation, String pathToAttackAnimation, String pathToDieAnimation,
       float animationAngle, float enemyPing, PairOfFloat playerCoord) {
@@ -127,166 +120,5 @@ public class Enemy {
   public void setPosition(float x, float y) {
     posX = x;
     posY = y;
-  }
-
-
-  public int getZoom() {
-    return zoom;
-  }
-
-  public void setZoom(int zoom) {
-    this.zoom = zoom;
-  }
-
-  public int getHp() {
-    return hp;
-  }
-
-  public void setHp(int hp) {
-    this.hp = hp;
-  }
-
-  public Animation<Texture> getWalkAnimation() {
-    return walkAnimation;
-  }
-
-  public void setWalkAnimation(Animation<Texture> walkAnimation) {
-    this.walkAnimation = walkAnimation;
-  }
-
-  public Animation<Texture> getIdleAnimation() {
-    return idleAnimation;
-  }
-
-  public void setIdleAnimation(Animation<Texture> idleAnimation) {
-    this.idleAnimation = idleAnimation;
-  }
-
-  public Animation<Texture> getAttackAnimation() {
-    return attackAnimation;
-  }
-
-  public void setAttackAnimation(Animation<Texture> attackAnimation) {
-    this.attackAnimation = attackAnimation;
-  }
-
-  public float getPosX() {
-    return posX;
-  }
-
-  public void setPosX(float posX) {
-    this.posX = posX;
-  }
-
-  public float getPosY() {
-    return posY;
-  }
-
-  public void setPosY(float posY) {
-    this.posY = posY;
-  }
-
-  public EnemyStatus getStatus() {
-    return status;
-  }
-
-  public void setStatus(EnemyStatus status) {
-    this.status = status;
-  }
-
-  public float getFrameDuration() {
-    return frameDuration;
-  }
-
-  public float getAnimationAngle() {
-    return animationAngle;
-  }
-
-  public void setAnimationAngle(float animationAngle) {
-    this.animationAngle = animationAngle;
-  }
-
-  public float getSpeed() {
-    return speed;
-  }
-
-  public void setSpeed(float speed) {
-    this.speed = speed;
-  }
-
-  public float getEnemyPing() {
-    return enemyPing;
-  }
-
-  public void setEnemyPing(float enemyPing) {
-    this.enemyPing = enemyPing;
-  }
-
-  public float getSpeedX() {
-    return speedX;
-  }
-
-  public void setSpeedX(float speedX) {
-    this.speedX = speedX;
-  }
-
-  public float getSpeedY() {
-    return speedY;
-  }
-
-  public void setSpeedY(float speedY) {
-    this.speedY = speedY;
-  }
-
-  public float getAttackRange() {
-    return attackRange;
-  }
-
-  public void setAttackRange(float attackRange) {
-    this.attackRange = attackRange;
-  }
-
-  public Animation<Texture> getDieAnimation() {
-    return dieAnimation;
-  }
-
-  public void setDieAnimation(Animation<Texture> dieAnimation) {
-    this.dieAnimation = dieAnimation;
-  }
-
-  public float getAttackFrameDuration() {
-    return attackFrameDuration;
-  }
-
-  public float getEnemyPingCounter() {
-    return enemyPingCounter;
-  }
-
-  public void setEnemyPingCounter(float enemyPingCounter) {
-    this.enemyPingCounter = enemyPingCounter;
-  }
-
-  public PairOfFloat getDestination() {
-    return destination;
-  }
-
-  public void setDestination(PairOfFloat destination) {
-    this.destination = destination;
-  }
-
-  public PairOfFloat getTurnSpeed() {
-    return turnSpeed;
-  }
-
-  public void setTurnSpeed(PairOfFloat turnSpeed) {
-    this.turnSpeed = turnSpeed;
-  }
-
-  public PairOfFloat getFloatDestination() {
-    return floatDestination;
-  }
-
-  public void setFloatDestination(PairOfFloat floatDestination) {
-    this.floatDestination = floatDestination;
   }
 }

@@ -22,7 +22,7 @@ public class FilesUtils {
   }
 
 
-  public static Animation<Texture> initAnimationFrames(String animationFilesPath, int zoomMultiplier, float frameDuration) {
+  public static Animation<Texture> initAnimationFrames(String animationFilesPath, float zoomMultiplier, float frameDuration) {
     Texture[] collect = new Texture[0];
     try {
       collect = Files.walk(Paths.get(animationFilesPath))

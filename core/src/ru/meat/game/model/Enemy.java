@@ -22,6 +22,14 @@ public class Enemy {
   private float enemyPing = 100;
   private float enemyPingCounter = 0;
 
+  private PairOfFloat center = new PairOfFloat(0f,0f);
+
+  private float radius;
+
+  /**
+   * флаг того, что враг мешается другому врагу
+   */
+  private boolean interference = false;
   /**
    * Направление
    */
@@ -36,12 +44,12 @@ public class Enemy {
   /**
    * скорость поворота
    */
-  private PairOfFloat turnSpeed = new PairOfFloat(2f,2f);
+  private PairOfFloat turnSpeed = new PairOfFloat(1f,1f);
 
   /**
    * делитель размера модельки
    */
-  private int zoom = 3;
+  private float zoom = 3;
 
   /**
    * Здоровье
@@ -86,7 +94,7 @@ public class Enemy {
    */
   private float animationAngle = 0;
 
-  public Enemy(float posX, float posY, float attackRange, int zoom, int hp, float speed,
+  public Enemy(float posX, float posY, float attackRange, float zoom, int hp, float speed,
       String pathToWalkAnimation, String pathToIdleAnimation, String pathToAttackAnimation, String pathToDieAnimation,
       float animationAngle, float enemyPing, PairOfFloat playerCoord) {
     this.attackRange = attackRange;

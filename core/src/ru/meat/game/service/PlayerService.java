@@ -5,10 +5,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import lombok.Data;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Player;
 
+@Data
 public class PlayerService {
 
   /**
@@ -140,83 +142,17 @@ public class PlayerService {
     player = new Player();
   }
 
-  public float getPosX() {
-    return posX;
+  public void changeTopStatus(CharacterTopStatus status) {
+    player.setTopStatus(status);
   }
 
-  public void setPosX(float posX) {
-    this.posX = posX;
-  }
-
-  public float getPosY() {
-    return posY;
-  }
-
-  public void setPosY(float posY) {
-    this.posY = posY;
-  }
 
   public void changeFeetStatus(CharacterFeetStatus status) {
     player.setFeetStatus(status);
   }
 
-  public float getMoveMultiplier() {
-    return moveMultiplier;
-  }
-
-  public void setMoveMultiplier(float moveMultiplier) {
-    this.moveMultiplier = moveMultiplier;
-  }
-
-  public float getFeetStateTime() {
-    return feetStateTime;
-  }
-
-  public void setFeetStateTime(float feetStateTime) {
-    this.feetStateTime = feetStateTime;
-  }
-
-  public Player getPlayer() {
-    return player;
-  }
-
-  public void setPlayer(Player player) {
-    this.player = player;
-  }
-
-  public float getTopStateTime() {
-    return topStateTime;
-  }
-
-  public void setTopStateTime(float topStateTime) {
-    this.topStateTime = topStateTime;
-  }
-
-  public float getSpeed() {
-    return speed;
-  }
-
-  public void setSpeed(float speed) {
-    this.speed = speed;
-  }
-
-  public float getFeetDirectionAngle() {
-    return moveDirectionAngle;
-  }
-
-  public void setFeetDirectionAngle(float feetDirectionAngle) {
-    this.moveDirectionAngle = feetDirectionAngle;
-  }
-
-  public float getModelFrontAngle() {
-    return modelFrontAngle;
-  }
-
-  public void setModelFrontAngle(float modelFrontAngle) {
-    this.modelFrontAngle = modelFrontAngle;
-  }
-
-  public void changeTopStatus(CharacterTopStatus status) {
-    player.setTopStatus(status);
+  public void moveOnChangeMap(float x, float y) {
+    posX += x;
+    posY += y;
   }
 }

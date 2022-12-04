@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class Player {
 
-  private final int zoomMultiplier = 3;
+  private final float zoomMultiplier = 3.5f;
   private final float frameDuration = 0.03f;
 
   private Animation<Texture> walkAnimation;

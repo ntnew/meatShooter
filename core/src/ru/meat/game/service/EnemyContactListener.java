@@ -17,19 +17,12 @@ public class EnemyContactListener implements ContactListener {
 
   @Override
   public void beginContact(Contact contact) {
-
+    System.out.println("shiieeeet");
   }
 
   @Override
   public void preSolve(Contact contact, Manifold oldManifold) {
-
-    WorldManifold manifold = contact.getWorldManifold();
-    for(int j = 0; j < manifold.getNumberOfContactPoints(); j++){
-      if(contact.getFixtureA().getUserData() != null && contact.getFixtureA().getUserData().equals("p"))
-        contact.setEnabled(false);
-      if(contact.getFixtureB().getUserData() != null && contact.getFixtureB().getUserData().equals("p"))
-        contact.setEnabled(false);
-    }
+    System.out.println("shi");
   }
 
   @Override

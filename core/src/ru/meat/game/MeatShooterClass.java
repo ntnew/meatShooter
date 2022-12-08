@@ -9,17 +9,30 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Enemy;
 import ru.meat.game.model.FloatPair;
+import ru.meat.game.model.weapons.Bullet;
+import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.PlayerService;
+import ru.meat.game.utils.GDXUtils;
+import ru.meat.game.utils.StaticFloats;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
+
+  @Override
+  public void dispose() {
+    super.dispose();
+    worldRenderer.dispose();
+  }
 
   private final InputProcessor inputProcessor;
   private OrthographicCamera camera;
@@ -29,10 +42,12 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   private List<Enemy> enemies = new ArrayList<>();
   private SpriteBatch spriteBatch;
-
+  private World world;
+  private WorldRenderer worldRenderer;
 
   private MapService mapService;
 
+  private List<Bullet> bullets = new ArrayList<>();
   public MeatShooterClass(InputProcessor inputProcessor) {
     this.inputProcessor = inputProcessor;
   }
@@ -44,20 +59,22 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
 //    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
-    playerService = new PlayerService(w/2,h/2);
+    playerService = new PlayerService(w / 2, h / 2);
     enemyService = new EnemyService();
     mapService = new MapService();
     mapService.initMap();
+    world = new World(new Vector2(0, 0), true);
 
     camera = new OrthographicCamera();
     camera.setToOrtho(false, w, h);
     camera.zoom = 1f;
     camera.update();
-//    camera.position.set(1600, 1000, 0);
 
     spriteBatch = new SpriteBatch();
-
+//    spriteBatch.setProjectionMatrix(camera.combined);
     Gdx.input.setInputProcessor(this);
+
+    worldRenderer = new WorldRenderer(world, true, camera);
 
     enemies.add(enemyService.createZombieEnemy(50f, 50f));
 //    enemies.add(enemyService.createZombieEnemy(100f, 100f));
@@ -68,6 +85,8 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 //    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
 //        MathUtils.random(0, Gdx.graphics.getHeight())));
 
+    enemies.forEach(
+        x -> x.setBox(GDXUtils.createCircleForEnemy(world, x.getRadius()/ StaticFloats.WORLD_TO_VIEW, 0.5f, "z1", x.getPosX(), x.getPosY())));
   }
 
   @Override
@@ -88,13 +107,17 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     });
 
     camera.update();
+    worldRenderer.getCameraBox2D().update();
+
     spriteBatch.begin();
+
     mapService.draw(spriteBatch);
     playerService.drawPlayer(spriteBatch);
     enemies.forEach(enemy -> {
       enemyService.drawEnemySprite(spriteBatch, enemy, stateTime);
       enemy.setPreviousStatus(enemy.getStatus());
     });
+    worldRenderer.render(stateTime, enemies);
     spriteBatch.end();
   }
 
@@ -190,7 +213,13 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
     if (button == Input.Buttons.LEFT) {
-      playerService.shoot();
+      Vector3 tmpVec3 = new Vector3();
+      tmpVec3.set(screenX, screenY, 0);
+      camera.unproject(tmpVec3);
+      new Vector2();
+      bullets.add(BulletService.createBullet(world, playerService.getPosX()/StaticFloats.WORLD_TO_VIEW, playerService.getPosY()/StaticFloats.WORLD_TO_VIEW, screenX/StaticFloats.WORLD_TO_VIEW,
+          tmpVec3.y/StaticFloats.WORLD_TO_VIEW));
+//      playerService.shoot();
     }
     return false;
   }

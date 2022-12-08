@@ -1,6 +1,7 @@
 package ru.meat.game.service;
 
 import static ru.meat.game.utils.GDXUtils.calcGipotenuza;
+import static ru.meat.game.utils.GDXUtils.createCircleForEnemy;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -24,7 +25,7 @@ public class EnemyService {
         "./assets/export/attack/",
         null,
         0, 300, null);
-    enemy.setRadius(50);
+    enemy.setRadius(30);
     return enemy;
   }
 

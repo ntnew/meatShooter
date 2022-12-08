@@ -1,35 +1,53 @@
 package ru.meat.game;
 
-import com.badlogic.gdx.Gdx;
+import static ru.meat.game.utils.StaticFloats.WORLD_HEIGHT;
+import static ru.meat.game.utils.StaticFloats.WORLD_WIDTH;
+
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import java.util.List;
+import lombok.Data;
 import ru.meat.game.model.Enemy;
-
+import ru.meat.game.service.EnemyContactListener;
+@Data
 public class WorldRenderer {
 
   Box2DDebugRenderer renderer;
 
-  MyWorld world;
-  public OrthographicCamera cam;
 
 
-  public WorldRenderer(MyWorld world, boolean debug, OrthographicCamera cam) {
+  World world;
+  public OrthographicCamera cameraBox2D;
+
+
+  public WorldRenderer(World world, boolean debug, OrthographicCamera cam) {
+    cameraBox2D = new OrthographicCamera();
+    cameraBox2D.viewportWidth = WORLD_WIDTH;
+    cameraBox2D.viewportHeight = WORLD_HEIGHT;
+    cameraBox2D.position.set(cameraBox2D.viewportWidth / 2, cameraBox2D.viewportHeight / 2, 0f);
+    cameraBox2D.update();
+
     renderer = new Box2DDebugRenderer();
+    renderer.setDrawBodies(debug);
+    world.setContactListener(new EnemyContactListener());
+
     this.world = world;
-    this.cam = cam;
+//    this.cam = cam;
   }
 
 
   public void dispose() {
-    world.getWorld().dispose();
+    world.dispose();
   }
 
   public void render(float delta, List<Enemy> enemies) {
-    renderer.render(world.getWorld(), cam.combined);
     enemies.forEach(x -> {
-      x.getBox().setTransform(x.getCenter().getX(), x.getCenter().getY(), 0);
+      x.getBox().setTransform(x.getCenter().getX()/40, x.getCenter().getY()/40, 0);
     });
-    world.getWorld().step(delta, 4, 4);
+
+    renderer.render(world, cameraBox2D.combined);
+    world.step(delta, 4, 4);
+
   }
 }

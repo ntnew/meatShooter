@@ -163,7 +163,8 @@ public class PlayerService {
   }
 
   public void shoot() {
-    player.setTopStatus(CharacterTopStatus.SHOOT);
+//    player.setTopStatus(CharacterTopStatus.SHOOT);
+
   }
 
   public void changeWeapon(int i) {

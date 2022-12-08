@@ -1,13 +1,17 @@
 package ru.meat.game.model;
 
-public class PairOfFloat {
+public class FloatPair {
 
   private Float x;
   private Float y;
 
-  public PairOfFloat(Float x, Float y) {
+  public FloatPair(Float x, Float y) {
     this.x = x;
     this.y = y;
+  }
+
+  public static FloatPair create(float x, float y){
+    return new FloatPair(x, y);
   }
 
   public Float getX() {

@@ -8,39 +8,30 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import java.util.ArrayList;
 import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Enemy;
-import ru.meat.game.model.PairOfFloat;
-import ru.meat.game.service.EnemyContactListener;
+import ru.meat.game.model.FloatPair;
 import ru.meat.game.service.EnemyService;
+import ru.meat.game.service.MapService;
 import ru.meat.game.service.PlayerService;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
 
   private final InputProcessor inputProcessor;
-  private TiledMap tiledMap;
   private OrthographicCamera camera;
-  private TiledMapRenderer tiledMapRenderer;
   private PlayerService playerService;
   private EnemyService enemyService;
-
   private float stateTime;
 
   private List<Enemy> enemies = new ArrayList<>();
-  SpriteBatch spriteBatch;
+  private SpriteBatch spriteBatch;
 
 
-
-  MyWorld world;
-
+  private MapService mapService;
 
   public MeatShooterClass(InputProcessor inputProcessor) {
     this.inputProcessor = inputProcessor;
@@ -48,38 +39,34 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   @Override
   public void create() {
-    world = new MyWorld();
-    world.getWorld().setContactListener(new EnemyContactListener());
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
 
 //    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
-    playerService = new PlayerService();
+    playerService = new PlayerService(w/2,h/2);
     enemyService = new EnemyService();
+    mapService = new MapService();
+    mapService.initMap();
 
     camera = new OrthographicCamera();
     camera.setToOrtho(false, w, h);
-    camera.zoom = 2.4f;
+    camera.zoom = 1f;
     camera.update();
 //    camera.position.set(1600, 1000, 0);
 
-    tiledMap = new TmxMapLoader().load("1map.tmx");
     spriteBatch = new SpriteBatch();
 
-    tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
     Gdx.input.setInputProcessor(this);
 
-
-
-    enemies.add(enemyService.createZombieEnemy(50f, 50f, world.getWorld(), "z" + enemies.size()));
-    enemies.add(enemyService.createZombieEnemy(100f, 100f, world.getWorld(), "z" + enemies.size()));
-    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight()), world.getWorld(), "z" + enemies.size()));
-    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight()), world.getWorld(), "z" + enemies.size()));
-    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight()), world.getWorld(), "z" + enemies.size()));
+    enemies.add(enemyService.createZombieEnemy(50f, 50f));
+//    enemies.add(enemyService.createZombieEnemy(100f, 100f));
+//    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+//        MathUtils.random(0, Gdx.graphics.getHeight())));
+//    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+//        MathUtils.random(0, Gdx.graphics.getHeight())));
+//    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+//        MathUtils.random(0, Gdx.graphics.getHeight())));
 
   }
 
@@ -95,34 +82,41 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     stateTime += Gdx.graphics.getDeltaTime();
     playerService.updateStateTime();
 
-    camera.update();
-
-    tiledMapRenderer.setView(camera);
-    tiledMapRenderer.render();
     enemyService.correctDistanceBetweenEnemies(enemies);
     enemies.parallelStream().forEach(enemy -> {
       enemyService.doSomething(playerService.getPosX(), playerService.getPosY(), enemy);
     });
 
+    camera.update();
     spriteBatch.begin();
+    mapService.draw(spriteBatch);
     playerService.drawPlayer(spriteBatch);
-    enemies.forEach(enemy -> enemyService.drawEnemySprite(spriteBatch, enemy, stateTime));
-
+    enemies.forEach(enemy -> {
+      enemyService.drawEnemySprite(spriteBatch, enemy, stateTime);
+      enemy.setPreviousStatus(enemy.getStatus());
+    });
     spriteBatch.end();
   }
 
   private void handleKey() {
     if (Gdx.input.isKeyPressed(Input.Keys.A)) {
       playerService.moveLeft();
+      moveAllObjects(playerService.getSpeed() * playerService.getMoveMultiplier(), 0);
     }
     if (Gdx.input.isKeyPressed(Input.Keys.W)) {
       playerService.moveUp();
+      moveAllObjects(0, -playerService.getSpeed() * playerService.getMoveMultiplier());
+
     }
     if (Gdx.input.isKeyPressed(Input.Keys.S)) {
       playerService.moveDown();
+      moveAllObjects(0, playerService.getSpeed() * playerService.getMoveMultiplier());
+
     }
     if (Gdx.input.isKeyPressed(Input.Keys.D)) {
       playerService.moveRight();
+      moveAllObjects(-playerService.getSpeed() * playerService.getMoveMultiplier(), 0);
+
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
@@ -153,30 +147,34 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
       camera.translate(0, 50);
       moveAllObjects(0, 50);
     }
-    if (keycode == Input.Keys.NUM_1) {
-      tiledMap.getLayers().get(0).setVisible(!tiledMap.getLayers().get(0).isVisible());
-    }
-    if (keycode == Input.Keys.NUM_2) {
-      tiledMap.getLayers().get(1).setVisible(!tiledMap.getLayers().get(1).isVisible());
-    }
     if (Gdx.input.isKeyPressed(Keys.BACKSPACE)) {
       camera.zoom += 0.1;
     }
     if (Gdx.input.isKeyPressed(Keys.MINUS)) {
       camera.zoom -= 0.1;
     }
-
+    if (keycode == Keys.NUM_1) {
+      playerService.changeWeapon(1);
+    }
+    if (keycode == Keys.NUM_2) {
+      playerService.changeWeapon(2);
+    }
     return false;
   }
 
-  private void moveAllObjects(float x, float y) {
-    playerService.moveOnChangeMap(x,y);
+  private void moveAllObjectsWithoutPlayer(float x, float y) {
     enemies.parallelStream().forEach(enemy -> {
-      PairOfFloat destination = enemy.getFloatDestination();
-      enemy.setFloatDestination(new PairOfFloat(destination.getX() +x, destination.getY() +y));
-      enemy.setPosX(enemy.getPosX() +x);
-      enemy.setPosY(enemy.getPosY() +y);
+      FloatPair destination = enemy.getFloatDestination();
+      enemy.setFloatDestination(new FloatPair(destination.getX() + x, destination.getY() + y));
+      enemy.setPosX(enemy.getPosX() + x);
+      enemy.setPosY(enemy.getPosY() + y);
     });
+    mapService.moveMap(x, y);
+  }
+
+  private void moveAllObjects(float x, float y) {
+    playerService.moveOnChangeMap(x, y);
+    moveAllObjectsWithoutPlayer(x, y);
   }
 
   @Override
@@ -191,6 +189,9 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    if (button == Input.Buttons.LEFT) {
+      playerService.shoot();
+    }
     return false;
   }
 

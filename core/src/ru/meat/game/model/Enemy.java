@@ -4,15 +4,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.physics.box2d.Body;
-import lombok.Builder;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Data;
 import ru.meat.game.utils.FilesUtils;
 
 @Data
 //@Builder
 public class Enemy {
-
-  private Body box;
 
   /**
    * Дальность атаки
@@ -22,29 +20,25 @@ public class Enemy {
   private float enemyPing = 100;
   private float enemyPingCounter = 0;
 
-  private PairOfFloat center = new PairOfFloat(0f,0f);
+  private FloatPair center = new FloatPair(0f,0f);
 
   private float radius;
 
   /**
-   * флаг того, что враг мешается другому врагу
-   */
-  private boolean interference = false;
-  /**
    * Направление
    */
-  private PairOfFloat destination;
+  private FloatPair destination;
 
   /**
    * Направление
    */
-  private PairOfFloat floatDestination;
+  private FloatPair floatDestination;
 
 
   /**
    * скорость поворота
    */
-  private PairOfFloat turnSpeed = new PairOfFloat(1f,1f);
+  private FloatPair turnSpeed = new FloatPair(1f,1f);
 
   /**
    * делитель размера модельки
@@ -85,6 +79,8 @@ public class Enemy {
    */
   private EnemyStatus status;
 
+  private EnemyStatus previousStatus;
+
   private final float frameDuration = 0.05f;
   private final float attackFrameDuration = 0.1f;
 
@@ -96,7 +92,7 @@ public class Enemy {
 
   public Enemy(float posX, float posY, float attackRange, float zoom, int hp, float speed,
       String pathToWalkAnimation, String pathToIdleAnimation, String pathToAttackAnimation, String pathToDieAnimation,
-      float animationAngle, float enemyPing, PairOfFloat playerCoord) {
+      float animationAngle, float enemyPing, FloatPair playerCoord) {
     this.attackRange = attackRange;
     this.enemyPing = enemyPing;
     this.zoom = zoom;
@@ -111,6 +107,7 @@ public class Enemy {
     this.idleAnimation = FilesUtils.initAnimationFrames(pathToIdleAnimation, zoom, frameDuration);
     this.dieAnimation = FilesUtils.initAnimationFrames(pathToDieAnimation, zoom, frameDuration);
     this.status = EnemyStatus.IDLE;
+    this.previousStatus = EnemyStatus.IDLE;
     this.animationAngle = animationAngle;
 
     idleAnimation.setPlayMode(PlayMode.LOOP);
@@ -119,8 +116,8 @@ public class Enemy {
     if (playerCoord != null) {
       this.destination = playerCoord;
     } else {
-      this.destination = new PairOfFloat(posX, posY);
-      this.floatDestination = new PairOfFloat(posX, posY);
+      this.destination = new FloatPair(posX, posY);
+      this.floatDestination = new FloatPair(posX, posY);
       this.enemyPingCounter = this.enemyPing;
     }
   }

@@ -168,8 +168,7 @@ public class PlayerService {
 
   public void shoot(OrthographicCamera camera, World world, int screenX, int screenY) {
     Weapon weapon = getActualWeapon();
-    if (!weapon.getShootLock().get()) {
-      weapon.getShootLock().set(true);
+    if (weapon.getCurrentLockCounter() == 0 || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()) {
       weapon.setCurrentLockCounter(TimeUtils.millis());
       Vector3 tmpVec3 = new Vector3();
       tmpVec3.set(screenX, screenY, 0);
@@ -181,16 +180,6 @@ public class PlayerService {
     }
   }
 
-  /**
-   * Обновляет блокиратор выстрела, если  прошло время перезарядки, то освобождает метод стрельбы
-   */
-  public void updateShootLock(){
-    Weapon actualWeapon = getActualWeapon();
-    if (actualWeapon.getShootLock().get() && TimeUtils.timeSinceMillis(actualWeapon.getCurrentLockCounter()) > actualWeapon.getFireRate()){
-      actualWeapon.setCurrentLockCounter(0);
-      actualWeapon.getShootLock().set(false);
-    }
-  }
 
   /**
    * Получить выбранное оружие у игрока

@@ -34,7 +34,6 @@ public class Player extends Actor {
 
   private List<Weapon> weapons = new ArrayList<>();
 
-
   private WeaponService weaponService;
 
   private CharacterTopStatus topStatus;

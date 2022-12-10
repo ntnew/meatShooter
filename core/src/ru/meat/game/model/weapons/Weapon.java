@@ -32,10 +32,5 @@ public class Weapon {
    * Скорострельность, сколько длится один выстрел, в миллисекундах
    */
   private long fireRate;
-  private AtomicBoolean shootLock;
-
-  {
-    new AtomicBoolean(false);
-  }
 
 }

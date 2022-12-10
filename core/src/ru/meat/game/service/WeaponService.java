@@ -27,7 +27,6 @@ public class WeaponService {
         .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .shootSound("glockShoot.mp3")
         .speed(pistolBulletSpeed)
-        .shootLock(new AtomicBoolean(false))
         .fireRate(1000)
         .currentLockCounter(0)
         .build();
@@ -42,7 +41,6 @@ public class WeaponService {
         .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
         .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(pistolBulletSpeed)
-        .shootLock(new AtomicBoolean(false))
         .fireRate(1000)
         .currentLockCounter(0)
         .build();

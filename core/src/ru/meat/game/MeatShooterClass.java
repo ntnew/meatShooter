@@ -93,7 +93,6 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   public void render() {
 
     playerService.rotateModel();
-    playerService.updateShootLock();
 
     handleKey();
     Gdx.gl.glClearColor(0, 0, 0, 1);

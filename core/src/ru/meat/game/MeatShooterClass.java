@@ -71,10 +71,10 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     camera.update();
 
     spriteBatch = new SpriteBatch();
-//    spriteBatch.setProjectionMatrix(camera.combined);
+    spriteBatch.setProjectionMatrix(camera.combined);
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, true, camera);
+    worldRenderer = new WorldRenderer(world, false, camera);
 
     enemies.add(enemyService.createZombieEnemy(50f, 50f));
 //    enemies.add(enemyService.createZombieEnemy(100f, 100f));
@@ -93,6 +93,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   public void render() {
 
     playerService.rotateModel();
+    playerService.updateShootLock();
 
     handleKey();
     Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -213,13 +214,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
     if (button == Input.Buttons.LEFT) {
-      Vector3 tmpVec3 = new Vector3();
-      tmpVec3.set(screenX, screenY, 0);
-      camera.unproject(tmpVec3);
-      new Vector2();
-      bullets.add(BulletService.createBullet(world, playerService.getPosX()/StaticFloats.WORLD_TO_VIEW, playerService.getPosY()/StaticFloats.WORLD_TO_VIEW, screenX/StaticFloats.WORLD_TO_VIEW,
-          tmpVec3.y/StaticFloats.WORLD_TO_VIEW));
-//      playerService.shoot();
+      playerService.shoot(camera, world, screenX, screenY);
     }
     return false;
   }

@@ -10,12 +10,23 @@ import ru.meat.game.utils.StaticFloats;
 
 public class BulletService {
 
-  public static Bullet createBullet(World world, float fromX, float fromY, float screenX, float screenY){
+  /**
+   *  создать пулю, задает её скорость и направление полёта
+   * @param world мир, в котором создастся объект для bpx2d
+   * @param fromX точка х откуда стреляют
+   * @param fromY точка у откуда стреляют
+   * @param screenX точка х куда стреляют
+   * @param screenY точка у куда стреляют
+   * @param bulletSpeed множитель скорости пули
+   * @return обект пули
+   */
+  public static Bullet createBullet(World world, float fromX, float fromY, float screenX, float screenY, float bulletSpeed){
     Body bulletBody = createCircleForBullet(world, fromX, fromY);
+    bulletBody.setBullet(true);
     Bullet bullet = new Bullet();
+    bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed,(screenY - fromY) * bulletSpeed);
     bullet.setBody(bulletBody);
-    bullet.getBody().setBullet(true);
-    bullet.getBody().setLinearVelocity((screenX - fromX) * 0.5f,(screenY - fromY) * 0.5f);
+
     return bullet;
   }
 
@@ -27,9 +38,8 @@ public class BulletService {
     def.position.set(x, y);
     Body box = world.createBody(def);
 
-
     CircleShape circle = new CircleShape();
-    circle.setRadius((float) 10/ StaticFloats.WORLD_TO_VIEW);
+    circle.setRadius((float) 3/ StaticFloats.WORLD_TO_VIEW);
 
     box.createFixture(circle, (float) 100);
     box.getFixtureList().get(0).setUserData("bullet");

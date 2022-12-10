@@ -7,4 +7,6 @@ import lombok.Data;
 public class Bullet {
 
   private Body body;
+
+  private float speedMultiply;
 }

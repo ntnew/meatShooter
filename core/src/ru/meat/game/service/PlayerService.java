@@ -1,19 +1,26 @@
 package ru.meat.game.service;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.TimeUtils;
 import lombok.Data;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Player;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
+import ru.meat.game.utils.StaticFloats;
 
 @Data
 public class PlayerService {
+
+  private final AudioService audioService;
 
   /**
    * Положение игрока по Х
@@ -38,6 +45,7 @@ public class PlayerService {
 
   public PlayerService(float x, float y) {
     initPlayer();
+    audioService = new AudioService();
     posX = x;
     posY = y;
   }
@@ -87,8 +95,8 @@ public class PlayerService {
     Sprite sprite = new Sprite(getActualFrame(feetStateTime));
     sprite.setX(posX + (20f / player.getZoomMultiplier()));
     sprite.setY(posY + (30f / player.getZoomMultiplier()));
-    sprite.setOrigin(sprite.getWidth()/2, sprite.getHeight()/2);
-    sprite.setRotation(modelFrontAngle-20);
+    sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
+    sprite.setRotation(modelFrontAngle - 20);
     sprite.draw(batch);
   }
 
@@ -97,7 +105,7 @@ public class PlayerService {
     sprite.setX(posX);
     sprite.setY(posY);
     sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    sprite.setRotation(modelFrontAngle-20);
+    sprite.setRotation(modelFrontAngle - 20);
     sprite.draw(batch);
   }
 
@@ -127,21 +135,17 @@ public class PlayerService {
   }
 
   public Texture getActualFrameTop(float stateTime) {
-    Weapon animationStack = getAnimationStack();
+    Weapon animationStack = getActualWeapon();
     if (player.getTopStatus() == CharacterTopStatus.MOVE) {
       return animationStack.getMoveAnimation().getKeyFrame(stateTime, true);
     } else if (player.getTopStatus() == CharacterTopStatus.RELOAD) {
-      return  animationStack.getReloadAnimation().getKeyFrame(stateTime, true);
+      return animationStack.getReloadAnimation().getKeyFrame(stateTime, true);
     } else if (player.getTopStatus() == CharacterTopStatus.SHOOT) {
-      return  animationStack.getShootAnimation().getKeyFrame(stateTime, true);
+      return animationStack.getShootAnimation().getKeyFrame(stateTime, true);
     } else if (player.getTopStatus() == CharacterTopStatus.MELEE_ATTACK) {
-      return  animationStack.getMeleeAttackAnimation().getKeyFrame(stateTime, true);
+      return animationStack.getMeleeAttackAnimation().getKeyFrame(stateTime, true);
     }
     return animationStack.getIdleAnimation().getKeyFrame(stateTime, true);
-  }
-
-  private Weapon getAnimationStack() {
-    return player.getWeapons().stream().filter(x -> x.getName().equals(player.getCurrentWeapon())).findFirst().orElse(player.getWeapons().get(0));
   }
 
   private void initPlayer() {
@@ -162,9 +166,38 @@ public class PlayerService {
     posY += y;
   }
 
-  public void shoot() {
-//    player.setTopStatus(CharacterTopStatus.SHOOT);
+  public void shoot(OrthographicCamera camera, World world, int screenX, int screenY) {
+    Weapon weapon = getActualWeapon();
+    if (!weapon.getShootLock().get()) {
+      weapon.getShootLock().set(true);
+      weapon.setCurrentLockCounter(TimeUtils.millis());
+      Vector3 tmpVec3 = new Vector3();
+      tmpVec3.set(screenX, screenY, 0);
+      camera.unproject(tmpVec3);
+      BulletService.createBullet(world, posX / StaticFloats.WORLD_TO_VIEW, posY / StaticFloats.WORLD_TO_VIEW,
+          screenX / StaticFloats.WORLD_TO_VIEW,
+          tmpVec3.y / StaticFloats.WORLD_TO_VIEW, weapon.getSpeed());
+      audioService.playShoot(weapon.getShootSound());
+    }
+  }
 
+  /**
+   * Обновляет блокиратор выстрела, если  прошло время перезарядки, то освобождает метод стрельбы
+   */
+  public void updateShootLock(){
+    Weapon actualWeapon = getActualWeapon();
+    if (actualWeapon.getShootLock().get() && TimeUtils.timeSinceMillis(actualWeapon.getCurrentLockCounter()) > actualWeapon.getFireRate()){
+      actualWeapon.setCurrentLockCounter(0);
+      actualWeapon.getShootLock().set(false);
+    }
+  }
+
+  /**
+   * Получить выбранное оружие у игрока
+   */
+  public Weapon getActualWeapon() {
+    return player.getWeapons().stream().filter(x -> x.getName().equals(player.getCurrentWeapon())).findFirst()
+        .orElse(player.getWeapons().get(0));
   }
 
   public void changeWeapon(int i) {

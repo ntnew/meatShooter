@@ -31,6 +31,15 @@ public class PlayerService {
    */
   private float posY;
 
+  /**
+   * Положение игрока по Х
+   */
+  private float centerX;
+  /**
+   * Положение игрока по У
+   */
+  private float centerY;
+
   private float moveMultiplier = 1f;
 
   private float feetStateTime;
@@ -59,31 +68,40 @@ public class PlayerService {
     topStateTime += Gdx.graphics.getDeltaTime();
   }
 
-  public void rotateModel() {
+  public void rotateModel(OrthographicCamera camera) {
     float xInput = Gdx.input.getX();
-    float yInput = (Gdx.graphics.getHeight() - Gdx.input.getY());
+    float yInput = Gdx.input.getY();
 
-    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(yInput - posY, xInput - posX) + 20;
+
+    Vector3 tmpVec3 = new Vector3();
+    tmpVec3.set(xInput, yInput, 0);
+    camera.unproject(tmpVec3);
+
+    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - centerY, tmpVec3.x - centerX) + 20;
   }
 
-  public void moveLeft() {
+  public float moveLeft() {
     posX = posX - (speed * moveMultiplier);
     moveDirectionAngle = 220;
+    return - (speed * moveMultiplier);
   }
 
-  public void moveRight() {
+  public float moveRight() {
     posX = posX + (speed * moveMultiplier);
     moveDirectionAngle = 40;
+    return (speed * moveMultiplier);
   }
 
-  public void moveUp() {
+  public float moveUp() {
     posY = posY + (speed * moveMultiplier);
     moveDirectionAngle = 130;
+    return (speed * moveMultiplier);
   }
 
-  public void moveDown() {
+  public float moveDown() {
     posY = posY - (speed * moveMultiplier);
     moveDirectionAngle = 300;
+    return - (speed * moveMultiplier);
   }
 
   public void drawPlayer(SpriteBatch batch) {
@@ -105,6 +123,8 @@ public class PlayerService {
     sprite.setX(posX);
     sprite.setY(posY);
     sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
+    centerX = posX + sprite.getWidth() / 2;
+    centerY = posY + sprite.getHeight() / 2;
     sprite.setRotation(modelFrontAngle - 20);
     sprite.draw(batch);
   }
@@ -173,8 +193,11 @@ public class PlayerService {
       Vector3 tmpVec3 = new Vector3();
       tmpVec3.set(screenX, screenY, 0);
       camera.unproject(tmpVec3);
-      BulletService.createBullet(world, posX / StaticFloats.WORLD_TO_VIEW, posY / StaticFloats.WORLD_TO_VIEW,
-          screenX / StaticFloats.WORLD_TO_VIEW,
+      System.out.println(posX + " f  " + posY  + " f  "+ screenX  + " f  "+ tmpVec3.y);
+      BulletService.createBullet(world,
+          posX / StaticFloats.WORLD_TO_VIEW,
+          posY / StaticFloats.WORLD_TO_VIEW,
+          tmpVec3.x / StaticFloats.WORLD_TO_VIEW,
           tmpVec3.y / StaticFloats.WORLD_TO_VIEW, weapon.getSpeed());
       audioService.playShoot(weapon.getShootSound());
     }

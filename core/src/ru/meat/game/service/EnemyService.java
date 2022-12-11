@@ -60,7 +60,7 @@ public class EnemyService {
     sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
     sprite.setRotation(enemy.getAnimationAngle());
     sprite.draw(batch);
-    enemy.setCenter(FloatPair.create(enemy.getPosX() + sprite.getWidth() / 2, enemy.getPosY() + sprite.getHeight() / 2));
+    enemy.setCenter(FloatPair.create(enemy.getPosX() + sprite.getWidth() / 2, enemy.getPosY() + sprite.getHeight() / 2 - 10));
   }
 
   private Texture getActualFrame(float stateTime, Enemy enemy) {

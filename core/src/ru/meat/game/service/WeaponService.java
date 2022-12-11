@@ -12,7 +12,7 @@ import ru.meat.game.model.weapons.WeaponEnum;
 @Data
 public class WeaponService {
 
-  private final static float pistolBulletSpeed = 0.05f;
+  private final static float pistolBulletSpeed = 5f;
 
   private final String assetsDir = "./assets/Top_Down_survivor/";
 

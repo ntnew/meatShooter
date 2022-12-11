@@ -71,10 +71,9 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     camera.update();
 
     spriteBatch = new SpriteBatch();
-    spriteBatch.setProjectionMatrix(camera.combined);
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, false, camera);
+    worldRenderer = new WorldRenderer(world, true, camera);
 
     enemies.add(enemyService.createZombieEnemy(50f, 50f));
 //    enemies.add(enemyService.createZombieEnemy(100f, 100f));
@@ -86,13 +85,13 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 //        MathUtils.random(0, Gdx.graphics.getHeight())));
 
     enemies.forEach(
-        x -> x.setBox(GDXUtils.createCircleForEnemy(world, x.getRadius()/ StaticFloats.WORLD_TO_VIEW, 0.5f, "z1", x.getPosX(), x.getPosY())));
+        x -> x.setBox(GDXUtils.createCircleForEnemy(world, x.getRadius()/ StaticFloats.WORLD_TO_VIEW, 80, "z1", x.getPosX(), x.getPosY())));
   }
 
   @Override
   public void render() {
 
-    playerService.rotateModel();
+    camera.update();
 
     handleKey();
     Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -106,9 +105,11 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
       enemyService.doSomething(playerService.getPosX(), playerService.getPosY(), enemy);
     });
 
-    camera.update();
+
+    playerService.rotateModel(camera);
     worldRenderer.getCameraBox2D().update();
 
+    spriteBatch.setProjectionMatrix(camera.combined);
     spriteBatch.begin();
 
     mapService.draw(spriteBatch);
@@ -117,29 +118,34 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
       enemyService.drawEnemySprite(spriteBatch, enemy, stateTime);
       enemy.setPreviousStatus(enemy.getStatus());
     });
-    worldRenderer.render(stateTime, enemies);
     spriteBatch.end();
+    worldRenderer.render(stateTime, enemies);
+
   }
 
   private void handleKey() {
     if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-      playerService.moveLeft();
-      moveAllObjects(playerService.getSpeed() * playerService.getMoveMultiplier(), 0);
+      float x = playerService.moveLeft();
+      camera.translate(x,0);
+      worldRenderer.getCameraBox2D().translate(x/StaticFloats.WORLD_TO_VIEW,0);
     }
+
     if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-      playerService.moveUp();
-      moveAllObjects(0, -playerService.getSpeed() * playerService.getMoveMultiplier());
-
+      float y = playerService.moveUp();
+      camera.translate(0,y);
+      worldRenderer.getCameraBox2D().translate(0,y/StaticFloats.WORLD_TO_VIEW);
     }
+
     if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-      playerService.moveDown();
-      moveAllObjects(0, playerService.getSpeed() * playerService.getMoveMultiplier());
-
+      float y = playerService.moveDown();
+      camera.translate(0,y);
+      worldRenderer.getCameraBox2D().translate(0, y/StaticFloats.WORLD_TO_VIEW);
     }
-    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-      playerService.moveRight();
-      moveAllObjects(-playerService.getSpeed() * playerService.getMoveMultiplier(), 0);
 
+    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+      float x = playerService.moveRight();
+      camera.translate(x,0);
+      worldRenderer.getCameraBox2D().translate(x/StaticFloats.WORLD_TO_VIEW,0);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
@@ -156,19 +162,15 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   public boolean keyDown(int keycode) {
     if (keycode == Input.Keys.LEFT) {
       camera.translate(-50, 0);
-      moveAllObjects(-50, 0);
     }
     if (keycode == Input.Keys.RIGHT) {
       camera.translate(50, 0);
-      moveAllObjects(50, 0);
     }
     if (keycode == Input.Keys.UP) {
       camera.translate(0, -50);
-      moveAllObjects(0, -50);
     }
     if (keycode == Input.Keys.DOWN) {
       camera.translate(0, 50);
-      moveAllObjects(0, 50);
     }
     if (Gdx.input.isKeyPressed(Keys.BACKSPACE)) {
       camera.zoom += 0.1;
@@ -183,21 +185,6 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
       playerService.changeWeapon(2);
     }
     return false;
-  }
-
-  private void moveAllObjectsWithoutPlayer(float x, float y) {
-    enemies.parallelStream().forEach(enemy -> {
-      FloatPair destination = enemy.getFloatDestination();
-      enemy.setFloatDestination(new FloatPair(destination.getX() + x, destination.getY() + y));
-      enemy.setPosX(enemy.getPosX() + x);
-      enemy.setPosY(enemy.getPosY() + y);
-    });
-    mapService.moveMap(x, y);
-  }
-
-  private void moveAllObjects(float x, float y) {
-    playerService.moveOnChangeMap(x, y);
-    moveAllObjectsWithoutPlayer(x, y);
   }
 
   @Override

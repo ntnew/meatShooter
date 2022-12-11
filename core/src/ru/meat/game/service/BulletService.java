@@ -21,9 +21,9 @@ public class BulletService {
    * @return обект пули
    */
   public static Bullet createBullet(World world, float fromX, float fromY, float screenX, float screenY, float bulletSpeed){
+    Bullet bullet = new Bullet();
     Body bulletBody = createCircleForBullet(world, fromX, fromY);
     bulletBody.setBullet(true);
-    Bullet bullet = new Bullet();
     bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed,(screenY - fromY) * bulletSpeed);
     bullet.setBody(bulletBody);
 

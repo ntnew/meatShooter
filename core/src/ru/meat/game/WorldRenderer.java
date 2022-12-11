@@ -9,7 +9,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import java.util.List;
 import lombok.Data;
 import ru.meat.game.model.Enemy;
-import ru.meat.game.service.EnemyContactListener;
+import ru.meat.game.service.MyContactListener;
 @Data
 public class WorldRenderer {
 
@@ -30,7 +30,7 @@ public class WorldRenderer {
 
     renderer = new Box2DDebugRenderer();
     renderer.setDrawBodies(debug);
-    world.setContactListener(new EnemyContactListener());
+    world.setContactListener(new MyContactListener());
 
     this.world = world;
 //    this.cam = cam;

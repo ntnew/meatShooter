@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.World;
 import ru.meat.game.model.weapons.Bullet;
+import ru.meat.game.model.weapons.BulletBodyUserData;
 import ru.meat.game.utils.StaticFloats;
 
 public class BulletService {
@@ -34,7 +35,7 @@ public class BulletService {
 
     BodyDef def = new BodyDef();
 
-    def.type = BodyType.KinematicBody;
+    def.type = BodyType.DynamicBody;
     def.position.set(x, y);
     Body box = world.createBody(def);
 
@@ -42,7 +43,7 @@ public class BulletService {
     circle.setRadius((float) 3/ StaticFloats.WORLD_TO_VIEW);
 
     box.createFixture(circle, (float) 100);
-    box.getFixtureList().get(0).setUserData("bullet");
+    box.getFixtureList().get(0).setUserData(new BulletBodyUserData("bullet", 20));
 
     circle.dispose();
 

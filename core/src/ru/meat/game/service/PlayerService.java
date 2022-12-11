@@ -193,7 +193,6 @@ public class PlayerService {
       Vector3 tmpVec3 = new Vector3();
       tmpVec3.set(screenX, screenY, 0);
       camera.unproject(tmpVec3);
-      System.out.println(posX + " f  " + posY  + " f  "+ screenX  + " f  "+ tmpVec3.y);
       BulletService.createBullet(world,
           posX / StaticFloats.WORLD_TO_VIEW,
           posY / StaticFloats.WORLD_TO_VIEW,

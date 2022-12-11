@@ -10,16 +10,15 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Enemy;
-import ru.meat.game.model.FloatPair;
+import ru.meat.game.model.EnemyBodyUserData;
 import ru.meat.game.model.weapons.Bullet;
-import ru.meat.game.service.BulletService;
+import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.PlayerService;
@@ -64,6 +63,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     mapService = new MapService();
     mapService.initMap();
     world = new World(new Vector2(0, 0), true);
+    world.setContactListener(new MyContactListener());
 
     camera = new OrthographicCamera();
     camera.setToOrtho(false, w, h);
@@ -76,22 +76,23 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     worldRenderer = new WorldRenderer(world, true, camera);
 
     enemies.add(enemyService.createZombieEnemy(50f, 50f));
-//    enemies.add(enemyService.createZombieEnemy(100f, 100f));
-//    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-//        MathUtils.random(0, Gdx.graphics.getHeight())));
-//    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-//        MathUtils.random(0, Gdx.graphics.getHeight())));
-//    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-//        MathUtils.random(0, Gdx.graphics.getHeight())));
+    enemies.add(enemyService.createZombieEnemy(100f, 100f));
+    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
 
     enemies.forEach(
-        x -> x.setBox(GDXUtils.createCircleForEnemy(world, x.getRadius()/ StaticFloats.WORLD_TO_VIEW, 80, "z1", x.getPosX(), x.getPosY())));
+        x -> x.setBox(GDXUtils.createCircleForEnemy(world, x.getRadius()/ StaticFloats.WORLD_TO_VIEW, 80,
+            new EnemyBodyUserData("z1", 0), x.getPosX(), x.getPosY())));
   }
 
   @Override
   public void render() {
-
     camera.update();
+    worldRenderer.getCameraBox2D().update();
 
     handleKey();
     Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -107,7 +108,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
 
     playerService.rotateModel(camera);
-    worldRenderer.getCameraBox2D().update();
+
 
     spriteBatch.setProjectionMatrix(camera.combined);
     spriteBatch.begin();

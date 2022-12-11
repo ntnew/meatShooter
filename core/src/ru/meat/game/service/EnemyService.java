@@ -1,7 +1,6 @@
 package ru.meat.game.service;
 
 import static ru.meat.game.utils.GDXUtils.calcGipotenuza;
-import static ru.meat.game.utils.GDXUtils.createCircleForEnemy;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -10,6 +9,7 @@ import com.badlogic.gdx.math.MathUtils;
 import java.util.List;
 import lombok.NoArgsConstructor;
 import ru.meat.game.model.Enemy;
+import ru.meat.game.model.EnemyBodyUserData;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.utils.GDXUtils;
@@ -23,9 +23,9 @@ public class EnemyService {
         "./assets/export/move/",
         "./assets/export/idle/",
         "./assets/export/attack/",
-        null,
+        "./assets/export/died",
         0, 300, null);
-    enemy.setRadius(30);
+    enemy.setRadius(20);
     return enemy;
   }
 
@@ -60,7 +60,8 @@ public class EnemyService {
     sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
     sprite.setRotation(enemy.getAnimationAngle());
     sprite.draw(batch);
-    enemy.setCenter(FloatPair.create(enemy.getPosX() + sprite.getWidth() / 2, enemy.getPosY() + sprite.getHeight() / 2 - 10));
+    enemy.setCenter(
+        FloatPair.create(enemy.getPosX() + sprite.getWidth() / 2, enemy.getPosY() + sprite.getHeight() / 2 - 10));
   }
 
   private Texture getActualFrame(float stateTime, Enemy enemy) {
@@ -70,7 +71,7 @@ public class EnemyService {
       return enemy.getIdleAnimation().getKeyFrame(stateTime);
     } else if (enemy.getStatus().equals(EnemyStatus.MOVE)) {
       return enemy.getWalkAnimation().getKeyFrame(stateTime);
-    } else if (enemy.getStatus().equals(EnemyStatus.DIE)) {
+    } else if (enemy.getStatus().equals(EnemyStatus.DIED)) {
       return enemy.getDieAnimation().getKeyFrame(stateTime, true);
     }
     return enemy.getIdleAnimation().getKeyFrame(stateTime);
@@ -85,38 +86,52 @@ public class EnemyService {
    */
   public void doSomething(float x, float y, Enemy enemy) {
     enemy.setEnemyPingCounter(enemy.getEnemyPingCounter() + 1);
-
-    //если расстояние меньше расстояния атаки, то атаковать
-    if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) < enemy.getAttackRange()) {
-      enemy.setStatus(EnemyStatus.ATTACK);
-    } else {
-      enemy.setStatus(EnemyStatus.MOVE);
-      //если расстояние меньше 10х расстояний атаки, то идти напрямик к игроку
-      if (isEnemyTooCloseToPlayer(x, y, enemy) && !enemy.getPreviousStatus().equals(EnemyStatus.ATTACK)) {
-        enemy.setDestination(FloatPair.create(x, y));
-      } else if (enemy.getEnemyPingCounter() > enemy.getEnemyPing()) {
-        enemy.setEnemyPingCounter(0);
-        if (MathUtils.random(0, 100) > 50) { //ставит рандомную точку, чтобы идти в непонятном направлении в 50% случаев
-          enemy.setDestination(
-              FloatPair.create(MathUtils.random(x - 2000, x + 2000), MathUtils.random(y - 2000, y + 2000)));
-        } else {
-          enemy.setDestination(
-              FloatPair.create(MathUtils.random(x - 500, x + 500), MathUtils.random(y - 500, y + 500)));
+    updateEnemyHp(enemy);
+    if (enemy.getHp() <= 0) {
+      enemy.setStatus(EnemyStatus.DIED);
+    }else {
+      //если расстояние меньше расстояния атаки, то атаковать
+      if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) < enemy.getAttackRange()) {
+        enemy.setStatus(EnemyStatus.ATTACK);
+      } else {
+        enemy.setStatus(EnemyStatus.MOVE);
+        //если расстояние меньше 10х расстояний атаки, то идти напрямик к игроку
+        if (isEnemyTooCloseToPlayer(x, y, enemy) && !enemy.getPreviousStatus().equals(EnemyStatus.ATTACK)) {
+          enemy.setDestination(FloatPair.create(x, y));
+        } else if (enemy.getEnemyPingCounter() > enemy.getEnemyPing()) {
+          enemy.setEnemyPingCounter(0);
+          if (MathUtils.random(0, 100)
+              > 50) { //ставит рандомную точку, чтобы идти в непонятном направлении в 50% случаев
+            enemy.setDestination(
+                FloatPair.create(MathUtils.random(x - 2000, x + 2000), MathUtils.random(y - 2000, y + 2000)));
+          } else {
+            enemy.setDestination(
+                FloatPair.create(MathUtils.random(x - 500, x + 500), MathUtils.random(y - 500, y + 500)));
+          }
         }
       }
-    }
 
-    defineSpeedXandY(enemy);
-    if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) > enemy.getAttackRange() / 1.5) {
-      rotateModel(enemy.getFloatDestination().getX() - enemy.getPosX(),
-          enemy.getFloatDestination().getY() - enemy.getPosY(), enemy);
-    } else {
-      enemy.setSpeedY(0);
-      enemy.setSpeedX(0);
-    }
+      defineSpeedXandY(enemy);
+      if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) > enemy.getAttackRange() / 1.5) {
+        rotateModel(enemy.getFloatDestination().getX() - enemy.getPosX(),
+            enemy.getFloatDestination().getY() - enemy.getPosY(), enemy);
+      } else {
+        enemy.setSpeedY(0);
+        enemy.setSpeedX(0);
+      }
 
-    enemy.setPosX(enemy.getPosX() + enemy.getSpeedX());
-    enemy.setPosY(enemy.getPosY() + enemy.getSpeedY());
+      enemy.setPosX(enemy.getPosX() + enemy.getSpeedX());
+      enemy.setPosY(enemy.getPosY() + enemy.getSpeedY());
+    }
+  }
+
+  private void updateEnemyHp(Enemy enemy) {
+    EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBox().getFixtureList().get(0).getUserData();
+    if (userData != null && userData.getDamage() != 0) {
+      enemy.setHp(enemy.getHp() - userData.getDamage());
+      userData.setDamage(0);
+      System.out.println(enemy.getHp());
+    }
   }
 
   private boolean isEnemyTooCloseToPlayer(float x, float y, Enemy enemy) {

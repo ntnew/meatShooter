@@ -4,5 +4,5 @@ public enum EnemyStatus {
   IDLE,
   ATTACK,
   MOVE,
-  DIE
+  DIED
 }

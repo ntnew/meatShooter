@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.World;
 import java.math.BigDecimal;
+import ru.meat.game.model.EnemyBodyUserData;
 
 public class GDXUtils {
 
@@ -63,7 +64,7 @@ public class GDXUtils {
    * @return
    */
 
-  public static Body createCircleForEnemy(World world, float radius, float density, String name, float x, float y) {
+  public static Body createCircleForEnemy(World world, float radius, float density, EnemyBodyUserData bodyData, float x, float y) {
 
     BodyDef def = new BodyDef();
 
@@ -75,7 +76,7 @@ public class GDXUtils {
     circle.setRadius(radius);
 
     box.createFixture(circle, density);
-    box.getFixtureList().get(0).setUserData(name);
+    box.getFixtureList().get(0).setUserData(bodyData);
 
     circle.dispose();
 

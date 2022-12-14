@@ -4,12 +4,14 @@ import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
+import ru.meat.game.service.BulletService;
 import ru.meat.game.service.WeaponService;
 
 @Data
@@ -39,7 +41,7 @@ public class Player extends Actor {
   private CharacterTopStatus topStatus;
   private CharacterFeetStatus feetStatus;
 
-  public Player() {
+  public Player(World world) {
     try {
       currentWeapon = WeaponEnum.PISTOL;
       topStatus = CharacterTopStatus.IDLE;
@@ -51,7 +53,7 @@ public class Player extends Actor {
       this.strafeLeftAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_left/", zoomMultiplier, frameDuration);
       this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
 
-      weaponService = new WeaponService();
+      weaponService = new WeaponService(new BulletService(world));
       weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
 

@@ -5,12 +5,17 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import lombok.NoArgsConstructor;
+import com.badlogic.gdx.physics.box2d.World;
+import lombok.AllArgsConstructor;
 import ru.meat.game.model.EnemyBodyUserData;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 
-@NoArgsConstructor
+
+@AllArgsConstructor
 public class MyContactListener implements ContactListener {
+
+
+  private final World world;
 
   @Override
   public void endContact(Contact contact) {
@@ -22,14 +27,19 @@ public class MyContactListener implements ContactListener {
 
     Fixture fa = contact.getFixtureA();
     Fixture fb = contact.getFixtureB();
-    setDamageToEnemyFromBullet(fa, fb);
+    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
+      setDamageToEnemyFromBullet(fa, fb);
+    }
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
-    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData){
-      EnemyBodyUserData userData = (EnemyBodyUserData) fa.getUserData();
-      userData.setDamage(((BulletBodyUserData) fb.getUserData()).getDamage());
-    }
+    EnemyBodyUserData enemyBodyUserData = (EnemyBodyUserData) fa.getUserData();
+    BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
+
+    enemyBodyUserData.setDamage(bulletBodyUserData.getDamage());
+
+    bulletBodyUserData.setNeedDispose(true);
+    fb.setUserData(bulletBodyUserData);
   }
 
   @Override
@@ -38,7 +48,7 @@ public class MyContactListener implements ContactListener {
   }
 
   @Override
-  public void postSolve(Contact contact, ContactImpulse impulse){
+  public void postSolve(Contact contact, ContactImpulse impulse) {
   }
 
 }

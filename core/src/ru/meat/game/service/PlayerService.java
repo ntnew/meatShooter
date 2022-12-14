@@ -52,8 +52,8 @@ public class PlayerService {
 
   private float modelFrontAngle = 0;
 
-  public PlayerService(float x, float y) {
-    initPlayer();
+  public PlayerService(float x, float y, World world) {
+    player = new Player(world);
     audioService = new AudioService();
     posX = x;
     posY = y;
@@ -61,11 +61,13 @@ public class PlayerService {
 
   private Player player;
 
-  public void updateStateTime() {
+  public void updateState() {
     if (CharacterFeetStatus.RUN.equals(player.getFeetStatus())) {
       feetStateTime += Gdx.graphics.getDeltaTime();
     }
     topStateTime += Gdx.graphics.getDeltaTime();
+
+    getActualWeapon().updateState();
   }
 
   public void rotateModel(OrthographicCamera camera) {
@@ -169,7 +171,7 @@ public class PlayerService {
   }
 
   private void initPlayer() {
-    player = new Player();
+
   }
 
   public void changeTopStatus(CharacterTopStatus status) {
@@ -186,18 +188,17 @@ public class PlayerService {
     posY += y;
   }
 
-  public void shoot(OrthographicCamera camera, World world, int screenX, int screenY) {
+  public void shoot(OrthographicCamera camera, float screenX, float screenY) {
     Weapon weapon = getActualWeapon();
     if (weapon.getCurrentLockCounter() == 0 || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()) {
       weapon.setCurrentLockCounter(TimeUtils.millis());
       Vector3 tmpVec3 = new Vector3();
       tmpVec3.set(screenX, screenY, 0);
       camera.unproject(tmpVec3);
-      BulletService.createBullet(world,
-          posX / StaticFloats.WORLD_TO_VIEW,
+      weapon.shoot(posX / StaticFloats.WORLD_TO_VIEW,
           posY / StaticFloats.WORLD_TO_VIEW,
           tmpVec3.x / StaticFloats.WORLD_TO_VIEW,
-          tmpVec3.y / StaticFloats.WORLD_TO_VIEW, weapon.getSpeed());
+          tmpVec3.y / StaticFloats.WORLD_TO_VIEW);
       audioService.playShoot(weapon.getShootSound());
     }
   }

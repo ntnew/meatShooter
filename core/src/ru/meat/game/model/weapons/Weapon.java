@@ -1,18 +1,19 @@
 package ru.meat.game.model.weapons;
 
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import ru.meat.game.model.FloatPair;
+import ru.meat.game.interfaces.Shootable;
+import ru.meat.game.service.BulletService;
 
 @Data
 @AllArgsConstructor
 @Builder
-public class Weapon {
+public class Weapon implements Shootable {
+
+  private final BulletService bulletService;
 
   private Texture bulletTexture;
 
@@ -33,4 +34,15 @@ public class Weapon {
    */
   private long fireRate;
 
+  private int damage;
+
+  @Override
+  public void shoot(float fromX, float fromY, float screenX, float screenY) {
+    bulletService.createBullet(fromX, fromY, screenX, screenY, speed, damage);
+  }
+
+  @Override
+  public void updateState() {
+    bulletService.updateBullets();
+  }
 }

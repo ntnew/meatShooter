@@ -4,8 +4,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.physics.box2d.Body;
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.swing.Box;
 import lombok.Data;
 import ru.meat.game.utils.FilesUtils;
 
@@ -13,7 +11,7 @@ import ru.meat.game.utils.FilesUtils;
 //@Builder
 public class Enemy {
 
-  private Body box;
+  private Body body;
   /**
    * Дальность атаки
    */

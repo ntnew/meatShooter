@@ -6,10 +6,8 @@ import static ru.meat.game.utils.StaticFloats.WORLD_WIDTH;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import java.util.List;
 import lombok.Data;
-import ru.meat.game.model.Enemy;
-import ru.meat.game.service.MyContactListener;
+
 @Data
 public class WorldRenderer {
 
@@ -30,7 +28,7 @@ public class WorldRenderer {
 
     renderer = new Box2DDebugRenderer();
     renderer.setDrawBodies(debug);
-    world.setContactListener(new MyContactListener());
+//    world.setContactListener(new MyContactListener());
 
     this.world = world;
 //    this.cam = cam;
@@ -41,13 +39,11 @@ public class WorldRenderer {
     world.dispose();
   }
 
-  public void render(float delta, List<Enemy> enemies) {
-    enemies.forEach(x -> {
-      x.getBox().setTransform(x.getCenter().getX()/40, x.getCenter().getY()/40, 0);
-    });
+  public void render(float delta) {
+
 
     renderer.render(world, cameraBox2D.combined);
-    world.step(delta, 4, 4);
+//    world.step(delta, 4, 4);
 
   }
 }

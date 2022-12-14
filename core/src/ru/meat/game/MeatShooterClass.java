@@ -3,26 +3,24 @@ package ru.meat.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
-import ru.meat.game.model.Enemy;
-import ru.meat.game.model.EnemyBodyUserData;
 import ru.meat.game.model.weapons.Bullet;
-import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
+import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.PlayerService;
-import ru.meat.game.utils.GDXUtils;
 import ru.meat.game.utils.StaticFloats;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
@@ -39,14 +37,12 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   private EnemyService enemyService;
   private float stateTime;
 
-  private List<Enemy> enemies = new ArrayList<>();
   private SpriteBatch spriteBatch;
   private World world;
   private WorldRenderer worldRenderer;
 
   private MapService mapService;
 
-  private List<Bullet> bullets = new ArrayList<>();
   public MeatShooterClass(InputProcessor inputProcessor) {
     this.inputProcessor = inputProcessor;
   }
@@ -58,12 +54,14 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
 //    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
-    playerService = new PlayerService(w / 2, h / 2);
+
     enemyService = new EnemyService();
     mapService = new MapService();
     mapService.initMap();
     world = new World(new Vector2(0, 0), true);
-    world.setContactListener(new MyContactListener());
+    world.step(1/60f, 6, 2);
+    playerService = new PlayerService(w / 2, h / 2, world);
+    world.setContactListener(new MyContactListener(world));
 
     camera = new OrthographicCamera();
     camera.setToOrtho(false, w, h);
@@ -75,18 +73,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     worldRenderer = new WorldRenderer(world, true, camera);
 
-    enemies.add(enemyService.createZombieEnemy(50f, 50f));
-    enemies.add(enemyService.createZombieEnemy(100f, 100f));
-    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
-    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
-    enemies.add(enemyService.createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
-
-    enemies.forEach(
-        x -> x.setBox(GDXUtils.createCircleForEnemy(world, x.getRadius()/ StaticFloats.WORLD_TO_VIEW, 80,
-            new EnemyBodyUserData("z1", 0), x.getPosX(), x.getPosY())));
+    enemyService.createEnemies(world);
   }
 
   @Override
@@ -99,13 +86,11 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     stateTime += Gdx.graphics.getDeltaTime();
-    playerService.updateStateTime();
+    playerService.updateState();
+    world.step(1/60f, 6, 2);
 
-    enemyService.correctDistanceBetweenEnemies(enemies);
-    enemies.parallelStream().forEach(enemy -> {
-      enemyService.doSomething(playerService.getPosX(), playerService.getPosY(), enemy);
-    });
-
+    enemyService.correctDistanceBetweenEnemies();
+    enemyService.actionEnemies(playerService.getPosX(), playerService.getPosY(), world);
 
     playerService.rotateModel(camera);
 
@@ -115,12 +100,9 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     mapService.draw(spriteBatch);
     playerService.drawPlayer(spriteBatch);
-    enemies.forEach(enemy -> {
-      enemyService.drawEnemySprite(spriteBatch, enemy, stateTime);
-      enemy.setPreviousStatus(enemy.getStatus());
-    });
+    enemyService.drawEnemies(spriteBatch,stateTime);
     spriteBatch.end();
-    worldRenderer.render(stateTime, enemies);
+    worldRenderer.render(stateTime);
 
   }
 
@@ -201,7 +183,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
     if (button == Input.Buttons.LEFT) {
-      playerService.shoot(camera, world, screenX, screenY);
+      playerService.shoot(camera, screenX, screenY);
     }
     return false;
   }

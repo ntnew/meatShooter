@@ -2,10 +2,13 @@ package ru.meat.game.service;
 
 import static ru.meat.game.utils.GDXUtils.calcGipotenuza;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.physics.box2d.World;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.NoArgsConstructor;
 import ru.meat.game.model.Enemy;
@@ -13,10 +16,12 @@ import ru.meat.game.model.EnemyBodyUserData;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.utils.GDXUtils;
+import ru.meat.game.utils.StaticFloats;
 
 @NoArgsConstructor
 public class EnemyService {
 
+  private List<Enemy> enemies = new ArrayList<>();
 
   public Enemy createZombieEnemy(float x, float y) {
     Enemy enemy = new Enemy(x, y, 50, 4.5f, 100, 0.7f,
@@ -31,10 +36,8 @@ public class EnemyService {
 
   /**
    * скорректировать дистанцию между врагами
-   *
-   * @param enemies список врагов на карте
    */
-  public void correctDistanceBetweenEnemies(List<Enemy> enemies) {
+  public void correctDistanceBetweenEnemies() {
     for (int i = 0; i < enemies.size(); i++) {
       Enemy enemy = enemies.get(i);
       for (int i1 = 0; i1 < enemies.size(); i1++) {
@@ -83,13 +86,17 @@ public class EnemyService {
    * @param x     x координата игрока
    * @param y     у координата игрока
    * @param enemy враг
+   * @param world
    */
-  public void doSomething(float x, float y, Enemy enemy) {
+  public void doSomething(float x, float y, Enemy enemy, World world) {
     enemy.setEnemyPingCounter(enemy.getEnemyPingCounter() + 1);
-    updateEnemyHp(enemy);
+
     if (enemy.getHp() <= 0) {
       enemy.setStatus(EnemyStatus.DIED);
-    }else {
+      enemy.getBody().setActive(false);
+      world.destroyBody(enemy.getBody());
+    } else {
+      updateEnemyHp(enemy);
       //если расстояние меньше расстояния атаки, то атаковать
       if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) < enemy.getAttackRange()) {
         enemy.setStatus(EnemyStatus.ATTACK);
@@ -100,8 +107,8 @@ public class EnemyService {
           enemy.setDestination(FloatPair.create(x, y));
         } else if (enemy.getEnemyPingCounter() > enemy.getEnemyPing()) {
           enemy.setEnemyPingCounter(0);
-          if (MathUtils.random(0, 100)
-              > 50) { //ставит рандомную точку, чтобы идти в непонятном направлении в 50% случаев
+          if (MathUtils.random(0, 100) < 30) {
+            //ставит рандомную точку, чтобы идти в непонятном направлении в 30% случаев
             enemy.setDestination(
                 FloatPair.create(MathUtils.random(x - 2000, x + 2000), MathUtils.random(y - 2000, y + 2000)));
           } else {
@@ -122,11 +129,12 @@ public class EnemyService {
 
       enemy.setPosX(enemy.getPosX() + enemy.getSpeedX());
       enemy.setPosY(enemy.getPosY() + enemy.getSpeedY());
+      enemy.getBody().setTransform(enemy.getCenter().getX() / 40, enemy.getCenter().getY() / 40, 0);
     }
   }
 
   private void updateEnemyHp(Enemy enemy) {
-    EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBox().getFixtureList().get(0).getUserData();
+    EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
     if (userData != null && userData.getDamage() != 0) {
       enemy.setHp(enemy.getHp() - userData.getDamage());
       userData.setDamage(0);
@@ -194,6 +202,37 @@ public class EnemyService {
     }
 
     rotateModel(x, y, enemy);
+  }
+
+  public void createEnemies(World world) {
+    enemies.add(createZombieEnemy(50f, 50f));
+    enemies.add(createZombieEnemy(100f, 100f));
+    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+        MathUtils.random(0, Gdx.graphics.getHeight())));
+
+    enemies.forEach(
+        x -> x.setBody(GDXUtils.createCircleForEnemy(world, x.getRadius() / StaticFloats.WORLD_TO_VIEW, 80,
+            new EnemyBodyUserData("z1", 0), x.getPosX(), x.getPosY())));
+  }
+
+  public void actionEnemies(float posX, float posY, World world) {
+    enemies.forEach(enemy -> {
+      if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
+        doSomething(posX, posY, enemy, world);
+      }
+      //TODO сделать максимально облегчённую версию врага
+    });
+  }
+
+  public void drawEnemies(SpriteBatch spriteBatch, float stateTime) {
+    enemies.forEach(enemy -> {
+      drawEnemySprite(spriteBatch, enemy, stateTime);
+      enemy.setPreviousStatus(enemy.getStatus());
+    });
   }
 }
 

@@ -2,9 +2,6 @@ package ru.meat.game.service;
 
 import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
-import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Data;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
@@ -12,7 +9,9 @@ import ru.meat.game.model.weapons.WeaponEnum;
 @Data
 public class WeaponService {
 
-  private final static float pistolBulletSpeed = 5f;
+  private final BulletService bulletService;
+
+  private final static float pistolBulletSpeed = 50f;
 
   private final String assetsDir = "./assets/Top_Down_survivor/";
 
@@ -29,6 +28,8 @@ public class WeaponService {
         .speed(pistolBulletSpeed)
         .fireRate(1000)
         .currentLockCounter(0)
+        .damage(20)
+        .bulletService(bulletService)
         .build();
   }
 
@@ -41,7 +42,10 @@ public class WeaponService {
         .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
         .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(pistolBulletSpeed)
-        .fireRate(1000)
+        .fireRate(100)
+        .shootSound("ak47.mp3")
+        .damage(35)
+        .bulletService(bulletService)
         .currentLockCounter(0)
         .build();
   }

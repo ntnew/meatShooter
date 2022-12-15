@@ -3,20 +3,15 @@ package ru.meat.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
-import java.util.ArrayList;
-import java.util.List;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
-import ru.meat.game.model.weapons.Bullet;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
@@ -59,7 +54,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     mapService = new MapService();
     mapService.initMap();
     world = new World(new Vector2(0, 0), true);
-    world.step(1/60f, 6, 2);
+    world.step(1 / 60f, 6, 2);
     playerService = new PlayerService(w / 2, h / 2, world);
     world.setContactListener(new MyContactListener(world));
 
@@ -87,20 +82,22 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     stateTime += Gdx.graphics.getDeltaTime();
     playerService.updateState();
-    world.step(1/60f, 6, 2);
+    world.step(1 / 60f, 6, 2);
 
     enemyService.correctDistanceBetweenEnemies();
     enemyService.actionEnemies(playerService.getPosX(), playerService.getPosY(), world);
 
     playerService.rotateModel(camera);
 
-
     spriteBatch.setProjectionMatrix(camera.combined);
     spriteBatch.begin();
 
     mapService.draw(spriteBatch);
     playerService.drawPlayer(spriteBatch);
-    enemyService.drawEnemies(spriteBatch,stateTime);
+    enemyService.drawEnemies(spriteBatch, stateTime);
+    playerService.getActualWeapon().getBulletService().drowBullets(spriteBatch, playerService.getPosX(),
+        playerService.getPosY());
+
     spriteBatch.end();
     worldRenderer.render(stateTime);
 
@@ -109,26 +106,26 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   private void handleKey() {
     if (Gdx.input.isKeyPressed(Input.Keys.A)) {
       float x = playerService.moveLeft();
-      camera.translate(x,0);
-      worldRenderer.getCameraBox2D().translate(x/StaticFloats.WORLD_TO_VIEW,0);
+      camera.translate(x, 0);
+      worldRenderer.getCameraBox2D().translate(x / StaticFloats.WORLD_TO_VIEW, 0);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.W)) {
       float y = playerService.moveUp();
-      camera.translate(0,y);
-      worldRenderer.getCameraBox2D().translate(0,y/StaticFloats.WORLD_TO_VIEW);
+      camera.translate(0, y);
+      worldRenderer.getCameraBox2D().translate(0, y / StaticFloats.WORLD_TO_VIEW);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.S)) {
       float y = playerService.moveDown();
-      camera.translate(0,y);
-      worldRenderer.getCameraBox2D().translate(0, y/StaticFloats.WORLD_TO_VIEW);
+      camera.translate(0, y);
+      worldRenderer.getCameraBox2D().translate(0, y / StaticFloats.WORLD_TO_VIEW);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.D)) {
       float x = playerService.moveRight();
-      camera.translate(x,0);
-      worldRenderer.getCameraBox2D().translate(x/StaticFloats.WORLD_TO_VIEW,0);
+      camera.translate(x, 0);
+      worldRenderer.getCameraBox2D().translate(x / StaticFloats.WORLD_TO_VIEW, 0);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(

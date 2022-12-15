@@ -28,10 +28,8 @@ public class WorldRenderer {
 
     renderer = new Box2DDebugRenderer();
     renderer.setDrawBodies(debug);
-//    world.setContactListener(new MyContactListener());
 
     this.world = world;
-//    this.cam = cam;
   }
 
 
@@ -40,8 +38,6 @@ public class WorldRenderer {
   }
 
   public void render(float delta) {
-
-
     renderer.render(world, cameraBox2D.combined);
 //    world.step(delta, 4, 4);
 

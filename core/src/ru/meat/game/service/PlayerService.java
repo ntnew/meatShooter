@@ -170,10 +170,6 @@ public class PlayerService {
     return animationStack.getIdleAnimation().getKeyFrame(stateTime, true);
   }
 
-  private void initPlayer() {
-
-  }
-
   public void changeTopStatus(CharacterTopStatus status) {
     player.setTopStatus(status);
   }
@@ -181,11 +177,6 @@ public class PlayerService {
 
   public void changeFeetStatus(CharacterFeetStatus status) {
     player.setFeetStatus(status);
-  }
-
-  public void moveOnChangeMap(float x, float y) {
-    posX += x;
-    posY += y;
   }
 
   public void shoot(OrthographicCamera camera, float screenX, float screenY) {

@@ -30,7 +30,7 @@ public class EnemyService {
         "./assets/export/attack/",
         "./assets/export/died",
         0, 300, null);
-    enemy.setRadius(20);
+    enemy.setRadius(10);
     return enemy;
   }
 

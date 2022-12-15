@@ -1,5 +1,11 @@
 package ru.meat.game.service;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -19,6 +25,8 @@ public class BulletService {
 
   private List<Bullet> bullets = new ArrayList<>();
 
+  private final ArrayList<Integer> bulletsToRemove = new ArrayList<>();
+
   /**
    * создать пулю, задает её скорость и направление полёта
    *
@@ -36,6 +44,8 @@ public class BulletService {
     bulletBody.setBullet(true);
     bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed, (screenY - fromY) * bulletSpeed);
     bullet.setBody(bulletBody);
+    bullet.setTexture(new Texture(Gdx.files.internal("./assets/Bullet1.png")));
+
     bullets.add(bullet);
   }
 
@@ -59,19 +69,36 @@ public class BulletService {
   }
 
   public void updateBullets() {
-    ArrayList<Integer> bulletsToRemove = new ArrayList<>();
-     for (int i = 0; i < bullets.size(); i++) {
-       BulletBodyUserData userData = (BulletBodyUserData) bullets.get(i).getBody().getFixtureList().get(0).getUserData();
-      if (userData.isNeedDispose()) {
-        try {
-          bullets.get(i).getBody().setActive(false);
-          world.destroyBody(bullets.get(i).getBody());
-          bulletsToRemove.add(i);
-        }catch (Exception e) {
 
-        }
+    for (int i = 0; i < bullets.size(); i++) {
+      Bullet bullet = bullets.get(i);
+      BulletBodyUserData userData = (BulletBodyUserData) bullet.getBody().getFixtureList().get(0).getUserData();
+      if (userData.isNeedDispose()) {
+        deleteBulletBody(i);
       }
     }
     bulletsToRemove.forEach(i -> bullets.remove((int) i));
+    bulletsToRemove.clear();
+  }
+
+  private void deleteBulletBody( int i) {
+    try {
+      bullets.get(i).getBody().setActive(false);
+      world.destroyBody(bullets.get(i).getBody());
+      bulletsToRemove.add(i);
+    } catch (Exception e) {
+
+    }
+  }
+
+  public void drowBullets(SpriteBatch spriteBatch, float x, float y) {
+   bullets.forEach(b -> {
+          Vector2 position = b.getBody().getFixtureList().get(0).getBody().getPosition();
+          Sprite sprite = new Sprite(b.getTexture());
+          sprite.setPosition(position.x*StaticFloats.WORLD_TO_VIEW, position.y*StaticFloats.WORLD_TO_VIEW);
+          sprite.setRotation((MathUtils.radiansToDegrees * MathUtils.atan2(y - position.y*StaticFloats.WORLD_TO_VIEW, x - position.x*StaticFloats.WORLD_TO_VIEW)));
+          sprite.draw(spriteBatch);
+        }
+    );
   }
 }

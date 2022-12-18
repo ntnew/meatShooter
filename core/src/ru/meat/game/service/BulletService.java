@@ -81,7 +81,7 @@ public class BulletService {
     bulletsToRemove.clear();
   }
 
-  private void deleteBulletBody( int i) {
+  private void deleteBulletBody(int i) {
     try {
       bullets.get(i).getBody().setActive(false);
       world.destroyBody(bullets.get(i).getBody());
@@ -91,13 +91,20 @@ public class BulletService {
     }
   }
 
-  public void drowBullets(SpriteBatch spriteBatch, float x, float y) {
-   bullets.forEach(b -> {
-          Vector2 position = b.getBody().getFixtureList().get(0).getBody().getPosition();
-          Sprite sprite = new Sprite(b.getTexture());
-          sprite.setPosition(position.x*StaticFloats.WORLD_TO_VIEW, position.y*StaticFloats.WORLD_TO_VIEW);
-          sprite.setRotation((MathUtils.radiansToDegrees * MathUtils.atan2(y - position.y*StaticFloats.WORLD_TO_VIEW, x - position.x*StaticFloats.WORLD_TO_VIEW)));
-          sprite.draw(spriteBatch);
+  public void drawBullets(SpriteBatch spriteBatch, float x, float y) {
+    bullets.forEach(b -> {
+          try {
+            Vector2 position = b.getBody().getFixtureList().get(0).getBody().getPosition();
+            Sprite sprite = new Sprite(b.getTexture());
+            sprite.setPosition(position.x * StaticFloats.WORLD_TO_VIEW - sprite.getWidth() / 12,
+                position.y * StaticFloats.WORLD_TO_VIEW + 20 - sprite.getHeight() / 2);
+            sprite.setOrigin(sprite.getWidth() / 12, sprite.getHeight() / 2);
+            sprite.rotate((MathUtils.radiansToDegrees * MathUtils.atan2(y - position.y * StaticFloats.WORLD_TO_VIEW,
+                x - position.x * StaticFloats.WORLD_TO_VIEW)));
+            sprite.draw(spriteBatch);
+          } catch (NullPointerException e) {
+
+          }
         }
     );
   }

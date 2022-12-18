@@ -186,8 +186,8 @@ public class PlayerService {
       Vector3 tmpVec3 = new Vector3();
       tmpVec3.set(screenX, screenY, 0);
       camera.unproject(tmpVec3);
-      weapon.shoot(posX / StaticFloats.WORLD_TO_VIEW,
-          posY / StaticFloats.WORLD_TO_VIEW,
+      weapon.shoot(getCenterX() / StaticFloats.WORLD_TO_VIEW,
+          getCenterY() / StaticFloats.WORLD_TO_VIEW,
           tmpVec3.x / StaticFloats.WORLD_TO_VIEW,
           tmpVec3.y / StaticFloats.WORLD_TO_VIEW);
       audioService.playShoot(weapon.getShootSound());

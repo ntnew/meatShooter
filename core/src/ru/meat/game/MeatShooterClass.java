@@ -1,5 +1,7 @@
 package ru.meat.game;
 
+import static ru.meat.game.utils.StaticFloats.*;
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -95,7 +97,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     mapService.draw(spriteBatch);
     playerService.drawPlayer(spriteBatch);
     enemyService.drawEnemies(spriteBatch, stateTime);
-    playerService.getActualWeapon().getBulletService().drowBullets(spriteBatch, playerService.getPosX(),
+    playerService.getActualWeapon().getBulletService().drawBullets(spriteBatch, playerService.getPosX(),
         playerService.getPosY());
 
     spriteBatch.end();
@@ -107,25 +109,25 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     if (Gdx.input.isKeyPressed(Input.Keys.A)) {
       float x = playerService.moveLeft();
       camera.translate(x, 0);
-      worldRenderer.getCameraBox2D().translate(x / StaticFloats.WORLD_TO_VIEW, 0);
+      worldRenderer.getCameraBox2D().translate(x / WORLD_TO_VIEW, 0);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.W)) {
       float y = playerService.moveUp();
       camera.translate(0, y);
-      worldRenderer.getCameraBox2D().translate(0, y / StaticFloats.WORLD_TO_VIEW);
+      worldRenderer.getCameraBox2D().translate(0, y / WORLD_TO_VIEW);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.S)) {
       float y = playerService.moveDown();
       camera.translate(0, y);
-      worldRenderer.getCameraBox2D().translate(0, y / StaticFloats.WORLD_TO_VIEW);
+      worldRenderer.getCameraBox2D().translate(0, y / WORLD_TO_VIEW);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.D)) {
       float x = playerService.moveRight();
       camera.translate(x, 0);
-      worldRenderer.getCameraBox2D().translate(x / StaticFloats.WORLD_TO_VIEW, 0);
+      worldRenderer.getCameraBox2D().translate(x / WORLD_TO_VIEW, 0);
     }
 
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(

@@ -11,7 +11,7 @@ public class WeaponService {
 
   private final BulletService bulletService;
 
-  private final static float pistolBulletSpeed = 50f;
+  private final static float pistolBulletSpeed = 1f;
 
   private final String assetsDir = "./assets/Top_Down_survivor/";
 

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class EnemyBodyUserData {
+public class BodyUserData {
 
   private String name;
   private int damage;

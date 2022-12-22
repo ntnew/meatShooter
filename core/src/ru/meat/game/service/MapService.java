@@ -16,7 +16,7 @@ public class MapService {
 
 
   public void initMap(){
-    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture(Gdx.files.internal("./assets/" + firstMap),4f));
+    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture(Gdx.files.internal("./assets/" + firstMap),0.9f));
   }
 
   public void draw(Batch batch){

@@ -1,6 +1,6 @@
 package ru.meat.game;
 
-import static ru.meat.game.utils.StaticFloats.*;
+import static ru.meat.game.utils.Settings.*;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -18,7 +18,6 @@ import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.PlayerService;
-import ru.meat.game.utils.StaticFloats;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
 
@@ -56,88 +55,59 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     mapService = new MapService();
     mapService.initMap();
     world = new World(new Vector2(0, 0), true);
-    world.step(1 / 60f, 6, 2);
-    playerService = new PlayerService(w / 2, h / 2, world);
+    world.step(1/60f, 6, 6);
+
     world.setContactListener(new MyContactListener(world));
 
     camera = new OrthographicCamera();
     camera.setToOrtho(false, w, h);
-    camera.zoom = 1f;
+    camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
+
+    camera.zoom = MAIN_ZOOM;
     camera.update();
 
     spriteBatch = new SpriteBatch();
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, true, camera);
+    worldRenderer = new WorldRenderer(world, true,w ,h);
 
+    playerService = new PlayerService(w / 2, h / 2, world);
     enemyService.createEnemies(world);
   }
 
   @Override
   public void render() {
-    camera.update();
-    worldRenderer.getCameraBox2D().update();
+    camera.update(false);
+    worldRenderer.getCameraBox2D().update(false);
 
-    handleKey();
+
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     stateTime += Gdx.graphics.getDeltaTime();
-    playerService.updateState();
+
     world.step(1 / 60f, 6, 2);
 
-    enemyService.correctDistanceBetweenEnemies();
-    enemyService.actionEnemies(playerService.getPosX(), playerService.getPosY(), world);
-
+    playerService.updateState();
+    playerService.handleKey(camera, worldRenderer.getCameraBox2D());
     playerService.rotateModel(camera);
 
+//    enemyService.correctDistanceBetweenEnemies();
+    enemyService.actionEnemies(playerService.getPlayer().getPosX(), playerService.getPlayer().getPosY(), world);
+
+
     spriteBatch.setProjectionMatrix(camera.combined);
+
     spriteBatch.begin();
 
     mapService.draw(spriteBatch);
     playerService.drawPlayer(spriteBatch);
     enemyService.drawEnemies(spriteBatch, stateTime);
-    playerService.getActualWeapon().getBulletService().drawBullets(spriteBatch, playerService.getPosX(),
-        playerService.getPosY());
+    playerService.drawBullets(spriteBatch);
 
     spriteBatch.end();
-    worldRenderer.render(stateTime);
+    worldRenderer.render();
 
-  }
-
-  private void handleKey() {
-    if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-      float x = playerService.moveLeft();
-      camera.translate(x, 0);
-      worldRenderer.getCameraBox2D().translate(x / WORLD_TO_VIEW, 0);
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-      float y = playerService.moveUp();
-      camera.translate(0, y);
-      worldRenderer.getCameraBox2D().translate(0, y / WORLD_TO_VIEW);
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-      float y = playerService.moveDown();
-      camera.translate(0, y);
-      worldRenderer.getCameraBox2D().translate(0, y / WORLD_TO_VIEW);
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-      float x = playerService.moveRight();
-      camera.translate(x, 0);
-      worldRenderer.getCameraBox2D().translate(x / WORLD_TO_VIEW, 0);
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
-        Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-      playerService.changeFeetStatus(CharacterFeetStatus.RUN);
-      playerService.changeTopStatus(CharacterTopStatus.MOVE);
-    } else {
-      playerService.changeFeetStatus(CharacterFeetStatus.IDLE);
-      playerService.changeTopStatus(CharacterTopStatus.IDLE);
-    }
   }
 
   @Override

@@ -3,14 +3,14 @@ package ru.meat.game.utils;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.World;
 import java.math.BigDecimal;
-import ru.meat.game.model.EnemyBodyUserData;
+import ru.meat.game.model.BodyUserData;
 
 public class GDXUtils {
 
@@ -64,11 +64,13 @@ public class GDXUtils {
    * @return
    */
 
-  public static Body createCircleForEnemy(World world, float radius, float density, EnemyBodyUserData bodyData, float x, float y) {
+  public static Body createCircleForEnemy(World world, float radius, float density, BodyUserData bodyData, float x,
+      float y) {
 
     BodyDef def = new BodyDef();
 
     def.type = BodyType.DynamicBody;
+    def.position.set(x / Settings.WORLD_TO_VIEW, y / Settings.WORLD_TO_VIEW);
 
     Body box = world.createBody(def);
 
@@ -82,5 +84,11 @@ public class GDXUtils {
 
     return box;
 
+  }
+
+  public static Filter getFilter(){
+    Filter f = new Filter();
+    f.groupIndex = -1;
+    return f;
   }
 }

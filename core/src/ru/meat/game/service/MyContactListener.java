@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import lombok.AllArgsConstructor;
-import ru.meat.game.model.EnemyBodyUserData;
+import ru.meat.game.model.BodyUserData;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 
 
@@ -27,16 +27,16 @@ public class MyContactListener implements ContactListener {
 
     Fixture fa = contact.getFixtureA();
     Fixture fb = contact.getFixtureB();
-    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
+    if (fa.getUserData() instanceof BodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
       setDamageToEnemyFromBullet(fa, fb);
     }
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
-    EnemyBodyUserData enemyBodyUserData = (EnemyBodyUserData) fa.getUserData();
+    BodyUserData bodyUserData = (BodyUserData) fa.getUserData();
     BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
 
-    enemyBodyUserData.setDamage(bulletBodyUserData.getDamage());
+    bodyUserData.setDamage(bulletBodyUserData.getDamage());
 
     bulletBodyUserData.setNeedDispose(true);
     fb.setUserData(bulletBodyUserData);

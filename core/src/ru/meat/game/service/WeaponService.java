@@ -11,12 +11,13 @@ public class WeaponService {
 
   private final BulletService bulletService;
 
+  private final AudioService audioService;
+
   private final static float pistolBulletSpeed = 1f;
 
   private final String assetsDir = "./assets/Top_Down_survivor/";
 
   public Weapon handgunWeapon(float zoom, float frameDuration) {
-
     return Weapon.builder()
         .name(WeaponEnum.PISTOL)
         .idleAnimation(initAnimationFrames(assetsDir + "handgun/idle/", zoom, frameDuration))
@@ -49,5 +50,4 @@ public class WeaponService {
         .currentLockCounter(0)
         .build();
   }
-
 }

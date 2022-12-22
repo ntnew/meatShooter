@@ -1,23 +1,41 @@
 package ru.meat.game.model;
 
 import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
+import static ru.meat.game.utils.Settings.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
+import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.WeaponService;
+import ru.meat.game.utils.GDXUtils;
+import ru.meat.game.utils.Settings;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class Player extends Actor {
 
-  private final float zoomMultiplier = 4.5f;
+  /**
+   * Положение игрока по Х
+   */
+  private float posX;
+  /**
+   * Положение игрока по У
+   */
+  private float posY;
+
+  private Body body;
+
+  private final float zoomMultiplier = 1f;
   private final float frameDuration = 0.03f;
 
   private Animation<Texture> walkAnimation;
@@ -41,11 +59,13 @@ public class Player extends Actor {
   private CharacterTopStatus topStatus;
   private CharacterFeetStatus feetStatus;
 
-  public Player(World world) {
+  public Player(World world, float x, float y) {
     try {
       currentWeapon = WeaponEnum.PISTOL;
       topStatus = CharacterTopStatus.IDLE;
       feetStatus = CharacterFeetStatus.IDLE;
+
+
 
       this.walkAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/walk/", zoomMultiplier, frameDuration);
       this.idle = initAnimationFrames("./assets/Top_Down_survivor/feet/idle/", zoomMultiplier, frameDuration);
@@ -53,10 +73,12 @@ public class Player extends Actor {
       this.strafeLeftAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_left/", zoomMultiplier, frameDuration);
       this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
 
-      weaponService = new WeaponService(new BulletService(world));
+      weaponService = new WeaponService(new BulletService(world), new AudioService());
       weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
 
+      body = GDXUtils.createCircleForEnemy(world,60/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
+      body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
 
     } catch (Exception e) {
       e.printStackTrace();

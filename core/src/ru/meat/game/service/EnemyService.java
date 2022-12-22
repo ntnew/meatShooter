@@ -1,22 +1,22 @@
 package ru.meat.game.service;
 
 import static ru.meat.game.utils.GDXUtils.calcGipotenuza;
+import static ru.meat.game.utils.Settings.*;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.NoArgsConstructor;
 import ru.meat.game.model.Enemy;
-import ru.meat.game.model.EnemyBodyUserData;
+import ru.meat.game.model.BodyUserData;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.utils.GDXUtils;
-import ru.meat.game.utils.StaticFloats;
 
 @NoArgsConstructor
 public class EnemyService {
@@ -24,13 +24,14 @@ public class EnemyService {
   private List<Enemy> enemies = new ArrayList<>();
 
   public Enemy createZombieEnemy(float x, float y) {
-    Enemy enemy = new Enemy(x, y, 50, 4.5f, 100, 0.7f,
+    Enemy enemy = new Enemy(x, y, 50, 1f, 100, 0.7f * MAIN_ZOOM,
         "./assets/export/move/",
         "./assets/export/idle/",
         "./assets/export/attack/",
         "./assets/export/died",
         0, 300, null);
-    enemy.setRadius(10);
+    enemy.setRadius(50);
+    enemy.setCenterMultip(FloatPair.create(2.9f, 1.78f));
     return enemy;
   }
 
@@ -58,13 +59,16 @@ public class EnemyService {
 
   public void drawEnemySprite(SpriteBatch batch, Enemy enemy, float stateTime) {
     Sprite sprite = new Sprite(getActualFrame(stateTime, enemy));
-    sprite.setX(enemy.getPosX());
-    sprite.setY(enemy.getPosY());
-    sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
+    if (enemy.getBody() != null) {
+      sprite.setX(
+          enemy.getBody().getPosition().x * WORLD_TO_VIEW - (sprite.getWidth() / enemy.getCenterMultip().getX()));
+      sprite.setY(enemy.getBody().getPosition().y * WORLD_TO_VIEW - (sprite.getHeight()
+          - sprite.getHeight() / enemy.getCenterMultip().getY()));
+    }
+    sprite.setOrigin(sprite.getWidth() / enemy.getCenterMultip().getX(),
+        sprite.getHeight() - sprite.getHeight() / enemy.getCenterMultip().getY());
     sprite.setRotation(enemy.getAnimationAngle());
     sprite.draw(batch);
-    enemy.setCenter(
-        FloatPair.create(enemy.getPosX() + sprite.getWidth() / 2, enemy.getPosY() + sprite.getHeight() / 2 - 10));
   }
 
   private Texture getActualFrame(float stateTime, Enemy enemy) {
@@ -86,55 +90,56 @@ public class EnemyService {
    * @param x     x координата игрока
    * @param y     у координата игрока
    * @param enemy враг
-   * @param world
    */
-  public void doSomething(float x, float y, Enemy enemy, World world) {
+  public void doSomething(float x, float y, Enemy enemy) {
     enemy.setEnemyPingCounter(enemy.getEnemyPingCounter() + 1);
 
     if (enemy.getHp() <= 0) {
       enemy.setStatus(EnemyStatus.DIED);
       enemy.getBody().setActive(false);
-      world.destroyBody(enemy.getBody());
     } else {
       updateEnemyHp(enemy);
       //если расстояние меньше расстояния атаки, то атаковать
       if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) < enemy.getAttackRange()) {
+        System.out.println(calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()));
         enemy.setStatus(EnemyStatus.ATTACK);
       } else {
         enemy.setStatus(EnemyStatus.MOVE);
         //если расстояние меньше 10х расстояний атаки, то идти напрямик к игроку
-        if (isEnemyTooCloseToPlayer(x, y, enemy) && !enemy.getPreviousStatus().equals(EnemyStatus.ATTACK)) {
-          enemy.setDestination(FloatPair.create(x, y));
-        } else if (enemy.getEnemyPingCounter() > enemy.getEnemyPing()) {
-          enemy.setEnemyPingCounter(0);
-          if (MathUtils.random(0, 100) < 30) {
-            //ставит рандомную точку, чтобы идти в непонятном направлении в 30% случаев
-            enemy.setDestination(
-                FloatPair.create(MathUtils.random(x - 2000, x + 2000), MathUtils.random(y - 2000, y + 2000)));
-          } else {
-            enemy.setDestination(
-                FloatPair.create(MathUtils.random(x - 500, x + 500), MathUtils.random(y - 500, y + 500)));
-          }
-        }
+//        if (isEnemyTooCloseToPlayer(x, y, enemy)) {
+//          enemy.setDestination(FloatPair.create(x, y));
+//        } else if (enemy.getEnemyPingCounter() > enemy.getEnemyPing()) {
+//          enemy.setEnemyPingCounter(0);
+//          if (MathUtils.random(0, 100) < 30) {
+//            //ставит рандомную точку, чтобы идти в непонятном направлении в 30% случаев
+//            enemy.setDestination(
+//                FloatPair.create(MathUtils.random(x - 2000, x + 2000), MathUtils.random(y - 2000, y + 2000)));
+//          } else {
+//            enemy.setDestination(
+//                FloatPair.create(MathUtils.random(x - 500, x + 500), MathUtils.random(y - 500, y + 500)));
+//          }
+//        }
       }
 
-      defineSpeedXandY(enemy);
-      if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) > enemy.getAttackRange() / 1.5) {
-        rotateModel(enemy.getFloatDestination().getX() - enemy.getPosX(),
-            enemy.getFloatDestination().getY() - enemy.getPosY(), enemy);
-      } else {
-        enemy.setSpeedY(0);
-        enemy.setSpeedX(0);
-      }
-
-      enemy.setPosX(enemy.getPosX() + enemy.getSpeedX());
-      enemy.setPosY(enemy.getPosY() + enemy.getSpeedY());
-      enemy.getBody().setTransform(enemy.getCenter().getX() / 40, enemy.getCenter().getY() / 40, 0);
+//      defineSpeedXandY(enemy);
+//      if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) > enemy.getAttackRange() / 1.5) {
+//        rotateModel(enemy.getFloatDestination().getX() - enemy.getPosX(),
+//            enemy.getFloatDestination().getY() - enemy.getPosY(), enemy);
+//      } else {
+//        enemy.setSpeedY(0);
+//        enemy.setSpeedX(0);
+//      }
+//
+//      enemy.setPosX(enemy.getPosX() + enemy.getSpeedX());
+//      enemy.setPosY(enemy.getPosY() + enemy.getSpeedY());
+//      enemy.setSpeedX(100);
+//      enemy.setSpeedY(100);
+      enemy.getBody().applyForceToCenter(new Vector2(enemy.getSpeedX(), enemy.getSpeedY()), true);
     }
   }
 
   private void updateEnemyHp(Enemy enemy) {
-    EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
+    BodyUserData userData = (BodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
     if (userData != null && userData.getDamage() != 0) {
       enemy.setHp(enemy.getHp() - userData.getDamage());
       userData.setDamage(0);
@@ -186,43 +191,28 @@ public class EnemyService {
     enemy.setSpeedX(cos * enemy.getSpeed());
   }
 
-
-  public void moveToPlayer(float x, float y, Enemy enemy) {
-    float v1 = enemy.getPosY();
-    float v2 = enemy.getPosX();
-    if (enemy.getPosX() < x - 20) {
-      enemy.setPosX(enemy.getPosX() + enemy.getSpeed());
-    } else {
-      enemy.setPosX(enemy.getPosX() - enemy.getSpeed());
-    }
-    if (enemy.getPosY() < y - 20) {
-      enemy.setPosY(enemy.getPosY() + enemy.getSpeed());
-    } else {
-      enemy.setPosY(enemy.getPosY() - enemy.getSpeed());
-    }
-
-    rotateModel(x, y, enemy);
-  }
-
   public void createEnemies(World world) {
     enemies.add(createZombieEnemy(50f, 50f));
-    enemies.add(createZombieEnemy(100f, 100f));
-    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
-    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
-    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
+//    enemies.add(createZombieEnemy(100f, 100f));
+//    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+//        MathUtils.random(0, Gdx.graphics.getHeight())));
+//    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+//        MathUtils.random(0, Gdx.graphics.getHeight())));
+//    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
+//        MathUtils.random(0, Gdx.graphics.getHeight())));
 
     enemies.forEach(
-        x -> x.setBody(GDXUtils.createCircleForEnemy(world, x.getRadius() / StaticFloats.WORLD_TO_VIEW, 80,
-            new EnemyBodyUserData("z1", 0), x.getPosX(), x.getPosY())));
+        x -> x.setBody(GDXUtils.createCircleForEnemy(world, x.getRadius() / WORLD_TO_VIEW, 80,
+            new BodyUserData("z1", 0), x.getPosX(), x.getPosY())));
   }
 
   public void actionEnemies(float posX, float posY, World world) {
     enemies.forEach(enemy -> {
       if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
-        doSomething(posX, posY, enemy, world);
+        doSomething(posX, posY, enemy);
+      } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
+        world.destroyBody(enemy.getBody());
+        enemy.setBody(null);
       }
       //TODO сделать максимально облегчённую версию врага
     });

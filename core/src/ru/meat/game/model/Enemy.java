@@ -1,5 +1,7 @@
 package ru.meat.game.model;
 
+import static ru.meat.game.utils.Settings.MAIN_ZOOM;
+
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
@@ -20,8 +22,6 @@ public class Enemy {
   private float enemyPing = 100;
   private float enemyPingCounter = 0;
 
-  private FloatPair center = new FloatPair(0f,0f);
-
   private float radius;
 
   /**
@@ -38,7 +38,13 @@ public class Enemy {
   /**
    * скорость поворота
    */
-  private FloatPair turnSpeed = new FloatPair(1f,1f);
+  private FloatPair turnSpeed = new FloatPair(1f*MAIN_ZOOM,1f*MAIN_ZOOM);
+
+
+  /**
+   * множитель на центр
+   */
+  private FloatPair centerMultip = new FloatPair(1f,1f);
 
   /**
    * делитель размера модельки
@@ -122,8 +128,4 @@ public class Enemy {
     }
   }
 
-  public void setPosition(float x, float y) {
-    posX = x;
-    posY = y;
-  }
 }

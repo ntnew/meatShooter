@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import ru.meat.game.interfaces.Shootable;
+import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
 
 @Data
@@ -14,6 +15,8 @@ import ru.meat.game.service.BulletService;
 public class Weapon implements Shootable {
 
   private final BulletService bulletService;
+
+  private final AudioService audioService;
 
   private Texture bulletTexture;
 
@@ -39,6 +42,7 @@ public class Weapon implements Shootable {
   @Override
   public void shoot(float fromX, float fromY, float screenX, float screenY) {
     bulletService.createBullet(fromX, fromY, screenX, screenY, speed, damage);
+
   }
 
   @Override

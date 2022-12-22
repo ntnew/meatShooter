@@ -189,7 +189,7 @@ public class PlayerService {
       tmpVec3.set(screenX, screenY, 0);
       camera.unproject(tmpVec3);
       weapon.shoot(player.getBody().getPosition().x,
-          player.getBody().getPosition().y -1,
+          player.getBody().getPosition().y,
           tmpVec3.x / Settings.WORLD_TO_VIEW,
           tmpVec3.y / Settings.WORLD_TO_VIEW);
       audioService.playShoot(weapon.getShootSound());

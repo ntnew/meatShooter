@@ -101,7 +101,6 @@ public class EnemyService {
       updateEnemyHp(enemy);
       //если расстояние меньше расстояния атаки, то атаковать
       if (calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()) < enemy.getAttackRange()) {
-        System.out.println(calcGipotenuza(x, y, enemy.getPosX(), enemy.getPosY()));
         enemy.setStatus(EnemyStatus.ATTACK);
       } else {
         enemy.setStatus(EnemyStatus.MOVE);

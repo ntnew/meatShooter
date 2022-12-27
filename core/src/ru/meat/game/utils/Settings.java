@@ -2,7 +2,7 @@ package ru.meat.game.utils;
 
 public class Settings {
 
-  public static float MAIN_ZOOM = 3f;
+  public static float MAIN_ZOOM = 4f;
 
   private static float SCREEN_WIDTH = 1280f;
   private static float SCREEN_HEIGHT = 720f;

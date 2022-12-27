@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -19,7 +20,6 @@ import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Player;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
-import ru.meat.game.utils.Settings;
 
 @Data
 public class PlayerService {
@@ -29,22 +29,13 @@ public class PlayerService {
 
   private Player player;
 
-  /**
-   * Положение игрока по Х
-   */
-  private float centerX;
-  /**
-   * Положение игрока по У
-   */
-  private float centerY;
-
   private float moveMultiplier = 1f;
 
   private float feetStateTime;
 
   private float topStateTime;
 
-  private float speed = 1f * MAIN_ZOOM;
+  private float speed = 3f*MAIN_ZOOM;
 
   private float moveDirectionAngle = 0;
 
@@ -72,37 +63,7 @@ public class PlayerService {
     tmpVec3.set(xInput, yInput, 0);
     tmpVec3 = camera.unproject(tmpVec3);
 
-//    System.out.println( tmpVec3.x +  " z " +  centerX + "     f    "+tmpVec3.y + " z " +  centerY);
-    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - centerY, tmpVec3.x - centerX) + 20;
-  }
-
-  public float moveLeft() {
-    player.setPosX(player.getPosX() - (speed * moveMultiplier));
-    moveDirectionAngle = 220;
-    return -(speed * moveMultiplier);
-  }
-
-  public float moveRight() {
-    player.setPosX(player.getPosX() + (speed * moveMultiplier));
-
-    moveDirectionAngle = 40;
-    return (speed * moveMultiplier);
-  }
-
-  public float moveUp() {
-    player.setPosY(player.getPosY() + (speed * moveMultiplier));
-    player.getBody().setLinearVelocity(0, (speed * moveMultiplier));
-
-    moveDirectionAngle = 130;
-    return (speed * moveMultiplier);
-  }
-
-  public float moveDown() {
-    player.setPosY(player.getPosY() - (speed * moveMultiplier));
-    player.getBody().setLinearVelocity(0, -(speed * moveMultiplier));
-
-    moveDirectionAngle = 300;
-    return -(speed * moveMultiplier);
+    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - player.getBody().getPosition().y, tmpVec3.x -  player.getBody().getPosition().x) + 20;
   }
 
   public void drawPlayer(SpriteBatch batch) {
@@ -126,8 +87,6 @@ public class PlayerService {
     sprite.setX(player.getBody().getPosition().x * WORLD_TO_VIEW - sprite.getWidth() / 2);
     sprite.setY(player.getBody().getPosition().y * WORLD_TO_VIEW - sprite.getHeight() / 2);
     sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    centerX = player.getPosX() + sprite.getWidth() / 2;
-    centerY = player.getPosY() + sprite.getHeight() / 2;
     sprite.setRotation(modelFrontAngle - 20);
     sprite.draw(batch);
   }
@@ -180,18 +139,16 @@ public class PlayerService {
     player.setFeetStatus(status);
   }
 
-  public void shoot(OrthographicCamera camera, float screenX, float screenY) {
+  public void shoot(OrthographicCamera cameraBox2D, float screenX, float screenY) {
     Weapon weapon = getActualWeapon();
     if (weapon.getCurrentLockCounter() == 0
         || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()) {
       weapon.setCurrentLockCounter(TimeUtils.millis());
-      Vector3 tmpVec3 = new Vector3();
-      tmpVec3.set(screenX, screenY, 0);
-      camera.unproject(tmpVec3);
-      weapon.shoot(player.getBody().getPosition().x,
-          player.getBody().getPosition().y,
-          tmpVec3.x / Settings.WORLD_TO_VIEW,
-          tmpVec3.y / Settings.WORLD_TO_VIEW);
+      Vector3 point = new Vector3();
+      point.set(screenX, screenY, 0);
+      cameraBox2D.unproject(point);
+
+      weapon.shoot(player.getBody().getPosition().x, player.getBody().getPosition().y, point.x, point.y);
       audioService.playShoot(weapon.getShootSound());
     }
   }
@@ -218,8 +175,10 @@ public class PlayerService {
       changeFeetStatus(CharacterFeetStatus.IDLE);
       changeTopStatus(CharacterTopStatus.IDLE);
     }
+
     float x = 0;
     float y = 0;
+
     if (Gdx.input.isKeyPressed(Input.Keys.A)) {
       x = -getSpeed();
     }
@@ -236,11 +195,28 @@ public class PlayerService {
       x = getSpeed();
     }
 
-    player.getBody().setLinearVelocity(x, y);
-    camera.position.set(player.getBody().getPosition().x *WORLD_TO_VIEW, player.getBody().getPosition().y *WORLD_TO_VIEW,0);
-    cameraBox2D.position.set(player.getBody().getPosition().x, player.getBody().getPosition().y ,0);
-    camera.update(false);
-    cameraBox2D.update(false);
+    player.getBody().setTransform(player.getBody().getPosition().x + x / WORLD_TO_VIEW, player.getBody().getPosition().y +y/WORLD_TO_VIEW, 0);
+
+    Vector2 position = player.getBody().getPosition();
+
+    if (position.x > cameraBox2D.position.x && x < 0){
+      x=0;
+    }
+    if (position.x < cameraBox2D.position.x && x > 0){
+      x=0;
+    }
+
+    if (position.y > cameraBox2D.position.y && y < 0){
+      y=0;
+    }
+    if (position.y < cameraBox2D.position.y && y > 0){
+      y=0;
+    }
+    camera.translate(x,y);
+    cameraBox2D.translate(x/WORLD_TO_VIEW,y/WORLD_TO_VIEW);
+
+    camera.update();
+    cameraBox2D.update();
   }
 
   private float getSpeed() {
@@ -248,6 +224,7 @@ public class PlayerService {
   }
 
   public void drawBullets(SpriteBatch spriteBatch) {
-    getActualWeapon().getBulletService().drawBullets(spriteBatch, player.getBody().getPosition().x, player.getBody().getPosition().y);
+    getActualWeapon().getBulletService()
+        .drawBullets(spriteBatch, player.getBody().getPosition().x, player.getBody().getPosition().y);
   }
 }

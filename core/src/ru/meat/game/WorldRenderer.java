@@ -25,8 +25,8 @@ public class WorldRenderer {
     cameraBox2D = new OrthographicCamera();
     cameraBox2D.viewportWidth = w/WORLD_TO_VIEW;
     cameraBox2D.viewportHeight = h/WORLD_TO_VIEW;
-    cameraBox2D.position.set(cameraBox2D.viewportWidth / 2, cameraBox2D.viewportHeight / 2, 0f);
     cameraBox2D.zoom = MAIN_ZOOM;
+    cameraBox2D.position.set(cameraBox2D.viewportWidth / 2, cameraBox2D.viewportHeight / 2, 0f);
     cameraBox2D.update();
 
     renderer = new Box2DDebugRenderer();

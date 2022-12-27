@@ -3,6 +3,7 @@ package ru.meat.game.utils;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -86,9 +87,14 @@ public class GDXUtils {
 
   }
 
-  public static Filter getFilter(){
+  public static Filter getFilter() {
     Filter f = new Filter();
     f.groupIndex = -1;
     return f;
+  }
+
+
+  public static float calcAngleBetweenTwoPoints(float x1, float y1, float x2, float y2) {
+    return MathUtils.radiansToDegrees * MathUtils.atan2(y2 - y1, x2 - x1);
   }
 }

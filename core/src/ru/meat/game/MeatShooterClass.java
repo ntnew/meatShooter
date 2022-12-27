@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.World;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
@@ -21,11 +23,6 @@ import ru.meat.game.service.PlayerService;
 
 public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
 
-  @Override
-  public void dispose() {
-    super.dispose();
-    worldRenderer.dispose();
-  }
 
   private final InputProcessor inputProcessor;
   private OrthographicCamera camera;
@@ -60,10 +57,11 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     world.setContactListener(new MyContactListener(world));
 
     camera = new OrthographicCamera();
+    camera.zoom = MAIN_ZOOM;
     camera.setToOrtho(false, w, h);
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
 
-    camera.zoom = MAIN_ZOOM;
+
     camera.update();
 
     spriteBatch = new SpriteBatch();
@@ -71,13 +69,43 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     worldRenderer = new WorldRenderer(world, true,w ,h);
 
-    playerService = new PlayerService(w / 2, h / 2, world);
+    playerService = new PlayerService(250, 250, world);
     enemyService.createEnemies(world);
+  }
+
+  public void setWorldBounds() {
+    float camX = camera.position.x;
+    float camY = camera.position.y;
+
+    Vector2 camMin = new Vector2(camera.viewportWidth/2, camera.viewportHeight/2);
+    camMin.scl(camera.zoom); //bring to center and scale by the zoom level
+    Vector2 camMax = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(), mapService.getCurrentMap().getMainTexture().getHeight());
+    camMax.sub(camMin); //bring to center
+
+//keep camera within borders
+    camX = Math.min(camMax.x, Math.max(camX, camMin.x));
+    camY = Math.min(camMax.y, Math.max(camY, camMin.y));
+
+    camera.position.set(camX, camY, 0);
+
+    float camX2 = worldRenderer.getCameraBox2D().position.x;
+    float camY2 = worldRenderer.getCameraBox2D().position.y;
+
+    Vector2 camMin2 = new Vector2(worldRenderer.getCameraBox2D().viewportWidth/2, worldRenderer.getCameraBox2D().viewportHeight/2);
+    camMin2.scl(worldRenderer.getCameraBox2D().zoom); //bring to center and scale by the zoom level
+    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(), mapService.getCurrentMap().getMainTexture().getHeight());
+    camMax2.sub(camMin2); //bring to center
+
+//keep camera within borders
+    camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
+    camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
+
+    worldRenderer.getCameraBox2D().position.set(camX2, camY2, 0);
   }
 
   @Override
   public void render() {
-    camera.update(false);
+    camera.update();
     worldRenderer.getCameraBox2D().update(false);
 
 
@@ -90,14 +118,15 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     playerService.updateState();
     playerService.handleKey(camera, worldRenderer.getCameraBox2D());
-    playerService.rotateModel(camera);
+    setWorldBounds();
+    playerService.rotateModel( worldRenderer.getCameraBox2D());
 
 //    enemyService.correctDistanceBetweenEnemies();
     enemyService.actionEnemies(playerService.getPlayer().getPosX(), playerService.getPlayer().getPosY(), world);
 
 
+    //рисовать текстуры
     spriteBatch.setProjectionMatrix(camera.combined);
-
     spriteBatch.begin();
 
     mapService.draw(spriteBatch);
@@ -152,7 +181,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
     if (button == Input.Buttons.LEFT) {
-      playerService.shoot(camera, screenX, screenY);
+      playerService.shoot(worldRenderer.getCameraBox2D(), screenX, screenY);
     }
     return false;
   }
@@ -177,5 +206,10 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     return false;
   }
 
+  @Override
+  public void dispose() {
+    super.dispose();
+    worldRenderer.dispose();
+  }
 
 }

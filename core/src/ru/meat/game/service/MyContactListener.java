@@ -7,7 +7,8 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import lombok.AllArgsConstructor;
-import ru.meat.game.model.BodyUserData;
+import ru.meat.game.model.bodyData.BodyUserData;
+import ru.meat.game.model.bodyData.EnemyBodyUserData;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 
 
@@ -27,9 +28,23 @@ public class MyContactListener implements ContactListener {
 
     Fixture fa = contact.getFixtureA();
     Fixture fb = contact.getFixtureB();
-    if (fa.getUserData() instanceof BodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
+    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
       setDamageToEnemyFromBullet(fa, fb);
     }
+
+    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BodyUserData && ((BodyUserData)fb.getUserData()).getName().equals("player")) {
+      attackPlayer(fa, fb);
+    }
+    if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BodyUserData && ((BodyUserData)fa.getUserData()).getName().equals("player")) {
+      attackPlayer(fb, fa);
+    }
+  }
+
+  private void attackPlayer(Fixture fa, Fixture fb){
+    EnemyBodyUserData bodyUserData = (EnemyBodyUserData) fa.getUserData();
+    bodyUserData.setNeedAttack(true);
+    BodyUserData playerUserData = (BodyUserData) fb.getUserData();
+    playerUserData.setDamage(10);
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {

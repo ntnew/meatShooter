@@ -35,7 +35,7 @@ public class PlayerService {
 
   private float topStateTime;
 
-  private float speed = 3f*MAIN_ZOOM;
+  private float speed = 2f*MAIN_ZOOM;
 
   private float moveDirectionAngle = 0;
 
@@ -55,6 +55,10 @@ public class PlayerService {
     getActualWeapon().updateState();
   }
 
+  /**
+   * Повернуть подельку за мышью
+   * @param camera отрисовывающая камера
+   */
   public void rotateModel(OrthographicCamera camera) {
     float xInput = Gdx.input.getX();
     float yInput = Gdx.input.getY();
@@ -166,15 +170,13 @@ public class PlayerService {
     player.setCurrentWeapon(WeaponEnum.getByPos(i));
   }
 
-  public void handleKey(OrthographicCamera camera, OrthographicCamera cameraBox2D) {
-    if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
-        Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-      changeFeetStatus(CharacterFeetStatus.RUN);
-      changeTopStatus(CharacterTopStatus.MOVE);
-    } else {
-      changeFeetStatus(CharacterFeetStatus.IDLE);
-      changeTopStatus(CharacterTopStatus.IDLE);
-    }
+  /**
+   * обработать нажатие на клавиши ходьбы
+   * @param camera камера отрисовки текстур
+   * @param cameraBox2D камера box2d
+   */
+  public void handleMoveKey(OrthographicCamera camera, OrthographicCamera cameraBox2D) {
+    handleMovingStatus();
 
     float x = 0;
     float y = 0;
@@ -219,6 +221,23 @@ public class PlayerService {
     cameraBox2D.update();
   }
 
+  /**
+   * Сменить статус действия текстур
+   */
+  private void handleMovingStatus() {
+    if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
+        Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+      changeFeetStatus(CharacterFeetStatus.RUN);
+      changeTopStatus(CharacterTopStatus.MOVE);
+    } else {
+      changeFeetStatus(CharacterFeetStatus.IDLE);
+      changeTopStatus(CharacterTopStatus.IDLE);
+    }
+  }
+
+  /**
+   * Получить скорость движения игрока
+   */
   private float getSpeed() {
     return (speed * moveMultiplier);
   }

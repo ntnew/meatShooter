@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.WeaponService;
 import ru.meat.game.utils.GDXUtils;
-import ru.meat.game.utils.Settings;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -77,7 +77,7 @@ public class Player extends Actor {
       weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
 
-      body = GDXUtils.createCircleForEnemy(world,60/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
+      body = GDXUtils.createCircleForEnemy(world,70/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
 
     } catch (Exception e) {

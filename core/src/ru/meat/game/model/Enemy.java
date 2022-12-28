@@ -49,7 +49,7 @@ public class Enemy {
   /**
    * делитель размера модельки
    */
-  private float zoom = 3;
+  private float zoom;
 
   /**
    * Здоровье
@@ -85,8 +85,6 @@ public class Enemy {
    */
   private EnemyStatus status;
 
-  private EnemyStatus previousStatus;
-
   private final float frameDuration = 0.05f;
   private final float attackFrameDuration = 0.1f;
 
@@ -113,7 +111,6 @@ public class Enemy {
     this.idleAnimation = FilesUtils.initAnimationFrames(pathToIdleAnimation, zoom, frameDuration);
     this.dieAnimation = FilesUtils.initAnimationFrames(pathToDieAnimation, zoom, frameDuration);
     this.status = EnemyStatus.IDLE;
-    this.previousStatus = EnemyStatus.IDLE;
     this.animationAngle = animationAngle;
 
     idleAnimation.setPlayMode(PlayMode.LOOP);

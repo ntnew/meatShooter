@@ -11,7 +11,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.World;
 import java.math.BigDecimal;
-import ru.meat.game.model.BodyUserData;
+import ru.meat.game.model.bodyData.BodyUserData;
 
 public class GDXUtils {
 
@@ -80,6 +80,7 @@ public class GDXUtils {
 
     box.createFixture(circle, density);
     box.getFixtureList().get(0).setUserData(bodyData);
+    box.setLinearDamping(1);
 
     circle.dispose();
 

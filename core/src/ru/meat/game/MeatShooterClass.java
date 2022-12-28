@@ -11,11 +11,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.physics.box2d.World;
-import ru.meat.game.model.CharacterFeetStatus;
-import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
@@ -69,11 +65,11 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     worldRenderer = new WorldRenderer(world, true,w ,h);
 
-    playerService = new PlayerService(250, 250, world);
+    playerService = new PlayerService(500, 500, world);
     enemyService.createEnemies(world);
   }
 
-  public void setWorldBounds() {
+  public void handleWorldBounds() {
     float camX = camera.position.x;
     float camY = camera.position.y;
 
@@ -96,7 +92,6 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(), mapService.getCurrentMap().getMainTexture().getHeight());
     camMax2.sub(camMin2); //bring to center
 
-//keep camera within borders
     camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
     camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
 
@@ -117,12 +112,12 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     world.step(1 / 60f, 6, 2);
 
     playerService.updateState();
-    playerService.handleKey(camera, worldRenderer.getCameraBox2D());
-    setWorldBounds();
-    playerService.rotateModel( worldRenderer.getCameraBox2D());
+    playerService.handleMoveKey(camera, worldRenderer.getCameraBox2D());
+    handleWorldBounds();
+    playerService.rotateModel(worldRenderer.getCameraBox2D());
 
 //    enemyService.correctDistanceBetweenEnemies();
-    enemyService.actionEnemies(playerService.getPlayer().getPosX(), playerService.getPlayer().getPosY(), world);
+    enemyService.actionEnemies(playerService.getPlayer().getBody().getPosition().x, playerService.getPlayer().getBody().getPosition().y, world);
 
 
     //рисовать текстуры
@@ -141,24 +136,6 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   @Override
   public boolean keyDown(int keycode) {
-    if (keycode == Input.Keys.LEFT) {
-      camera.translate(-50, 0);
-    }
-    if (keycode == Input.Keys.RIGHT) {
-      camera.translate(50, 0);
-    }
-    if (keycode == Input.Keys.UP) {
-      camera.translate(0, -50);
-    }
-    if (keycode == Input.Keys.DOWN) {
-      camera.translate(0, 50);
-    }
-    if (Gdx.input.isKeyPressed(Keys.BACKSPACE)) {
-      camera.zoom += 0.1;
-    }
-    if (Gdx.input.isKeyPressed(Keys.MINUS)) {
-      camera.zoom -= 0.1;
-    }
     if (keycode == Keys.NUM_1) {
       playerService.changeWeapon(1);
     }

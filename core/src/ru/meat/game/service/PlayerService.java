@@ -43,9 +43,9 @@ public class PlayerService {
 
   private float modelFrontAngle = 0;
 
-  public PlayerService(float x, float y, World world) {
+  public PlayerService(float x, float y, World world, AudioService audioService) {
     player = new Player(world, x, y);
-    audioService = new AudioService();
+    this.audioService = audioService;
   }
 
   public void updateState() {
@@ -59,6 +59,9 @@ public class PlayerService {
     handlePlayerHp();
   }
 
+  /**
+   * Обработать значения хп игрока
+   */
   private void handlePlayerHp() {
     BodyUserData userData = (BodyUserData) player.getBody().getFixtureList().get(0).getUserData();
     if (userData.getDamage() != 0) {
@@ -78,15 +81,12 @@ public class PlayerService {
    * @param camera отрисовывающая камера
    */
   public void rotateModel(OrthographicCamera camera) {
-    float xInput = Gdx.input.getX();
-    float yInput = Gdx.input.getY();
-
     Vector3 tmpVec3 = new Vector3();
-    tmpVec3.set(xInput, yInput, 0);
+    tmpVec3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
     tmpVec3 = camera.unproject(tmpVec3);
 
-    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - player.getBody().getPosition().y,
-        tmpVec3.x - player.getBody().getPosition().x) + 20;
+    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - getBodyPosY(),
+        tmpVec3.x - getBodyPosX()) + 20;
   }
 
   public void drawPlayer(SpriteBatch batch) {
@@ -100,10 +100,8 @@ public class PlayerService {
 
   private void drawDie(SpriteBatch batch) {
     Sprite sprite = new Sprite(player.getDiedAnimation().getKeyFrame(Gdx.graphics.getDeltaTime()));
-    sprite.setX(
-        player.getBody().getPosition().x * WORLD_TO_VIEW + (20f / player.getZoomMultiplier()) - sprite.getWidth() / 2);
-    sprite.setY(
-        player.getBody().getPosition().y * WORLD_TO_VIEW + (30f / player.getZoomMultiplier()) - sprite.getHeight() / 2);
+    sprite.setX(getBodyPosX() * WORLD_TO_VIEW + (20f / player.getZoomMultiplier()) - sprite.getWidth() / 2);
+    sprite.setY(getBodyPosY() * WORLD_TO_VIEW + (30f / player.getZoomMultiplier()) - sprite.getHeight() / 2);
     sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
     sprite.setRotation(modelFrontAngle - 20);
     sprite.draw(batch);
@@ -168,25 +166,31 @@ public class PlayerService {
     return animationStack.getIdleAnimation().getKeyFrame(stateTime, true);
   }
 
-  public void changeTopStatus(CharacterTopStatus status) {
+  private void changeTopStatus(CharacterTopStatus status) {
     player.setTopStatus(status);
   }
 
 
-  public void changeFeetStatus(CharacterFeetStatus status) {
+  private void changeFeetStatus(CharacterFeetStatus status) {
     player.setFeetStatus(status);
   }
 
-  public void shoot(OrthographicCamera cameraBox2D, float screenX, float screenY) {
+  /**
+   * Стрелять
+   *
+   * @param cameraBox2D камера box2d
+   */
+  public void shoot(OrthographicCamera cameraBox2D) {
     Weapon weapon = getActualWeapon();
     if (weapon.getCurrentLockCounter() == 0
         || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()) {
       weapon.setCurrentLockCounter(TimeUtils.millis());
+
       Vector3 point = new Vector3();
-      point.set(screenX, screenY, 0);
+      point.set(Gdx.input.getX(), Gdx.input.getY(), 0);
       cameraBox2D.unproject(point);
 
-      weapon.shoot(player.getBody().getPosition().x, player.getBody().getPosition().y, point.x, point.y);
+      weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y);
       audioService.playShoot(weapon.getShootSound());
     }
   }
@@ -233,16 +237,13 @@ public class PlayerService {
         x = getSpeed();
       }
 
-      player.getBody().setTransform(player.getBody().getPosition().x + x / WORLD_TO_VIEW,
-          player.getBody().getPosition().y + y / WORLD_TO_VIEW, 0);
+      player.getBody().setTransform(getBodyPosX() + x / WORLD_TO_VIEW, getBodyPosY() + y / WORLD_TO_VIEW, 0);
 
-      Vector2 position = player.getBody().getPosition();
-
-      if ((position.x > cameraBox2D.position.x && x < 0) || (position.x < cameraBox2D.position.x && x > 0)) {
+      if ((getBodyPosX() > cameraBox2D.position.x && x < 0) || (getBodyPosX() < cameraBox2D.position.x && x > 0)) {
         x = 0;
       }
 
-      if ((position.y > cameraBox2D.position.y && y < 0) || (position.y < cameraBox2D.position.y && y > 0)) {
+      if ((getBodyPosY() > cameraBox2D.position.y && y < 0) || (getBodyPosY() < cameraBox2D.position.y && y > 0)) {
         y = 0;
       }
 
@@ -276,7 +277,20 @@ public class PlayerService {
   }
 
   public void drawBullets(SpriteBatch spriteBatch) {
-    getActualWeapon().getBulletService()
-        .drawBullets(spriteBatch, player.getBody().getPosition().x, player.getBody().getPosition().y);
+    getActualWeapon().getBulletService().drawBullets(spriteBatch, getBodyPosX(), getBodyPosY());
+  }
+
+  /**
+   * Получить координату Х игрока в box2d
+   */
+  public float getBodyPosX() {
+    return player.getBody().getPosition().x;
+  }
+
+  /**
+   * Получить координату У игрока в box2d
+   */
+  public float getBodyPosY() {
+    return player.getBody().getPosition().y;
   }
 }

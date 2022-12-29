@@ -2,6 +2,9 @@ package ru.meat.game.model.bodyData;
 
 import lombok.Data;
 
+/**
+ * Клас, который кладётся в body box2d для передачи информации контактов
+ */
 @Data
 public class EnemyBodyUserData extends BodyUserData{
 

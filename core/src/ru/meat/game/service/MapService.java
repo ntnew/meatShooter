@@ -16,15 +16,10 @@ public class MapService {
 
 
   public void initMap(){
-    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture(Gdx.files.internal("./assets/" + firstMap),0.9f));
+    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture(Gdx.files.internal("./assets/" + firstMap),1f));
   }
 
   public void draw(Batch batch){
     batch.draw(currentMap.getMainTexture(), currentMap.getPos().getX(), currentMap.getPos().getY());
-  }
-
-  public void moveMap(float x, float y) {
-    FloatPair pos = currentMap.getPos();
-    currentMap.setPos(new FloatPair(pos.getX() + x,pos.getY() + y));
   }
 }

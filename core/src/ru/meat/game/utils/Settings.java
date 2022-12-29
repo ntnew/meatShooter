@@ -22,6 +22,9 @@ public class Settings {
   public static float VIEW_TO_WORLD = 1 / WORLD_TO_VIEW;
 
 
+  /**
+   * Громкость эффектов
+   */
   public static final float VOLUME = 0.1f;
 
 }

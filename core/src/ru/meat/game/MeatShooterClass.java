@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import ru.meat.game.service.AudioService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
@@ -25,6 +26,8 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   private PlayerService playerService;
   private EnemyService enemyService;
   private float stateTime;
+
+  private AudioService audioService;
 
   private SpriteBatch spriteBatch;
   private World world;
@@ -40,6 +43,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   public void create() {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
+    audioService = new AudioService();
 
 //    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
@@ -64,10 +68,14 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     worldRenderer = new WorldRenderer(world, true, w, h);
 
-    playerService = new PlayerService(500, 500, world);
+    playerService = new PlayerService(500, 500, world, audioService);
     enemyService.createEnemies(world);
   }
 
+
+  /**
+   * обработать рамки камеры, чтобы не заходили за края
+   */
   public void handleWorldBounds() {
     float camX = camera.position.x;
     float camY = camera.position.y;
@@ -116,8 +124,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     playerService.handleMoveKey(camera, worldRenderer.getCameraBox2D());
     handleWorldBounds();
 
-    enemyService.actionEnemies(playerService.getPlayer().getBody().getPosition().x,
-        playerService.getPlayer().getBody().getPosition().y, world);
+    enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY(), world);
     handleMouse();
 
     //рисовать текстуры
@@ -138,7 +145,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     if (!playerService.getPlayer().isDead()) {
       playerService.rotateModel(worldRenderer.getCameraBox2D());
       if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-        playerService.shoot(worldRenderer.getCameraBox2D(), Gdx.input.getX(), Gdx.input.getY());
+        playerService.shoot(worldRenderer.getCameraBox2D());
       }
     }
   }

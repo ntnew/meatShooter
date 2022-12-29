@@ -14,10 +14,6 @@ import ru.meat.game.utils.FilesUtils;
 public class Enemy {
 
   private Body body;
-  /**
-   * Дальность атаки
-   */
-  private float attackRange = 40;
 
   private float enemyPing = 100;
   private float enemyPingCounter = 0;
@@ -75,6 +71,9 @@ public class Enemy {
   private float posX = 50;
   private float posY = 50;
 
+  /**
+   * Урон врага
+   */
   private int attack;
   /**
    * Скорость атаки секунд длится одна атака
@@ -100,10 +99,9 @@ public class Enemy {
    */
   private float animationAngle = 0;
 
-  public Enemy(float posX, float posY, float attackRange, float zoom, int hp, float speed,
+  public Enemy(float posX, float posY, float zoom, int hp, float speed,
       String pathToWalkAnimation, String pathToIdleAnimation, String pathToAttackAnimation, String pathToDieAnimation,
       float animationAngle, float enemyPing, FloatPair playerCoord) {
-    this.attackRange = attackRange;
     this.enemyPing = enemyPing;
     this.zoom = zoom;
     this.hp = hp;

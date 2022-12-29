@@ -25,14 +25,8 @@ import ru.meat.game.utils.GDXUtils;
 public class Player extends Actor {
 
   /**
-   * Положение игрока по Х
+   * Тело игрока в box2d
    */
-  private float posX;
-  /**
-   * Положение игрока по У
-   */
-  private float posY;
-
   private Body body;
 
   private Double hp;

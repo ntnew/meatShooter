@@ -26,7 +26,7 @@ public class EnemyService {
   private List<Enemy> enemies = new ArrayList<>();
 
   public Enemy createZombieEnemy(float x, float y, World world) {
-    Enemy enemy = new Enemy(x, y, 50, 1f, 100, 0.01f * MAIN_ZOOM,
+    Enemy enemy = new Enemy(x, y, 1f, 100, 0.01f * MAIN_ZOOM,
         "./assets/export/move/",
         "./assets/export/idle/",
         "./assets/export/attack/",
@@ -142,11 +142,6 @@ public class EnemyService {
       System.out.println(enemy.getHp());
     }
   }
-
-//  private boolean isEnemyTooCloseToPlayer(float x, float y, Enemy enemy) {
-//    return calcGipotenuza(enemy.getBody().getPosition().x - x, enemy.getBody().getPosition().y - y)
-//        < enemy.getAttackRange() * 8;
-//  }
 
   /**
    * Установить угол поворота для модельки врага на точку

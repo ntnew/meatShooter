@@ -35,8 +35,12 @@ public class Player extends Actor {
 
   private Body body;
 
+  private Double hp;
+
   private final float zoomMultiplier = 1f;
   private final float frameDuration = 0.03f;
+
+  private boolean isDead = false;
 
   private Animation<Texture> walkAnimation;
   private Animation<Texture> idle;
@@ -49,6 +53,8 @@ public class Player extends Actor {
   private Animation<Texture> rifleSnootAnimation;
   private Animation<Texture> rifleMoveAnimation;
   private Animation<Texture> rifleReloadAnimation;
+
+  private Animation<Texture> diedAnimation;
 
   private WeaponEnum currentWeapon;
 
@@ -65,19 +71,21 @@ public class Player extends Actor {
       topStatus = CharacterTopStatus.IDLE;
       feetStatus = CharacterFeetStatus.IDLE;
 
-
+      this.hp = 500d;
 
       this.walkAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/walk/", zoomMultiplier, frameDuration);
       this.idle = initAnimationFrames("./assets/Top_Down_survivor/feet/idle/", zoomMultiplier, frameDuration);
       this.runAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/run/", zoomMultiplier, frameDuration);
       this.strafeLeftAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_left/", zoomMultiplier, frameDuration);
       this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
+      this.diedAnimation = initAnimationFrames("./assets/export/died", zoomMultiplier,frameDuration);
+
 
       weaponService = new WeaponService(new BulletService(world), new AudioService());
       weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
 
-      body = GDXUtils.createCircleForEnemy(world,70/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
+      body = GDXUtils.createCircleForEnemy(world,90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
 
     } catch (Exception e) {

@@ -48,7 +48,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     mapService = new MapService();
     mapService.initMap();
     world = new World(new Vector2(0, 0), true);
-    world.step(1/60f, 6, 6);
+    world.step(1 / 60f, 6, 6);
 
     world.setContactListener(new MyContactListener(world));
 
@@ -57,13 +57,12 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     camera.setToOrtho(false, w, h);
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
 
-
     camera.update();
 
     spriteBatch = new SpriteBatch();
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, true,w ,h);
+    worldRenderer = new WorldRenderer(world, true, w, h);
 
     playerService = new PlayerService(500, 500, world);
     enemyService.createEnemies(world);
@@ -73,9 +72,10 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     float camX = camera.position.x;
     float camY = camera.position.y;
 
-    Vector2 camMin = new Vector2(camera.viewportWidth/2, camera.viewportHeight/2);
+    Vector2 camMin = new Vector2(camera.viewportWidth / 2, camera.viewportHeight / 2);
     camMin.scl(camera.zoom); //bring to center and scale by the zoom level
-    Vector2 camMax = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(), mapService.getCurrentMap().getMainTexture().getHeight());
+    Vector2 camMax = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(),
+        mapService.getCurrentMap().getMainTexture().getHeight());
     camMax.sub(camMin); //bring to center
 
 //keep camera within borders
@@ -87,9 +87,11 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     float camX2 = worldRenderer.getCameraBox2D().position.x;
     float camY2 = worldRenderer.getCameraBox2D().position.y;
 
-    Vector2 camMin2 = new Vector2(worldRenderer.getCameraBox2D().viewportWidth/2, worldRenderer.getCameraBox2D().viewportHeight/2);
+    Vector2 camMin2 = new Vector2(worldRenderer.getCameraBox2D().viewportWidth / 2,
+        worldRenderer.getCameraBox2D().viewportHeight / 2);
     camMin2.scl(worldRenderer.getCameraBox2D().zoom); //bring to center and scale by the zoom level
-    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(), mapService.getCurrentMap().getMainTexture().getHeight());
+    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(),
+        mapService.getCurrentMap().getMainTexture().getHeight());
     camMax2.sub(camMin2); //bring to center
 
     camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
@@ -103,7 +105,6 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     camera.update();
     worldRenderer.getCameraBox2D().update(false);
 
-
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -114,11 +115,10 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     playerService.updateState();
     playerService.handleMoveKey(camera, worldRenderer.getCameraBox2D());
     handleWorldBounds();
-    playerService.rotateModel(worldRenderer.getCameraBox2D());
 
-//    enemyService.correctDistanceBetweenEnemies();
-    enemyService.actionEnemies(playerService.getPlayer().getBody().getPosition().x, playerService.getPlayer().getBody().getPosition().y, world);
-
+    enemyService.actionEnemies(playerService.getPlayer().getBody().getPosition().x,
+        playerService.getPlayer().getBody().getPosition().y, world);
+    handleMouse();
 
     //рисовать текстуры
     spriteBatch.setProjectionMatrix(camera.combined);
@@ -132,6 +132,15 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
     spriteBatch.end();
     worldRenderer.render();
 
+  }
+
+  private void handleMouse() {
+    if (!playerService.getPlayer().isDead()) {
+      playerService.rotateModel(worldRenderer.getCameraBox2D());
+      if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        playerService.shoot(worldRenderer.getCameraBox2D(), Gdx.input.getX(), Gdx.input.getY());
+      }
+    }
   }
 
   @Override
@@ -157,9 +166,6 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-    if (button == Input.Buttons.LEFT) {
-      playerService.shoot(worldRenderer.getCameraBox2D(), screenX, screenY);
-    }
     return false;
   }
 

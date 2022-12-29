@@ -25,7 +25,7 @@ public class EnemyService {
 
   private List<Enemy> enemies = new ArrayList<>();
 
-  public Enemy createZombieEnemy(float x, float y) {
+  public Enemy createZombieEnemy(float x, float y, World world) {
     Enemy enemy = new Enemy(x, y, 50, 1f, 100, 0.01f * MAIN_ZOOM,
         "./assets/export/move/",
         "./assets/export/idle/",
@@ -33,31 +33,13 @@ public class EnemyService {
         "./assets/export/died",
         0, 300, null);
     enemy.setRadius(80);
+    enemy.setAttack(10);
+    enemy.setAttackSpeed(1.5);
     enemy.setCenterMultip(FloatPair.create(2.9f, 1.78f));
+    enemy.setBody(GDXUtils.createCircleForEnemy(world, enemy.getRadius() / WORLD_TO_VIEW, 80,
+        new EnemyBodyUserData("zombie", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y));
     return enemy;
   }
-
-//  /**
-//   * скорректировать дистанцию между врагами
-//   */
-//  public void correctDistanceBetweenEnemies() {
-//    for (int i = 0; i < enemies.size(); i++) {
-//      Enemy enemy = enemies.get(i);
-//      for (int i1 = 0; i1 < enemies.size(); i1++) {
-//        if (i != i1) {
-//          Enemy enemy2 = enemies.get(i1);
-//          float cat1 = enemy2.getPosX() - enemy.getPosX();
-//          float cat2 = enemy2.getPosY() - enemy.getPosY();
-//          float gip = GDXUtils.calcGipotenuza(cat1, cat2);
-//
-//          if (gip < enemy.getRadius()) {
-//            enemy2.setPosX(cat1 < 0 ? enemy2.getPosX() - 0.5f : enemy2.getPosX() + 0.5f);
-//            enemy2.setPosY(cat2 < 0 ? enemy2.getPosY() - 0.5f : enemy2.getPosY() + 0.5f);
-//          }
-//        }
-//      }
-//    }
-//  }
 
   public void drawEnemySprite(SpriteBatch batch, Enemy enemy, float stateTime) {
     Sprite sprite = new Sprite(getActualFrame(stateTime, enemy));
@@ -73,7 +55,14 @@ public class EnemyService {
 
   private Texture getActualFrame(float stateTime, Enemy enemy) {
     if (enemy.getStatus().equals(EnemyStatus.ATTACK)) {
-      return enemy.getAttackAnimation().getKeyFrame(stateTime, true);
+      Texture keyFrame = enemy.getAttackAnimation().getKeyFrame(stateTime, true);
+      Texture lastKeyframe = enemy.getAttackAnimation().getKeyFrames()[enemy.getAttackAnimation().getKeyFrames().length- 1];
+      if (keyFrame.equals(lastKeyframe)) {
+        enemy.setStatus(EnemyStatus.MOVE);
+        EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
+        userData.setNeedAttack(false);
+      }
+      return keyFrame;
     } else if (enemy.getStatus().equals(EnemyStatus.IDLE)) {
       return enemy.getIdleAnimation().getKeyFrame(stateTime);
     } else if (enemy.getStatus().equals(EnemyStatus.MOVE)) {
@@ -199,18 +188,14 @@ public class EnemyService {
 //  }
 
   public void createEnemies(World world) {
-    enemies.add(createZombieEnemy(50f, 50f));
-    enemies.add(createZombieEnemy(100f, 100f));
+    enemies.add(createZombieEnemy(50f, 50f, world));
+    enemies.add(createZombieEnemy(100f, 100f, world));
     enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
+        MathUtils.random(0, Gdx.graphics.getHeight()), world));
     enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
+        MathUtils.random(0, Gdx.graphics.getHeight()), world));
     enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight())));
-
-    enemies.forEach(
-        x -> x.setBody(GDXUtils.createCircleForEnemy(world, x.getRadius() / WORLD_TO_VIEW, 80,
-            new EnemyBodyUserData("z1", 0, false), x.getPosX(), x.getPosY())));
+        MathUtils.random(0, Gdx.graphics.getHeight()), world));
   }
 
   /**

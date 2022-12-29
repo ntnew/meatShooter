@@ -75,6 +75,12 @@ public class Enemy {
   private float posX = 50;
   private float posY = 50;
 
+  private int attack;
+  /**
+   * Скорость атаки секунд длится одна атака
+   */
+  private Double attackSpeed;
+
   private Animation<Texture> walkAnimation;
   private Animation<Texture> idleAnimation;
   private Animation<Texture> attackAnimation;

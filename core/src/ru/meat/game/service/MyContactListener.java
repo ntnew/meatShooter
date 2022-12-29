@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.TimeUtils;
 import lombok.AllArgsConstructor;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.bodyData.EnemyBodyUserData;
@@ -20,31 +21,26 @@ public class MyContactListener implements ContactListener {
 
   @Override
   public void endContact(Contact contact) {
-
   }
 
   @Override
   public void beginContact(Contact contact) {
-
     Fixture fa = contact.getFixtureA();
     Fixture fb = contact.getFixtureB();
     if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
       setDamageToEnemyFromBullet(fa, fb);
     }
-
-    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BodyUserData && ((BodyUserData)fb.getUserData()).getName().equals("player")) {
-      attackPlayer(fa, fb);
-    }
-    if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BodyUserData && ((BodyUserData)fa.getUserData()).getName().equals("player")) {
-      attackPlayer(fb, fa);
-    }
   }
 
-  private void attackPlayer(Fixture fa, Fixture fb){
-    EnemyBodyUserData bodyUserData = (EnemyBodyUserData) fa.getUserData();
-    bodyUserData.setNeedAttack(true);
+  private void attackPlayer(Fixture fa, Fixture fb) {
+    EnemyBodyUserData enemyData = (EnemyBodyUserData) fa.getUserData();
+    enemyData.setNeedAttack(true);
+
     BodyUserData playerUserData = (BodyUserData) fb.getUserData();
-    playerUserData.setDamage(10);
+    if (enemyData.getPreviousAttackTime() == null || TimeUtils.timeSinceMillis(enemyData.getPreviousAttackTime()) > enemyData.getAttackSpeed()*1000) {
+      playerUserData.setDamage(playerUserData.getDamage() + enemyData.getAttack());
+      enemyData.setPreviousAttackTime(TimeUtils.millis());
+    }
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
@@ -60,6 +56,16 @@ public class MyContactListener implements ContactListener {
   @Override
   public void preSolve(Contact contact, Manifold oldManifold) {
 
+    Fixture fa = contact.getFixtureA();
+    Fixture fb = contact.getFixtureB();
+    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BodyUserData
+        && ((BodyUserData) fb.getUserData()).getName().equals("player")) {
+      attackPlayer(fa, fb);
+    }
+    if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BodyUserData
+        && ((BodyUserData) fa.getUserData()).getName().equals("player")) {
+      attackPlayer(fb, fa);
+    }
   }
 
   @Override

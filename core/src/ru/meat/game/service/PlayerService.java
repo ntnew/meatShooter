@@ -12,12 +12,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
 import lombok.Data;
 import ru.meat.game.model.CharacterFeetStatus;
 import ru.meat.game.model.CharacterTopStatus;
 import ru.meat.game.model.Player;
+import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
 
@@ -35,7 +37,7 @@ public class PlayerService {
 
   private float topStateTime;
 
-  private float speed = 2f*MAIN_ZOOM;
+  private float speed = 2f * MAIN_ZOOM;
 
   private float moveDirectionAngle = 0;
 
@@ -53,10 +55,26 @@ public class PlayerService {
     topStateTime += Gdx.graphics.getDeltaTime();
 
     getActualWeapon().updateState();
+
+    handlePlayerHp();
+  }
+
+  private void handlePlayerHp() {
+    BodyUserData userData = (BodyUserData) player.getBody().getFixtureList().get(0).getUserData();
+    if (userData.getDamage() != 0) {
+      player.setHp(player.getHp() - userData.getDamage());
+      userData.setDamage(0);
+      System.out.println(player.getHp());
+    }
+
+    if (player.getHp() <= 0) {
+      player.setDead(true);
+    }
   }
 
   /**
    * Повернуть подельку за мышью
+   *
    * @param camera отрисовывающая камера
    */
   public void rotateModel(OrthographicCamera camera) {
@@ -67,12 +85,28 @@ public class PlayerService {
     tmpVec3.set(xInput, yInput, 0);
     tmpVec3 = camera.unproject(tmpVec3);
 
-    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - player.getBody().getPosition().y, tmpVec3.x -  player.getBody().getPosition().x) + 20;
+    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - player.getBody().getPosition().y,
+        tmpVec3.x - player.getBody().getPosition().x) + 20;
   }
 
   public void drawPlayer(SpriteBatch batch) {
-    drawFeetSprite(batch);
-    drawTopSprite(batch);
+    if (player.isDead()) {
+      drawDie(batch);
+    } else {
+      drawFeetSprite(batch);
+      drawTopSprite(batch);
+    }
+  }
+
+  private void drawDie(SpriteBatch batch) {
+    Sprite sprite = new Sprite(player.getDiedAnimation().getKeyFrame(Gdx.graphics.getDeltaTime()));
+    sprite.setX(
+        player.getBody().getPosition().x * WORLD_TO_VIEW + (20f / player.getZoomMultiplier()) - sprite.getWidth() / 2);
+    sprite.setY(
+        player.getBody().getPosition().y * WORLD_TO_VIEW + (30f / player.getZoomMultiplier()) - sprite.getHeight() / 2);
+    sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
+    sprite.setRotation(modelFrontAngle - 20);
+    sprite.draw(batch);
   }
 
   private void drawFeetSprite(SpriteBatch batch) {
@@ -172,53 +206,52 @@ public class PlayerService {
 
   /**
    * обработать нажатие на клавиши ходьбы
-   * @param camera камера отрисовки текстур
+   *
+   * @param camera      камера отрисовки текстур
    * @param cameraBox2D камера box2d
    */
   public void handleMoveKey(OrthographicCamera camera, OrthographicCamera cameraBox2D) {
-    handleMovingStatus();
+    if (!player.isDead()) {
+      handleMovingStatus();
 
-    float x = 0;
-    float y = 0;
+      float x = 0;
+      float y = 0;
 
-    if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-      x = -getSpeed();
+      if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+        x = -getSpeed();
+      }
+
+      if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        y = getSpeed();
+      }
+
+      if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        y = -getSpeed();
+      }
+
+      if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        x = getSpeed();
+      }
+
+      player.getBody().setTransform(player.getBody().getPosition().x + x / WORLD_TO_VIEW,
+          player.getBody().getPosition().y + y / WORLD_TO_VIEW, 0);
+
+      Vector2 position = player.getBody().getPosition();
+
+      if ((position.x > cameraBox2D.position.x && x < 0) || (position.x < cameraBox2D.position.x && x > 0)) {
+        x = 0;
+      }
+
+      if ((position.y > cameraBox2D.position.y && y < 0) || (position.y < cameraBox2D.position.y && y > 0)) {
+        y = 0;
+      }
+
+      camera.translate(x, y);
+      cameraBox2D.translate(x / WORLD_TO_VIEW, y / WORLD_TO_VIEW);
+
+      camera.update();
+      cameraBox2D.update();
     }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-      y = getSpeed();
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-      y = -getSpeed();
-    }
-
-    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-      x = getSpeed();
-    }
-
-    player.getBody().setTransform(player.getBody().getPosition().x + x / WORLD_TO_VIEW, player.getBody().getPosition().y +y/WORLD_TO_VIEW, 0);
-
-    Vector2 position = player.getBody().getPosition();
-
-    if (position.x > cameraBox2D.position.x && x < 0){
-      x=0;
-    }
-    if (position.x < cameraBox2D.position.x && x > 0){
-      x=0;
-    }
-
-    if (position.y > cameraBox2D.position.y && y < 0){
-      y=0;
-    }
-    if (position.y < cameraBox2D.position.y && y > 0){
-      y=0;
-    }
-    camera.translate(x,y);
-    cameraBox2D.translate(x/WORLD_TO_VIEW,y/WORLD_TO_VIEW);
-
-    camera.update();
-    cameraBox2D.update();
   }
 
   /**

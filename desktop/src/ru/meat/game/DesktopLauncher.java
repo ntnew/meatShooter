@@ -12,6 +12,6 @@ public class DesktopLauncher {
     config.setWindowedMode(1280,760);
 
 
-    new Lwjgl3Application(new MeatShooterClass(new InputHandler()), config);
+    new Lwjgl3Application(new MyGame(), config);
 	}
 }

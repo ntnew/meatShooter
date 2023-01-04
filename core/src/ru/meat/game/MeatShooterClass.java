@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,7 +19,7 @@ import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.PlayerService;
 
-public class MeatShooterClass extends ApplicationAdapter implements InputProcessor {
+public class MeatShooterClass implements InputProcessor, Screen {
 
 
   private final InputProcessor inputProcessor;
@@ -37,10 +38,10 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   public MeatShooterClass(InputProcessor inputProcessor) {
     this.inputProcessor = inputProcessor;
-  }
-
-  @Override
-  public void create() {
+//  }
+//
+//  @Override
+//  public void create() {
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
     audioService = new AudioService();
@@ -109,7 +110,12 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
   }
 
   @Override
-  public void render() {
+  public void show() {
+
+  }
+
+  @Override
+  public void render(float delta) {
     camera.update();
     worldRenderer.getCameraBox2D().update(false);
 
@@ -138,6 +144,26 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
     spriteBatch.end();
     worldRenderer.render();
+
+  }
+
+  @Override
+  public void resize(int width, int height) {
+
+  }
+
+  @Override
+  public void pause() {
+
+  }
+
+  @Override
+  public void resume() {
+
+  }
+
+  @Override
+  public void hide() {
 
   }
 
@@ -198,7 +224,7 @@ public class MeatShooterClass extends ApplicationAdapter implements InputProcess
 
   @Override
   public void dispose() {
-    super.dispose();
+//    super.dispose();
     worldRenderer.dispose();
   }
 

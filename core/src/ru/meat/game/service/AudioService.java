@@ -18,4 +18,12 @@ public class AudioService {
     music.setVolume(VOLUME);
     music.play();
   }
+
+
+  public static void playMainMenuMusic() {
+    Music music = Gdx.audio.newMusic(Gdx.files.internal("sound/main_menu.mp3"));
+    music.setOnCompletionListener(Music::dispose);
+    music.setVolume(VOLUME);
+    music.play();
+  }
 }

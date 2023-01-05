@@ -75,7 +75,6 @@ public class BulletService {
   }
 
   public void updateBullets() {
-
     for (int i = 0; i < bullets.size(); i++) {
       Bullet bullet = bullets.get(i);
       Array<Fixture> fixtureList = bullet.getBody().getFixtureList();
@@ -84,19 +83,15 @@ public class BulletService {
         if (userData.isNeedDispose()) {
           deleteBulletBody(i);
         }
-      } else {
-        bulletsToRemove.add(i);
       }
     }
-    bulletsToRemove.forEach(i -> bullets.remove((int) i));
-    bulletsToRemove.clear();
+    bullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
   }
 
   private void deleteBulletBody(int i) {
     try {
       bullets.get(i).getBody().setActive(false);
       world.destroyBody(bullets.get(i).getBody());
-      bulletsToRemove.add(i);
     } catch (Exception e) {
 
     }

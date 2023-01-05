@@ -12,25 +12,24 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.meat.game.model.Enemy;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.bodyData.EnemyBodyUserData;
+import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.utils.GDXUtils;
 
 @NoArgsConstructor
 public class EnemyService {
 
+  @Getter
   private List<Enemy> enemies = new ArrayList<>();
 
   public Enemy createZombieEnemy(float x, float y, World world) {
     Enemy enemy = new Enemy(x, y, 1f, 100, 0.01f * MAIN_ZOOM,
-        "./assets/export/move/",
-        "./assets/export/idle/",
-        "./assets/export/attack/",
-        "./assets/export/died",
         0, 300, null);
     enemy.setRadius(80);
     enemy.setAttack(10);
@@ -55,8 +54,8 @@ public class EnemyService {
 
   private Texture getActualFrame(float stateTime, Enemy enemy) {
     if (enemy.getStatus().equals(EnemyStatus.ATTACK)) {
-      Texture keyFrame = enemy.getAttackAnimation().getKeyFrame(stateTime, true);
-      Texture lastKeyframe = enemy.getAttackAnimation().getKeyFrames()[enemy.getAttackAnimation().getKeyFrames().length- 1];
+      Texture keyFrame = EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrame(stateTime, true);
+      Texture lastKeyframe = EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames()[EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames().length- 1];
       if (keyFrame.equals(lastKeyframe)) {
         enemy.setStatus(EnemyStatus.MOVE);
         EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
@@ -64,17 +63,17 @@ public class EnemyService {
       }
       return keyFrame;
     } else if (enemy.getStatus().equals(EnemyStatus.IDLE)) {
-      return enemy.getIdleAnimation().getKeyFrame(stateTime);
+      return EnemiesAnimation.getInstance().getIdleAnimation().getKeyFrame(stateTime);
     } else if (enemy.getStatus().equals(EnemyStatus.MOVE)) {
-      return enemy.getWalkAnimation().getKeyFrame(stateTime);
+      return EnemiesAnimation.getInstance().getWalkAnimation().getKeyFrame(stateTime);
     } else if (enemy.getStatus().equals(EnemyStatus.DIED)) {
-      return enemy.getDieAnimation().getKeyFrame(stateTime, true);
+      return EnemiesAnimation.getInstance().getDieAnimation().getKeyFrame(stateTime, true);
     }
-    return enemy.getIdleAnimation().getKeyFrame(stateTime);
+    return EnemiesAnimation.getInstance().getIdleAnimation().getKeyFrame(stateTime);
   }
 
   /**
-   * Метод действия врага, если расстояние до игрока меньше расстояния атаки, то атакует, else идёт
+   * Метод действия врага
    *
    * @param x     x координата игрока
    * @param y     у координата игрока
@@ -153,44 +152,8 @@ public class EnemyService {
     enemy.setAnimationAngle(MathUtils.radiansToDegrees * MathUtils.atan2(y, x) + 10);
   }
 
-//  public void defineSpeedXandY(Enemy enemy) {
-//    float x;
-//    float y;
-//    if (enemy.getFloatDestination().getX() > enemy.getDestination().getX()) {
-//      x = enemy.getFloatDestination().getX() - enemy.getTurnSpeed().getX();
-//    } else if (enemy.getFloatDestination().getX() < enemy.getDestination().getX()) {
-//      x = enemy.getFloatDestination().getX() + enemy.getTurnSpeed().getX();
-//    } else {
-//      x = enemy.getDestination().getX();
-//    }
-//
-//    if (enemy.getFloatDestination().getY() > enemy.getDestination().getY()) {
-//      y = enemy.getFloatDestination().getY() - enemy.getTurnSpeed().getY();
-//    } else if (enemy.getFloatDestination().getY() < enemy.getDestination().getY()) {
-//      y = enemy.getFloatDestination().getY() + enemy.getTurnSpeed().getY();
-//    } else {
-//      y = enemy.getDestination().getY();
-//    }
-//
-//    enemy.setFloatDestination(FloatPair.create(x, y));
-//    float catetPrilezjaschiy = x - enemy.getPosX();
-//    float catetProtivo = y - enemy.getPosY();
-//    float gip = GDXUtils.calcGipotenuza(catetPrilezjaschiy, catetProtivo);
-//    float sin = catetProtivo / gip;
-//    float cos = catetPrilezjaschiy / gip;
-//    enemy.setSpeedY(sin * enemy.getSpeed());
-//    enemy.setSpeedX(cos * enemy.getSpeed());
-//  }
-
   public void createEnemies(World world) {
     enemies.add(createZombieEnemy(50f, 50f, world));
-    enemies.add(createZombieEnemy(100f, 100f, world));
-    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight()), world));
-    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight()), world));
-    enemies.add(createZombieEnemy(MathUtils.random(0, Gdx.graphics.getWidth()),
-        MathUtils.random(0, Gdx.graphics.getHeight()), world));
   }
 
   /**

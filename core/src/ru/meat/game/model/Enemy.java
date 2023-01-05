@@ -80,11 +80,6 @@ public class Enemy {
    */
   private Double attackSpeed;
 
-  private Animation<Texture> walkAnimation;
-  private Animation<Texture> idleAnimation;
-  private Animation<Texture> attackAnimation;
-  private Animation<Texture> dieAnimation;
-
   /**
    * Статус действия модельки
    */
@@ -100,7 +95,6 @@ public class Enemy {
   private float animationAngle = 0;
 
   public Enemy(float posX, float posY, float zoom, int hp, float speed,
-      String pathToWalkAnimation, String pathToIdleAnimation, String pathToAttackAnimation, String pathToDieAnimation,
       float animationAngle, float enemyPing, FloatPair playerCoord) {
     this.enemyPing = enemyPing;
     this.zoom = zoom;
@@ -110,16 +104,10 @@ public class Enemy {
     this.speedY = 0;
     this.posX = posX;
     this.posY = posY;
-    this.attackAnimation = FilesUtils.initAnimationFrames(pathToAttackAnimation, zoom, attackFrameDuration);
-    this.walkAnimation = FilesUtils.initAnimationFrames(pathToWalkAnimation, zoom, frameDuration);
-    this.idleAnimation = FilesUtils.initAnimationFrames(pathToIdleAnimation, zoom, frameDuration);
-    this.dieAnimation = FilesUtils.initAnimationFrames(pathToDieAnimation, zoom, frameDuration);
+
     this.status = EnemyStatus.IDLE;
     this.animationAngle = animationAngle;
 
-    idleAnimation.setPlayMode(PlayMode.LOOP);
-    walkAnimation.setPlayMode(PlayMode.LOOP);
-    attackAnimation.setPlayMode(PlayMode.NORMAL);
     if (playerCoord != null) {
       this.destination = playerCoord;
     } else {

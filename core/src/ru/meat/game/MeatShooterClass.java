@@ -11,8 +11,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import java.util.stream.Collectors;
+import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
@@ -36,22 +39,16 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
   private MapService mapService;
 
-  public MeatShooterClass(InputProcessor inputProcessor) {
+  public MeatShooterClass(InputProcessor inputProcessor, int map) {
     this.inputProcessor = inputProcessor;
-//  }
-//
-//  @Override
-//  public void create() {
+
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
     audioService = new AudioService();
 
-//    Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-// fullscreen
-
     enemyService = new EnemyService();
-    mapService = new MapService();
-    mapService.initMap();
+    this.mapService = new MapService();
+    mapService.initMap(map);
     world = new World(new Vector2(0, 0), true);
     world.step(1 / 60f, 6, 6);
 
@@ -67,7 +64,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
     spriteBatch = new SpriteBatch();
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, true, w, h);
+    worldRenderer = new WorldRenderer(world, false, w, h);
 
     playerService = new PlayerService(500, 500, world, audioService);
     enemyService.createEnemies(world);
@@ -116,6 +113,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
   @Override
   public void render(float delta) {
+    createMoreEnemies();
     camera.update();
     worldRenderer.getCameraBox2D().update(false);
 
@@ -144,7 +142,29 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
     spriteBatch.end();
     worldRenderer.render();
+  }
 
+  private void createMoreEnemies() {
+    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 100) {
+      int random = MathUtils.random(1, 4);
+      System.out.println(enemyService.getEnemies().size());
+      float xBound1 = 0;
+      float xBound2 = 0;
+      float yBound1 = 0;
+      float yBound2 = 0;
+//      if (random == 1){
+        xBound1 = playerService.getBodyPosX()*WORLD_TO_VIEW- Gdx.graphics.getWidth()-10;
+        xBound2 = playerService.getBodyPosX()*WORLD_TO_VIEW- Gdx.graphics.getWidth();
+        yBound1 = playerService.getBodyPosY()*WORLD_TO_VIEW - Gdx.graphics.getHeight()/2;
+        yBound2 = playerService.getBodyPosY()*WORLD_TO_VIEW + Gdx.graphics.getHeight()/2;
+
+//      }
+      enemyService.getEnemies().add(
+      enemyService.createZombieEnemy(
+          MathUtils.random(xBound1,xBound2),
+          MathUtils.random(yBound1,yBound2),
+          world));
+    }
   }
 
   @Override

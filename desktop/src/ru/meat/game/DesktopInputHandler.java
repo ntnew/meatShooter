@@ -2,7 +2,7 @@ package ru.meat.game;
 
 import com.badlogic.gdx.InputProcessor;
 
-public class InputHandler implements InputProcessor {
+public class DesktopInputHandler implements InputProcessor {
 
   @Override
   public boolean keyDown(int keycode) {

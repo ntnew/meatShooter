@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -23,26 +22,27 @@ import ru.meat.game.MyGame;
 public class MainMenu implements Screen {
 
   final MyGame game;
-  private Stage stage;
-  OrthographicCamera camera;
+  private final Stage stage;
+  private OrthographicCamera camera;
 
-  private Button startButton;
+  private Button newGameButton;
   private Button exitButton;
   private Button optionsButton;
 
   public MainMenu(final MyGame game) {
-    new Thread() {{
-      playMainMenuMusic();
-    }}.start();
-
     this.game = game;
 
-    camera = new OrthographicCamera();
-    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    initCam();
+
     stage = new Stage(new ScreenViewport());
     Gdx.input.setInputProcessor(stage);
 
     createButtons();
+  }
+
+  private void initCam() {
+    camera = new OrthographicCamera();
+    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
   }
 
   private void createButtons() {
@@ -55,8 +55,6 @@ public class MainMenu implements Screen {
     createOptionsButton(textButtonStyle);
 
     createExitButton(textButtonStyle);
-
-
   }
 
   private void createExitButton(TextButtonStyle textButtonStyle) {
@@ -70,7 +68,6 @@ public class MainMenu implements Screen {
       }
     });
     stage.addActor(exitButton);
-
   }
 
   private void createOptionsButton(TextButtonStyle textButtonStyle) {
@@ -84,22 +81,20 @@ public class MainMenu implements Screen {
       }
     });
     stage.addActor(optionsButton);
-
   }
 
   private void createStartButton(TextButtonStyle textButtonStyle) {
-    startButton = new TextButton("New Game", textButtonStyle);
-    startButton.setSize(200, 70);
-    startButton.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 2);
-    startButton.addListener(new ChangeListener() {
+    newGameButton = new TextButton("New Game", textButtonStyle);
+    newGameButton.setSize(200, 50);
+    newGameButton.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 2);
+    newGameButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
-        game.setScreen(new MeatShooterClass(null));
+        game.setScreen(new MapSelectorMenu(game));
         dispose();
       }
     });
-    stage.addActor(startButton);
-
+    stage.addActor(newGameButton);
   }
 
   @Override
@@ -109,13 +104,13 @@ public class MainMenu implements Screen {
 
   @Override
   public void render(float delta) {
-    ScreenUtils.clear(0, 0, 0.2f, 1);
+    ScreenUtils.clear(0, 0, 0, 1);
 
     camera.update();
     game.batch.setProjectionMatrix(camera.combined);
 
     game.batch.begin();
-    startButton.draw(game.batch, 1);
+    newGameButton.draw(game.batch, 1);
     optionsButton.draw(game.batch, 1);
     exitButton.draw(game.batch, 1);
 
@@ -144,7 +139,7 @@ public class MainMenu implements Screen {
 
   @Override
   public void dispose() {
-    this.game.dispose();
+
   }
 
   //...Rest of class omitted for succinctness.

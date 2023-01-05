@@ -1,22 +1,25 @@
 package ru.meat.game.service;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import lombok.Data;
-import ru.meat.game.model.Map;
+import ru.meat.game.loader.LoaderManager;
+import ru.meat.game.model.maps.Map;
 import ru.meat.game.model.FloatPair;
+import ru.meat.game.model.maps.Maps;
 import ru.meat.game.utils.GDXUtils;
 
 @Data
 public class MapService {
 
-  private final String firstMap = "dirtMap2.png";
-
   private Map currentMap;
 
-
-  public void initMap(){
-    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture(Gdx.files.internal("./assets/" + firstMap),1f));
+  public void initMap(int mapPos){
+    Maps map = Maps.getNameByPos(mapPos);
+    currentMap = new Map(FloatPair.create(0f,0f), LoaderManager.getInstance().get(map.getName()));
+//    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get(map.getName()), map.getScale()));
+// изменение размера медленно работает TODO переделать масштабирование
   }
 
   public void draw(Batch batch){

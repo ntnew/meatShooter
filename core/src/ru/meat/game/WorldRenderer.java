@@ -14,9 +14,6 @@ import lombok.Data;
 public class WorldRenderer {
 
   Box2DDebugRenderer renderer;
-
-
-
   World world;
   public OrthographicCamera cameraBox2D;
 

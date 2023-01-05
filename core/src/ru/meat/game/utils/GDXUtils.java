@@ -26,6 +26,17 @@ public class GDXUtils {
   public static Texture resizeTexture(FileHandle texture, float zoomMultiplier) {
     Pixmap pixmap200 = new Pixmap(texture);
 
+    return getScaledTexture(zoomMultiplier, pixmap200);
+  }
+
+  public static Texture resizeTexture(Texture texture, float zoomMultiplier) {
+    texture.getTextureData().prepare();
+    Pixmap pixmap200 = texture.getTextureData().consumePixmap();
+
+    return getScaledTexture(zoomMultiplier, pixmap200);
+  }
+
+  private static Texture getScaledTexture(float zoomMultiplier, Pixmap pixmap200) {
     Pixmap pixmap100 = new Pixmap(
         BigDecimal.valueOf(pixmap200.getWidth() / zoomMultiplier).intValue(),
         BigDecimal.valueOf(pixmap200.getHeight() / zoomMultiplier).intValue(),

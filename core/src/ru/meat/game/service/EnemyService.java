@@ -29,7 +29,7 @@ public class EnemyService {
   private List<Enemy> enemies = new ArrayList<>();
 
   public Enemy createZombieEnemy(float x, float y, World world) {
-    Enemy enemy = new Enemy(x, y, 1f, 100, 0.01f * MAIN_ZOOM,
+    Enemy enemy = new Enemy(x, y, 1f, 100, MathUtils.random(0.005f,0.03f) * MAIN_ZOOM,
         0, 300, null);
     enemy.setRadius(80);
     enemy.setAttack(10);

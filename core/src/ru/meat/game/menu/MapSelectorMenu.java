@@ -20,7 +20,6 @@ import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.maps.Maps;
 import ru.meat.game.service.AudioService;
-import ru.meat.game.service.MapService;
 
 public class MapSelectorMenu implements Screen {
 
@@ -46,7 +45,7 @@ public class MapSelectorMenu implements Screen {
     TextButtonStyle textButtonStyle = new TextButtonStyle();
     textButtonStyle.font = this.game.font;
     textButtonStyle.fontColor = Color.WHITE;
-    createStartButton(textButtonStyle);
+    createDeathMatchButton(textButtonStyle);
   }
 
   private void initCam() {
@@ -86,7 +85,7 @@ public class MapSelectorMenu implements Screen {
     game.batch.end();
   }
 
-  private void createStartButton(TextButtonStyle textButtonStyle) {
+  private void createDeathMatchButton(TextButtonStyle textButtonStyle) {
     firstMapButton = new TextButton("Death match", textButtonStyle);
     firstMapButton.setSize(200, 50);
     firstMapButton.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 2);

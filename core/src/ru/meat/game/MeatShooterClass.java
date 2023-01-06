@@ -46,6 +46,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
     enemyService = new EnemyService();
     this.mapService = new MapService();
     mapService.initMap(map);
+
     world = new World(new Vector2(0, 0), true);
     world.step(1 / 60f, 6, 6);
 
@@ -94,8 +95,8 @@ public class MeatShooterClass implements InputProcessor, Screen {
     Vector2 camMin2 = new Vector2(worldRenderer.getCameraBox2D().viewportWidth / 2,
         worldRenderer.getCameraBox2D().viewportHeight / 2);
     camMin2.scl(worldRenderer.getCameraBox2D().zoom); //bring to center and scale by the zoom level
-    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(),
-        mapService.getCurrentMap().getMainTexture().getHeight());
+    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth()/WORLD_TO_VIEW,
+        mapService.getCurrentMap().getMainTexture().getHeight()/WORLD_TO_VIEW);
     camMax2.sub(camMin2); //bring to center
 
     camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));

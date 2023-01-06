@@ -31,8 +31,6 @@ public class MeatShooterClass implements InputProcessor, Screen {
   private EnemyService enemyService;
   private float stateTime;
 
-  private AudioService audioService;
-
   private SpriteBatch spriteBatch;
   private World world;
   private WorldRenderer worldRenderer;
@@ -44,7 +42,6 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
-    audioService = new AudioService();
 
     enemyService = new EnemyService();
     this.mapService = new MapService();
@@ -64,9 +61,10 @@ public class MeatShooterClass implements InputProcessor, Screen {
     spriteBatch = new SpriteBatch();
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, false, w, h);
+    worldRenderer = new WorldRenderer(world, true, w, h);
 
-    playerService = new PlayerService(Gdx.graphics.getWidth()/2*MAIN_ZOOM, Gdx.graphics.getHeight()/2*MAIN_ZOOM, world, audioService);
+    playerService = new PlayerService(Gdx.graphics.getWidth() / 2 * MAIN_ZOOM, Gdx.graphics.getHeight() / 2 * MAIN_ZOOM,
+        world);
     enemyService.createEnemies(world);
   }
 
@@ -145,7 +143,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
   }
 
   private void createMoreEnemies() {
-    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 100) {
+    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 10) {
       // Инициализация начальной позиции
       float xBound1 = playerService.getBodyPosX() * WORLD_TO_VIEW;
       float xBound2 = playerService.getBodyPosX() * WORLD_TO_VIEW;
@@ -174,8 +172,8 @@ public class MeatShooterClass implements InputProcessor, Screen {
       } else if (random == 4) {
         xBound1 = xBound1 - deltaByX;
         xBound2 = xBound2 + deltaByX;
-        yBound1 = yBound1 - deltaByY / 2- 50;
-        yBound2 = yBound2 - deltaByY / 2  - 20;
+        yBound1 = yBound1 - deltaByY / 2 - 50;
+        yBound2 = yBound2 - deltaByY / 2 - 20;
       }
       //Создание врага
       enemyService.getEnemies().add(

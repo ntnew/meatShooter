@@ -76,7 +76,7 @@ public class GDXUtils {
    * @return
    */
 
-  public static Body createCircleForEnemy(World world, float radius, float density, BodyUserData bodyData, float x,
+  public static Body createCircleForModel(World world, float radius, float density, BodyUserData bodyData, float x,
       float y) {
 
     BodyDef def = new BodyDef();

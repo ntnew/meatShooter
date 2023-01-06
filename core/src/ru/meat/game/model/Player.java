@@ -15,7 +15,6 @@ import lombok.EqualsAndHashCode;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
-import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.WeaponService;
 import ru.meat.game.utils.GDXUtils;
@@ -75,11 +74,11 @@ public class Player extends Actor {
       this.diedAnimation = initAnimationFrames("./assets/export/died", zoomMultiplier,frameDuration);
 
 
-      weaponService = new WeaponService(new BulletService(world), new AudioService());
+      weaponService = new WeaponService(new BulletService(world));
       weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
 
-      body = GDXUtils.createCircleForEnemy(world,90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
+      body = GDXUtils.createCircleForModel(world,90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
 
     } catch (Exception e) {

@@ -1,23 +1,21 @@
 package ru.meat.game.service;
 
-import static ru.meat.game.utils.GDXUtils.calcGipotenuza;
-import static ru.meat.game.utils.Settings.*;
+import static ru.meat.game.utils.Settings.MAIN_ZOOM;
+import static ru.meat.game.utils.Settings.WORLD_TO_VIEW;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.meat.game.model.Enemy;
-import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
+import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.bodyData.EnemyBodyUserData;
 import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.utils.GDXUtils;
@@ -35,7 +33,7 @@ public class EnemyService {
     enemy.setAttack(10);
     enemy.setAttackSpeed(1.5);
     enemy.setCenterMultip(FloatPair.create(2.9f, 1.78f));
-    enemy.setBody(GDXUtils.createCircleForEnemy(world, enemy.getRadius() / WORLD_TO_VIEW, 80,
+    enemy.setBody(GDXUtils.createCircleForModel(world, enemy.getRadius() / WORLD_TO_VIEW, 80,
         new EnemyBodyUserData("zombie", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y));
     return enemy;
   }

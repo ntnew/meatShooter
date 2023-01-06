@@ -2,6 +2,7 @@ package ru.meat.game.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.meat.game.MeatShooterClass;
 import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
+import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.maps.Maps;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.MapService;
@@ -35,11 +37,6 @@ public class MapSelectorMenu implements Screen {
 
   private int selectedMap = 0;
 
-  private Texture mapTexture;
-
-  private MapService mapService;
-
-
   public MapSelectorMenu(final MyGame game) {
     this.game = game;
     initCam();
@@ -50,7 +47,6 @@ public class MapSelectorMenu implements Screen {
     textButtonStyle.font = this.game.font;
     textButtonStyle.fontColor = Color.WHITE;
     createStartButton(textButtonStyle);
-    mapService = new MapService();
   }
 
   private void initCam() {
@@ -69,9 +65,12 @@ public class MapSelectorMenu implements Screen {
     if (selectedMap != 0 && loading && !startedLoad) {
       startedLoad = true;
       LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class);
+      LoaderManager.getInstance().load("glockShoot.mp3", Sound.class);
+      LoaderManager.getInstance().load("ak47.mp3", Sound.class);
+      EnemiesAnimation.getInstance();
 
     }
-    if (loading && startedLoad && LoaderManager.getInstance().update()) {
+    if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {
       game.setScreen(new MeatShooterClass(null, selectedMap));
       AudioService.smoothStopMusic(game.music);
     }

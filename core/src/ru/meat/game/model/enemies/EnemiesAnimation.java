@@ -10,6 +10,8 @@ import ru.meat.game.utils.FilesUtils;
 @Data
 public class EnemiesAnimation {
 
+  private boolean loading = false;
+
   private Animation<Texture> walkAnimation;
   private Animation<Texture> idleAnimation;
   private Animation<Texture> attackAnimation;
@@ -25,6 +27,7 @@ public class EnemiesAnimation {
   }
 
   public EnemiesAnimation() {
+    loading = true;
     this.attackAnimation = doAsync("./assets/export/attack/", 1, 0.1f);
     this.walkAnimation = doAsync("./assets/export/move/", 1, 0.05f);
     this.idleAnimation = doAsync("./assets/export/idle/", 1, 0.05f);
@@ -33,6 +36,7 @@ public class EnemiesAnimation {
     this.idleAnimation.setPlayMode(PlayMode.LOOP);
     this.walkAnimation.setPlayMode(PlayMode.LOOP);
     this.attackAnimation.setPlayMode(PlayMode.NORMAL);
+    this.loading = false;
   }
 
   private static Animation<Texture> doAsync(String path, float zoom, float frameDuration) {

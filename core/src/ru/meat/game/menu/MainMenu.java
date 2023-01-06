@@ -1,7 +1,5 @@
 package ru.meat.game.menu;
 
-import static ru.meat.game.service.AudioService.playMainMenuMusic;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -16,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import ru.meat.game.MeatShooterClass;
 import ru.meat.game.MyGame;
 
 public class MainMenu implements Screen {

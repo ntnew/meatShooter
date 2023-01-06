@@ -26,9 +26,6 @@ import ru.meat.game.model.weapons.WeaponEnum;
 @Data
 public class PlayerService {
 
-  private final AudioService audioService;
-
-
   private Player player;
 
   private float moveMultiplier = 1f;
@@ -43,9 +40,8 @@ public class PlayerService {
 
   private float modelFrontAngle = 0;
 
-  public PlayerService(float x, float y, World world, AudioService audioService) {
+  public PlayerService(float x, float y, World world) {
     player = new Player(world, x, y);
-    this.audioService = audioService;
   }
 
   public void updateState() {
@@ -191,7 +187,7 @@ public class PlayerService {
       cameraBox2D.unproject(point);
 
       weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y);
-      audioService.playShoot(weapon.getShootSound());
+      AudioService.getInstance().playShoot(weapon.getShootSound());
     }
   }
 

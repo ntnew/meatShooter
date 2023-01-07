@@ -1,7 +1,7 @@
 package ru.meat.game.service;
 
-import static ru.meat.game.utils.Settings.MAIN_ZOOM;
-import static ru.meat.game.utils.Settings.WORLD_TO_VIEW;
+import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;

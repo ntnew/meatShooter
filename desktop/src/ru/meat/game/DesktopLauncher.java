@@ -1,5 +1,6 @@
 package ru.meat.game;
 
+
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
@@ -9,7 +10,6 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Meat Shooter");
-    config.setWindowedMode(1280,760);
 
 
     new Lwjgl3Application(new MyGame(), config);

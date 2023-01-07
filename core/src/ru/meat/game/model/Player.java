@@ -1,7 +1,7 @@
 package ru.meat.game.model;
 
 import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
-import static ru.meat.game.utils.Settings.WORLD_TO_VIEW;
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;

@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.World;
 import java.math.BigDecimal;
 import ru.meat.game.model.bodyData.BodyUserData;
+import ru.meat.game.settings.Constants;
 
 public class GDXUtils {
 
@@ -82,7 +83,7 @@ public class GDXUtils {
     BodyDef def = new BodyDef();
 
     def.type = BodyType.DynamicBody;
-    def.position.set(x / Settings.WORLD_TO_VIEW, y / Settings.WORLD_TO_VIEW);
+    def.position.set(x / Constants.WORLD_TO_VIEW, y / Constants.WORLD_TO_VIEW);
 
     Body box = world.createBody(def);
 

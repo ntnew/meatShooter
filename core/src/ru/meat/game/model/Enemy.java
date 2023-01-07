@@ -1,13 +1,9 @@
 package ru.meat.game.model;
 
-import static ru.meat.game.utils.Settings.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.physics.box2d.Body;
 import lombok.Data;
-import ru.meat.game.utils.FilesUtils;
 
 @Data
 //@Builder

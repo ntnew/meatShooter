@@ -30,6 +30,8 @@ public class MapSelectorMenu implements Screen {
 
   private Button firstMapButton;
 
+  private Button backButton;
+
   private boolean loading = false;
 
   private boolean startedLoad = false;
@@ -46,6 +48,21 @@ public class MapSelectorMenu implements Screen {
     textButtonStyle.font = this.game.font;
     textButtonStyle.fontColor = Color.WHITE;
     createDeathMatchButton(textButtonStyle);
+    createBackButton(textButtonStyle);
+
+  }
+
+  private void createBackButton(TextButtonStyle textButtonStyle) {
+    backButton = new TextButton("Back", textButtonStyle);
+    backButton.setSize(200, 50);
+    backButton.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 2-50);
+    backButton.addListener(new ChangeListener() {
+      @Override
+      public void changed(ChangeEvent event, Actor actor) {
+        game.setScreen(new MainMenu(game));
+      }
+    });
+    stage.addActor(backButton);
   }
 
   private void initCam() {
@@ -70,8 +87,8 @@ public class MapSelectorMenu implements Screen {
 
     }
     if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {
-      game.setScreen(new MeatShooterClass(null, selectedMap));
-      AudioService.smoothStopMusic(game.music);
+      game.setScreen(new MeatShooterClass(selectedMap));
+      AudioService.getInstance().smoothStopMusic();
     }
 
     camera.update();
@@ -80,6 +97,7 @@ public class MapSelectorMenu implements Screen {
     game.batch.begin();
     if (!loading) {
       firstMapButton.draw(game.batch, 1);
+      backButton.draw(game.batch,1);
     }
 
     game.batch.end();

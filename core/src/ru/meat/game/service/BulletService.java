@@ -1,6 +1,6 @@
 package ru.meat.game.service;
 
-import static ru.meat.game.utils.Settings.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -21,7 +21,7 @@ import lombok.Data;
 import ru.meat.game.model.weapons.Bullet;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 import ru.meat.game.utils.GDXUtils;
-import ru.meat.game.utils.Settings;
+import ru.meat.game.settings.Constants;
 
 @Data
 public class BulletService {
@@ -64,7 +64,7 @@ public class BulletService {
     Body box = world.createBody(def);
 
     CircleShape circle = new CircleShape();
-    circle.setRadius((float) 3 / Settings.WORLD_TO_VIEW);
+    circle.setRadius((float) 3 / Constants.WORLD_TO_VIEW);
 
     box.createFixture(circle, (float) 100);
     box.getFixtureList().get(0).setUserData(new BulletBodyUserData("bullet", damage));
@@ -104,11 +104,11 @@ public class BulletService {
             if (!fixtureList.isEmpty()) {
               Vector2 position = fixtureList.get(0).getBody().getPosition();
               Sprite sprite = new Sprite(b.getTexture());
-              sprite.setPosition(position.x * Settings.WORLD_TO_VIEW - sprite.getWidth() / 12,
-                  position.y * Settings.WORLD_TO_VIEW + 20 - sprite.getHeight() / 2);
+              sprite.setPosition(position.x * Constants.WORLD_TO_VIEW - sprite.getWidth() / 12,
+                  position.y * Constants.WORLD_TO_VIEW + 20 - sprite.getHeight() / 2);
               sprite.setOrigin(sprite.getWidth() / 12, sprite.getHeight() / 2);
-              sprite.rotate((MathUtils.radiansToDegrees * MathUtils.atan2(y - position.y * Settings.WORLD_TO_VIEW,
-                  x - position.x * Settings.WORLD_TO_VIEW)));
+              sprite.rotate((MathUtils.radiansToDegrees * MathUtils.atan2(y - position.y * Constants.WORLD_TO_VIEW,
+                  x - position.x * Constants.WORLD_TO_VIEW)));
               sprite.draw(spriteBatch);
             }
           } catch (NullPointerException e) {

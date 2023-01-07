@@ -36,4 +36,8 @@ public class FilesUtils {
 
     return new Animation<>(frameDuration, collect);
   }
+
+  public static void readSettings(){
+
+  }
 }

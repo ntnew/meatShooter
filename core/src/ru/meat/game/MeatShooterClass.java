@@ -1,8 +1,7 @@
 package ru.meat.game;
 
-import static ru.meat.game.utils.Settings.*;
+import static ru.meat.game.settings.Constants.*;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
@@ -14,18 +13,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import java.util.stream.Collectors;
 import ru.meat.game.model.EnemyStatus;
-import ru.meat.game.service.AudioService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.PlayerService;
 
 public class MeatShooterClass implements InputProcessor, Screen {
-
-
-  private final InputProcessor inputProcessor;
   private OrthographicCamera camera;
   private PlayerService playerService;
   private EnemyService enemyService;
@@ -37,8 +31,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
   private MapService mapService;
 
-  public MeatShooterClass(InputProcessor inputProcessor, int map) {
-    this.inputProcessor = inputProcessor;
+  public MeatShooterClass(int map) {
 
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
@@ -64,7 +57,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
     worldRenderer = new WorldRenderer(world, true, w, h);
 
-    playerService = new PlayerService(Gdx.graphics.getWidth() / 2 * MAIN_ZOOM, Gdx.graphics.getHeight() / 2 * MAIN_ZOOM,
+    playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM, Gdx.graphics.getHeight() / 2f * MAIN_ZOOM,
         world);
     enemyService.createEnemies(world);
   }

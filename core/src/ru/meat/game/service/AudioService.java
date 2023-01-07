@@ -1,7 +1,5 @@
 package ru.meat.game.service;
 
-import static ru.meat.game.utils.Settings.VOLUME;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -10,7 +8,7 @@ import com.badlogic.gdx.utils.async.AsyncExecutor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.model.enemies.EnemiesAnimation;
+import ru.meat.game.settings.Settings;
 
 @Data
 @NoArgsConstructor
@@ -25,39 +23,47 @@ public class AudioService {
     return instance;
   }
 
+  private Music currentMusic;
+
   public void playShoot(String shootSound) {
     Sound sound = LoaderManager.getInstance().get(shootSound);
-    sound.play(VOLUME);
+    sound.play(Settings.getInstance().EFFECT_VOLUME);
   }
 
 
-  public static Music playMainMenuMusic() {
+  public void playMainMenuMusic() {
     Music music = Gdx.audio.newMusic(Gdx.files.internal("sound/main_menu.mp3"));
     music.setOnCompletionListener(Music::dispose);
-    music.setVolume(VOLUME);
+    music.setVolume(Settings.getInstance().MUSIC_VOLUME);
     music.play();
-    return music;
+    this.currentMusic = music;
   }
 
   /**
    * плавно выключить музыку
-   *
-   * @param music
    */
-  public static void smoothStopMusic(Music music) {
-    new AsyncExecutor(4, "turn-off-music").submit(() -> {
-      float volume = music.getVolume();
-      long timeCount = 0;
-      while (volume > 0.01) {
-        volume = music.getVolume();
-        if (TimeUtils.timeSinceMillis(timeCount) > 300) {
-          timeCount = TimeUtils.millis();
-          music.setVolume(volume - 0.01f);
-          volume = volume - 0.01f;
+  public void smoothStopMusic() {
+    if (currentMusic != null) {
+      new AsyncExecutor(4, "turn-off-music").submit(() -> {
+        float volume = currentMusic.getVolume();
+        long timeCount = 0;
+        while (volume > 0.01) {
+          volume = currentMusic.getVolume();
+          if (TimeUtils.timeSinceMillis(timeCount) > 300) {
+            timeCount = TimeUtils.millis();
+            currentMusic.setVolume(volume - 0.01f);
+            volume = volume - 0.01f;
+          }
         }
-      }
-      music.stop();
-      return true;
-    });
+        currentMusic.stop();
+        currentMusic = null;
+        return true;
+      });
+    }
+  }
+
+  public void playTestShoot(float volume) {
+    Sound sound = Gdx.audio.newSound(Gdx.files.internal("glockShoot.mp3"));
+    sound.play(volume);
   }
 }

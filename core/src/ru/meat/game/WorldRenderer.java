@@ -1,9 +1,7 @@
 package ru.meat.game;
 
-import static ru.meat.game.utils.Settings.MAIN_ZOOM;
-import static ru.meat.game.utils.Settings.WORLD_HEIGHT;
-import static ru.meat.game.utils.Settings.WORLD_TO_VIEW;
-import static ru.meat.game.utils.Settings.WORLD_WIDTH;
+import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;

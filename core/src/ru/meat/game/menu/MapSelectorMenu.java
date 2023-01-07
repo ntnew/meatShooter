@@ -84,6 +84,7 @@ public class MapSelectorMenu implements Screen {
       LoaderManager.getInstance().load("glockShoot.mp3", Sound.class);
       LoaderManager.getInstance().load("ak47.mp3", Sound.class);
       LoaderManager.getInstance().load("sound/weapons/ak47reload.mp3", Sound.class);
+      LoaderManager.getInstance().load("Bullet1.png",Texture.class);
       EnemiesAnimation.getInstance();
 
     }
@@ -100,7 +101,6 @@ public class MapSelectorMenu implements Screen {
       firstMapButton.draw(game.batch, 1);
       backButton.draw(game.batch,1);
     }
-
     game.batch.end();
   }
 

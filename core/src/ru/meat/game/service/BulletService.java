@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
+import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.weapons.Bullet;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 import ru.meat.game.utils.GDXUtils;
@@ -31,6 +32,16 @@ public class BulletService {
   private List<Bullet> bullets = new ArrayList<>();
 
   private final ArrayList<Integer> bulletsToRemove = new ArrayList<>();
+
+  /**
+   * текстура пули
+   */
+  private Texture texture;
+
+  public BulletService(World world) {
+    this.world = world;
+    texture = GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get("Bullet1.png"), 1 / MAIN_ZOOM);
+  }
 
   /**
    * создать пулю, задает её скорость и направление полёта
@@ -48,9 +59,11 @@ public class BulletService {
     Body bulletBody = createCircleForBullet(fromX, fromY, damage);
     bulletBody.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
     bulletBody.setBullet(true);
-    bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed * MAIN_ZOOM, (screenY - fromY) * bulletSpeed * MAIN_ZOOM);
+    bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed * MAIN_ZOOM,
+        (screenY - fromY) * bulletSpeed * MAIN_ZOOM);
     bullet.setBody(bulletBody);
-    bullet.setTexture(new Texture(Gdx.files.internal("./assets/Bullet1.png")));
+    bullet.setTexture(texture);
+    bullet.setModelAngle(bulletBody.getLinearVelocity().angleDeg());
 
     bullets.add(bullet);
   }
@@ -64,7 +77,7 @@ public class BulletService {
     Body box = world.createBody(def);
 
     CircleShape circle = new CircleShape();
-    circle.setRadius((float) 3 / Constants.WORLD_TO_VIEW);
+    circle.setRadius((float) 2 * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
 
     box.createFixture(circle, (float) 100);
     box.getFixtureList().get(0).setUserData(new BulletBodyUserData("bullet", damage));
@@ -104,11 +117,11 @@ public class BulletService {
             if (!fixtureList.isEmpty()) {
               Vector2 position = fixtureList.get(0).getBody().getPosition();
               Sprite sprite = new Sprite(b.getTexture());
-              sprite.setPosition(position.x * Constants.WORLD_TO_VIEW - sprite.getWidth() / 12,
-                  position.y * Constants.WORLD_TO_VIEW + 20 - sprite.getHeight() / 2);
-              sprite.setOrigin(sprite.getWidth() / 12, sprite.getHeight() / 2);
-              sprite.rotate((MathUtils.radiansToDegrees * MathUtils.atan2(y - position.y * Constants.WORLD_TO_VIEW,
-                  x - position.x * Constants.WORLD_TO_VIEW)));
+              sprite.setOrigin(sprite.getWidth() - sprite.getWidth() / 12, sprite.getHeight() / 2);
+              sprite.setPosition(position.x * Constants.WORLD_TO_VIEW - sprite.getWidth() + sprite.getWidth() / 12,
+                  position.y * Constants.WORLD_TO_VIEW - sprite.getHeight() / 2);
+
+              sprite.rotate(b.getModelAngle());
               sprite.draw(spriteBatch);
             }
           } catch (NullPointerException e) {

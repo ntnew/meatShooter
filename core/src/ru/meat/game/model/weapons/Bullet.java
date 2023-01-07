@@ -12,4 +12,6 @@ public class Bullet {
   private float speedMultiply;
 
   private Texture texture;
+
+  private float modelAngle;
 }

@@ -10,6 +10,7 @@ import lombok.Data;
 import ru.meat.game.interfaces.Shootable;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
+import ru.meat.game.service.RpgStatsService;
 
 @Data
 @AllArgsConstructor
@@ -49,7 +50,7 @@ public class Weapon implements Shootable {
   /**
    * сколько длится перезарядка в секундах
    */
-  private int reloadDuration;
+  private float reloadDuration;
 
   private long reloadCounter;
 
@@ -64,7 +65,8 @@ public class Weapon implements Shootable {
         reloadCounter = TimeUtils.millis();
         AudioService.getInstance().playSound(reloadSound);
       }
-      if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration*1000L){
+      if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
+          * RpgStatsService.getInstance().getStats().getReloadSpeed()) {
         fireCount = 0;
         reloadCounter = 0;
       }

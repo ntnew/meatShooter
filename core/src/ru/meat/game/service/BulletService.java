@@ -80,7 +80,8 @@ public class BulletService {
     circle.setRadius((float) 2 * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
 
     box.createFixture(circle, (float) 100);
-    box.getFixtureList().get(0).setUserData(new BulletBodyUserData("bullet", damage));
+    box.getFixtureList().get(0)
+        .setUserData(new BulletBodyUserData("bullet", damage * RpgStatsService.getInstance().getStats().getDamage()));
 
     circle.dispose();
 

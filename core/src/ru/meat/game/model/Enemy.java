@@ -30,13 +30,13 @@ public class Enemy {
   /**
    * скорость поворота
    */
-  private FloatPair turnSpeed = new FloatPair(1f*MAIN_ZOOM,1f*MAIN_ZOOM);
+  private FloatPair turnSpeed = new FloatPair(1f * MAIN_ZOOM, 1f * MAIN_ZOOM);
 
 
   /**
    * множитель на центр
    */
-  private FloatPair centerMultip = new FloatPair(1f,1f);
+  private FloatPair centerMultip = new FloatPair(1f, 1f);
 
   /**
    * делитель размера модельки
@@ -46,7 +46,7 @@ public class Enemy {
   /**
    * Здоровье
    */
-  private int hp = 1;
+  private float hp = 1;
 
   /**
    * Максимальная скорость
@@ -89,6 +89,11 @@ public class Enemy {
    * Угол поворота модельки, меняется в зависимости от направления движения
    */
   private float animationAngle = 0;
+
+  /**
+   * Очки вознаграждения за убийство
+   */
+  private int rewardPoint;
 
   public Enemy(float posX, float posY, float zoom, int hp, float speed,
       float animationAngle, float enemyPing, FloatPair playerCoord) {

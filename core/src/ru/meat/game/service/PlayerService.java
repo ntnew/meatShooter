@@ -1,6 +1,7 @@
 package ru.meat.game.service;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.PLAYER_MOVE_SPEED;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
@@ -14,9 +15,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
 import lombok.Data;
-import ru.meat.game.model.CharacterFeetStatus;
-import ru.meat.game.model.CharacterTopStatus;
-import ru.meat.game.model.Player;
+import ru.meat.game.model.player.CharacterFeetStatus;
+import ru.meat.game.model.player.CharacterTopStatus;
+import ru.meat.game.model.player.Player;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
@@ -32,7 +33,7 @@ public class PlayerService {
 
   private float topStateTime;
 
-  private float speed = 2f * MAIN_ZOOM;
+  private float speed = PLAYER_MOVE_SPEED ;
 
   private float moveDirectionAngle = 0;
 
@@ -177,7 +178,8 @@ public class PlayerService {
   public void shoot(OrthographicCamera cameraBox2D) {
     Weapon weapon = getActualWeapon();
     if (weapon.getCurrentLockCounter() == 0
-        || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()) {
+        || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()
+        * RpgStatsService.getInstance().getStats().getFireSpeed()) {
       weapon.setCurrentLockCounter(TimeUtils.millis());
 
       Vector3 point = new Vector3();
@@ -185,7 +187,6 @@ public class PlayerService {
       cameraBox2D.unproject(point);
 
       weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y);
-
     }
   }
 
@@ -267,7 +268,7 @@ public class PlayerService {
    * Получить скорость движения игрока
    */
   private float getSpeed() {
-    return (speed * moveMultiplier);
+    return speed * moveMultiplier * MAIN_ZOOM * RpgStatsService.getInstance().getStats().getMoveSpeed();
   }
 
   public void drawBullets(SpriteBatch spriteBatch) {

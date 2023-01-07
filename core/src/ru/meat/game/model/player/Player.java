@@ -1,4 +1,4 @@
-package ru.meat.game.model;
+package ru.meat.game.model.player;
 
 import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
@@ -16,6 +16,7 @@ import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
 import ru.meat.game.service.BulletService;
+import ru.meat.game.service.RpgStatsService;
 import ru.meat.game.service.WeaponService;
 import ru.meat.game.utils.GDXUtils;
 
@@ -64,7 +65,7 @@ public class Player extends Actor {
       topStatus = CharacterTopStatus.IDLE;
       feetStatus = CharacterFeetStatus.IDLE;
 
-      this.hp = 500d;
+      this.hp = RpgStatsService.getInstance().getStats().getHp();
 
       this.walkAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/walk/", zoomMultiplier, frameDuration);
       this.idle = initAnimationFrames("./assets/Top_Down_survivor/feet/idle/", zoomMultiplier, frameDuration);

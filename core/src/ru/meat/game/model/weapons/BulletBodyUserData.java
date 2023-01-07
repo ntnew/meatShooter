@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 public class BulletBodyUserData {
 
   private String name;
-  private int damage;
+  private float damage;
   private boolean isNeedDispose;
 
-  public BulletBodyUserData(String name, int damage) {
+  public BulletBodyUserData(String name, float damage) {
     this.name = name;
     this.damage = damage;
     this.isNeedDispose = false;

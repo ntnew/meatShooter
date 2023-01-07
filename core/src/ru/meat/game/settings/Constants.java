@@ -12,12 +12,8 @@ public class Constants {
    */
   public static float WORLD_TO_VIEW = 40;
 
-
-
-
-//  public static float WORLD_WIDTH = SCREEN_WIDTH / WORLD_TO_VIEW;
-//  public static float WORLD_HEIGHT = SCREEN_HEIGHT / WORLD_TO_VIEW;
-//
-//  public static float VIEW_TO_WORLD = 1 / WORLD_TO_VIEW;
-
+  /**
+   * Скорость бега игрока
+   */
+  public static float PLAYER_MOVE_SPEED = 2f;
 }

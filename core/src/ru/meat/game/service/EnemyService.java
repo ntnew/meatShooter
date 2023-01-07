@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.World;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ru.meat.game.model.Enemy;
@@ -25,9 +26,12 @@ public class EnemyService {
 
   @Getter
   private List<Enemy> enemies = new ArrayList<>();
+  @Getter
+  private AtomicInteger rewardPointCount = new AtomicInteger(0);
+
 
   public Enemy createZombieEnemy(float x, float y, World world) {
-    Enemy enemy = new Enemy(x, y, 1f, 100, MathUtils.random(0.005f,0.03f) * MAIN_ZOOM,
+    Enemy enemy = new Enemy(x, y, 1f, 100, MathUtils.random(0.005f, 0.03f) * MAIN_ZOOM,
         0, 300, null);
     enemy.setRadius(80);
     enemy.setAttack(10);
@@ -35,6 +39,7 @@ public class EnemyService {
     enemy.setCenterMultip(FloatPair.create(2.9f, 1.78f));
     enemy.setBody(GDXUtils.createCircleForModel(world, enemy.getRadius() / WORLD_TO_VIEW, 80,
         new EnemyBodyUserData("zombie", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y));
+    enemy.setRewardPoint(5);
     return enemy;
   }
 
@@ -53,7 +58,8 @@ public class EnemyService {
   private Texture getActualFrame(float stateTime, Enemy enemy) {
     if (enemy.getStatus().equals(EnemyStatus.ATTACK)) {
       Texture keyFrame = EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrame(stateTime, true);
-      Texture lastKeyframe = EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames()[EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames().length- 1];
+      Texture lastKeyframe = EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames()[
+          EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames().length - 1];
       if (keyFrame.equals(lastKeyframe)) {
         enemy.setStatus(EnemyStatus.MOVE);
         EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
@@ -168,8 +174,8 @@ public class EnemyService {
       } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
         world.destroyBody(enemy.getBody());
         enemy.setBody(null);
+        rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
       }
-      //TODO сделать максимально облегчённую версию врага
     });
   }
 

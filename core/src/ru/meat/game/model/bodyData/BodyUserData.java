@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class BodyUserData {
 
   private String name;
-  private int damage;
+  private float damage;
 }

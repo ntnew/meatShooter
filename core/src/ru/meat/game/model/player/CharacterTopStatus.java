@@ -1,4 +1,4 @@
-package ru.meat.game.model;
+package ru.meat.game.model.player;
 
 public enum CharacterTopStatus {
   IDLE,

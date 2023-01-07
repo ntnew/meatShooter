@@ -107,7 +107,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
   public void render(float delta) {
     createMoreEnemies();
     camera.update();
-    worldRenderer.getCameraBox2D().update(false);
+    worldRenderer.getCameraBox2D().update();
 
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -134,10 +134,11 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
     spriteBatch.end();
     worldRenderer.render();
+//    System.out.println(enemyService.getRewardPointCount().get());
   }
 
   private void createMoreEnemies() {
-    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 10) {
+    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 20) {
       // Инициализация начальной позиции
       float xBound1 = playerService.getBodyPosX() * WORLD_TO_VIEW;
       float xBound2 = playerService.getBodyPosX() * WORLD_TO_VIEW;
@@ -149,25 +150,25 @@ public class MeatShooterClass implements InputProcessor, Screen {
       //рандомизация позиции появления врагов
       int random = MathUtils.random(1, 4);
       if (random == 1) {
-        xBound1 = xBound1 - deltaByX / 2 - 50;
-        xBound2 = xBound2 - deltaByX / 2 - 20;
+        xBound1 = xBound1 - deltaByX / 2 - 100;
+        xBound2 = xBound2 - deltaByX / 2 - 80;
         yBound1 = yBound1 - deltaByY;
         yBound2 = yBound2 + deltaByY;
       } else if (random == 2) {
-        xBound1 = xBound1 + deltaByX / 2 + 20;
-        xBound2 = xBound2 + deltaByX / 2 + 50;
+        xBound1 = xBound1 + deltaByX / 2 + 80;
+        xBound2 = xBound2 + deltaByX / 2 + 100;
         yBound1 = yBound1 - deltaByY;
         yBound2 = yBound2 + deltaByY;
       } else if (random == 3) {
         xBound1 = xBound1 - deltaByX;
         xBound2 = xBound2 + deltaByX;
-        yBound1 = yBound1 + deltaByY / 2 + 20;
-        yBound2 = yBound2 + deltaByY / 2 + 50;
+        yBound1 = yBound1 + deltaByY / 2 + 80;
+        yBound2 = yBound2 + deltaByY / 2 + 100;
       } else if (random == 4) {
         xBound1 = xBound1 - deltaByX;
         xBound2 = xBound2 + deltaByX;
-        yBound1 = yBound1 - deltaByY / 2 - 50;
-        yBound2 = yBound2 - deltaByY / 2 - 20;
+        yBound1 = yBound1 - deltaByY / 2 - 100;
+        yBound2 = yBound2 - deltaByY / 2 - 80;
       }
       //Создание врага
       enemyService.getEnemies().add(

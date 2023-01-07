@@ -25,10 +25,12 @@ public class AudioService {
 
   private Music currentMusic;
 
-  public void playShoot(String shootSound) {
+  public void playSound(String shootSound) {
     Sound sound = LoaderManager.getInstance().get(shootSound);
     sound.play(Settings.getInstance().EFFECT_VOLUME);
   }
+
+
 
 
   public void playMainMenuMusic() {

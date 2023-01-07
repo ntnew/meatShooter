@@ -185,7 +185,7 @@ public class PlayerService {
       cameraBox2D.unproject(point);
 
       weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y);
-      AudioService.getInstance().playShoot(weapon.getShootSound());
+
     }
   }
 

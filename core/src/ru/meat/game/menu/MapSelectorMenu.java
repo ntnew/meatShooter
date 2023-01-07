@@ -83,6 +83,7 @@ public class MapSelectorMenu implements Screen {
       LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class);
       LoaderManager.getInstance().load("glockShoot.mp3", Sound.class);
       LoaderManager.getInstance().load("ak47.mp3", Sound.class);
+      LoaderManager.getInstance().load("sound/weapons/ak47reload.mp3", Sound.class);
       EnemiesAnimation.getInstance();
 
     }

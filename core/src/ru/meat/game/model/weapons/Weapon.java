@@ -2,6 +2,8 @@ package ru.meat.game.model.weapons;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.utils.TimeUtils;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +32,7 @@ public class Weapon implements Shootable {
   private Animation<Texture> shootAnimation;
   private Animation<Texture> reloadAnimation;
   private String shootSound;
+  private String reloadSound;
 
   private long currentLockCounter;
   /**
@@ -39,10 +42,33 @@ public class Weapon implements Shootable {
 
   private int damage;
 
+  private int clipSize;
+
+  private int fireCount;
+
+  /**
+   * сколько длится перезарядка в секундах
+   */
+  private int reloadDuration;
+
+  private long reloadCounter;
+
   @Override
   public void shoot(float fromX, float fromY, float screenX, float screenY) {
-    bulletService.createBullet(fromX, fromY, screenX, screenY, speed, damage);
-
+    if (fireCount < clipSize) {
+      fireCount += 1;
+      AudioService.getInstance().playSound(shootSound);
+      bulletService.createBullet(fromX, fromY, screenX, screenY, speed, damage);
+    } else {
+      if (reloadCounter == 0) {
+        reloadCounter = TimeUtils.millis();
+        AudioService.getInstance().playSound(reloadSound);
+      }
+      if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration*1000L){
+        fireCount = 0;
+        reloadCounter = 0;
+      }
+    }
   }
 
   @Override

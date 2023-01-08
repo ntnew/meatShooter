@@ -81,15 +81,13 @@ public class MapSelectorMenu implements Screen {
     if (selectedMap != 0 && loading && !startedLoad) {
       startedLoad = true;
       LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class);
-      LoaderManager.getInstance().load("glockShoot.mp3", Sound.class);
-      LoaderManager.getInstance().load("ak47.mp3", Sound.class);
-      LoaderManager.getInstance().load("sound/weapons/ak47reload.mp3", Sound.class);
       LoaderManager.getInstance().load("Bullet1.png",Texture.class);
       EnemiesAnimation.getInstance();
 
     }
     if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {
       game.setScreen(new MeatShooterClass(selectedMap, game));
+      AudioService.getInstance().initSteps();
       AudioService.getInstance().smoothStopMusic();
     }
 

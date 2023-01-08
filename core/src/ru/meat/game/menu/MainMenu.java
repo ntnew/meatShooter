@@ -31,7 +31,7 @@ public class MainMenu implements Screen {
 
   public MainMenu(final MyGame game) {
     this.game = game;
-    AudioService.getInstance().playMainMenuMusic();
+
     initCam();
 
     stage = new Stage(new ScreenViewport());
@@ -96,6 +96,7 @@ public class MainMenu implements Screen {
 
   @Override
   public void render(float delta) {
+    AudioService.getInstance().playMainMenuMusic();
     ScreenUtils.clear(0, 0, 0, 1);
 
     camera.update();

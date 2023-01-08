@@ -62,6 +62,7 @@ public class PlayerService {
     if (userData.getDamage() != 0) {
       player.setHp(player.getHp() - userData.getDamage());
       userData.setDamage(0);
+      AudioService.getInstance().playHit();
       System.out.println(player.getHp());
     }
 
@@ -256,6 +257,7 @@ public class PlayerService {
   private void handleMovingStatus() {
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
         Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+      AudioService.getInstance().playStep();
       changeFeetStatus(CharacterFeetStatus.RUN);
       changeTopStatus(CharacterTopStatus.MOVE);
     } else {

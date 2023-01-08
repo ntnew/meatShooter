@@ -174,6 +174,7 @@ public class EnemyService {
       } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
         world.destroyBody(enemy.getBody());
         enemy.setBody(null);
+        AudioService.getInstance().playEnemyDie();
         rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
       }
     });

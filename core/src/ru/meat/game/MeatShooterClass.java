@@ -17,6 +17,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import ru.meat.game.menu.MainMenu;
 import ru.meat.game.model.EnemyStatus;
+import ru.meat.game.service.AudioService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
@@ -112,6 +113,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
   @Override
   public void render(float delta) {
+    AudioService.getInstance().playGameMusic();
     createMoreEnemies();
     camera.update();
     worldRenderer.getCameraBox2D().update();
@@ -145,6 +147,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
     if (playerService.getPlayer().isDead()) {
       RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
       this.game.setScreen(new MainMenu(game));
+      AudioService.getInstance().smoothStopMusic();
     }
   }
 

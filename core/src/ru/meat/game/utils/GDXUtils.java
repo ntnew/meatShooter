@@ -10,6 +10,12 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import java.math.BigDecimal;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.settings.Constants;
@@ -109,5 +115,17 @@ public class GDXUtils {
 
   public static float calcAngleBetweenTwoPoints(float x1, float y1, float x2, float y2) {
     return MathUtils.radiansToDegrees * MathUtils.atan2(y2 - y1, x2 - x1);
+  }
+
+
+  public static Button createButton(TextButtonStyle textButtonStyle,  String name, ClickListener clickListener) {
+    Button button = new TextButton(name, textButtonStyle);
+    button.addListener(clickListener);
+    return button;
+  }
+
+  private Label createTextLabel(LabelStyle labelStyle, String text) {
+    Label label = new Label(text, labelStyle);
+    return label;
   }
 }

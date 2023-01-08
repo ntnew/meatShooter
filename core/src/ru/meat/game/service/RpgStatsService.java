@@ -36,6 +36,11 @@ public class RpgStatsService {
     }
     stats.setExperience(prefs.getLong("EXP"));
 
+    if (!prefs.contains("LVL")) {
+      prefs.putLong("LVL", 1);
+    }
+    stats.setLvl(prefs.getLong("LVL"));
+
     if (!prefs.contains("DAMAGE")) {
       prefs.putFloat("DAMAGE", 1);
     }
@@ -64,10 +69,10 @@ public class RpgStatsService {
     prefs.flush();
   }
 
-
   public void saveStats() {
-    prefs.putFloat("HP", Float.parseFloat(String.format("%.2f", stats.getHp())));
+    prefs.putFloat("HP", Float.parseFloat(String.format("%.0f", stats.getHp())));
     prefs.putLong("EXP", stats.getExperience());
+    prefs.putLong("LVL", stats.getLvl());
     prefs.putFloat("DAMAGE", stats.getDamage());
     prefs.putFloat("RESIST", stats.getResist());
     prefs.putFloat("MOVE_SPEED", stats.getMoveSpeed());

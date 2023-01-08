@@ -53,8 +53,6 @@ public class SettingsMenu implements Screen {
 
   private Button backButton;
   private Button saveButton;
-
-  private LabelStyle labelStyle;
   private Preferences preferences;
 
   public SettingsMenu(final MyGame game) {
@@ -64,48 +62,39 @@ public class SettingsMenu implements Screen {
     stage = new Stage(new ScreenViewport());
     Gdx.input.setInputProcessor(stage);
 
-    TextButtonStyle textButtonStyle = new TextButtonStyle();
-    textButtonStyle.font = this.game.font;
-    textButtonStyle.fontColor = Color.WHITE;
-
-    labelStyle = new LabelStyle();
-    labelStyle.font = game.font;
-    labelStyle.fontColor = Color.WHITE;
-
     initCam();
 
-    createBackButton(textButtonStyle);
+    createBackButton();
     createResolutionBox();
-    createNextButton(textButtonStyle);
-    createPreviousButton(textButtonStyle);
-    createSaveButton(textButtonStyle);
+    createNextButton();
+    createPreviousButton();
+    createSaveButton();
 
     createEffVolumeBox();
-    createDecreaseEffVolButton(textButtonStyle);
-    createAddEffVolButton(textButtonStyle);
+    createDecreaseEffVolButton();
+    createAddEffVolButton();
 
-    createAddMusicVolButton(textButtonStyle);
-    createDecreaseMusicVolButton(textButtonStyle);
+    createAddMusicVolButton();
+    createDecreaseMusicVolButton();
     createMusicVolumeBox();
 
     table = new Table();
     table.setSize(300, 300);
     table.setPosition(10, 10);
     table.setDebug(false);
-    Label resolution = new Label("resolution", labelStyle);
+    Label resolution = new Label("resolution", game.getLabelStyle());
     resolution.setAlignment(Align.center);
     table.add(resolution).width(120);
     table.add(prevButton);
     table.add(resolutionBox).width(75);
     table.add(nextButton);
-    stage.addActor(table);
     table.row();
-    table.add(new Label("effect volume", labelStyle));
+    table.add(new Label("effect volume", game.getLabelStyle()));
     table.add(prevEffVolButton);
     table.add(effectVolumeBox);
     table.add(nextEffVolButton);
     table.row();
-    table.add(new Label("music volume", labelStyle));
+    table.add(new Label("music volume", game.getLabelStyle()));
     table.add(decreaseMusicVolButton);
     table.add(musicVolumeBox);
     table.add(addMusicVolButton);
@@ -113,6 +102,8 @@ public class SettingsMenu implements Screen {
     table.add(saveButton);
     table.add();
     table.add(backButton);
+
+    stage.addActor(table);
 
 
   }
@@ -122,8 +113,8 @@ public class SettingsMenu implements Screen {
     camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
   }
 
-  private void createBackButton(TextButtonStyle textButtonStyle) {
-    backButton = new TextButton("Back", textButtonStyle);
+  private void createBackButton() {
+    backButton = new TextButton("Back", game.getTextButtonStyle());
     backButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -136,12 +127,12 @@ public class SettingsMenu implements Screen {
   private void createResolutionBox() {
     int screen_width = preferences.getInteger("SCREEN_WIDTH");
     int screen_height = preferences.getInteger("SCREEN_HEIGHT");
-    resolutionBox = new Label(screen_width + "x" + screen_height, labelStyle);
+    resolutionBox = new Label(screen_width + "x" + screen_height, game.getLabelStyle());
     resolutionBox.setAlignment(Align.center);
   }
 
-  private void createNextButton(TextButtonStyle textButtonStyle) {
-    nextButton = new TextButton(">>", textButtonStyle);
+  private void createNextButton() {
+    nextButton = new TextButton(">>", game.getTextButtonStyle());
     nextButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -156,8 +147,8 @@ public class SettingsMenu implements Screen {
     });
   }
 
-  private void createPreviousButton(TextButtonStyle textButtonStyle) {
-    prevButton = new TextButton("<<", textButtonStyle);
+  private void createPreviousButton() {
+    prevButton = new TextButton("<<", game.getTextButtonStyle());
     prevButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -174,11 +165,11 @@ public class SettingsMenu implements Screen {
 
   private void createEffVolumeBox() {
     float effect_volume = preferences.getFloat("EFFECT_VOLUME");
-    effectVolumeBox = new Label(String.format("%.0f", effect_volume * 100), labelStyle);
+    effectVolumeBox = new Label(String.format("%.0f", effect_volume * 100), game.getLabelStyle());
   }
 
-  private void createAddEffVolButton(TextButtonStyle textButtonStyle) {
-    nextEffVolButton = new TextButton(">>", textButtonStyle);
+  private void createAddEffVolButton() {
+    nextEffVolButton = new TextButton(">>", game.getTextButtonStyle());
     nextEffVolButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -186,13 +177,13 @@ public class SettingsMenu implements Screen {
         v = v + 5;
         v = Math.min(v, 100);
         effectVolumeBox.setText(String.format("%.0f", v));
-        AudioService.getInstance().playTestShoot(Float.parseFloat(String.valueOf(v/100)));
+        AudioService.getInstance().playTestShoot(Float.parseFloat(String.valueOf(v / 100)));
       }
     });
   }
 
-  private void createDecreaseEffVolButton(TextButtonStyle textButtonStyle) {
-    prevEffVolButton = new TextButton("<<", textButtonStyle);
+  private void createDecreaseEffVolButton() {
+    prevEffVolButton = new TextButton("<<", game.getTextButtonStyle());
     prevEffVolButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -200,18 +191,18 @@ public class SettingsMenu implements Screen {
         v = v - 5;
         v = Math.max(v, 0);
         effectVolumeBox.setText(String.format("%.0f", v));
-        AudioService.getInstance().playTestShoot(Float.parseFloat(String.valueOf(v/100)));
+        AudioService.getInstance().playTestShoot(Float.parseFloat(String.valueOf(v / 100)));
       }
     });
   }
 
   private void createMusicVolumeBox() {
     float effect_volume = preferences.getFloat("MUSIC_VOLUME");
-    musicVolumeBox = new Label(String.format("%.0f", effect_volume * 100 ), labelStyle);
+    musicVolumeBox = new Label(String.format("%.0f", effect_volume * 100), game.getLabelStyle());
   }
 
-  private void createAddMusicVolButton(TextButtonStyle textButtonStyle) {
-    addMusicVolButton = new TextButton(">>", textButtonStyle);
+  private void createAddMusicVolButton() {
+    addMusicVolButton = new TextButton(">>", game.getTextButtonStyle());
     addMusicVolButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -219,13 +210,13 @@ public class SettingsMenu implements Screen {
         v = v + 5;
         v = Math.min(v, 100);
         musicVolumeBox.setText(String.format("%.0f", v));
-        AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v/100)));
+        AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v / 100)));
       }
     });
   }
 
-  private void createDecreaseMusicVolButton(TextButtonStyle textButtonStyle) {
-    decreaseMusicVolButton = new TextButton("<<", textButtonStyle);
+  private void createDecreaseMusicVolButton() {
+    decreaseMusicVolButton = new TextButton("<<", game.getTextButtonStyle());
     decreaseMusicVolButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -233,13 +224,13 @@ public class SettingsMenu implements Screen {
         v = v - 5;
         v = Math.max(v, 0);
         musicVolumeBox.setText(String.format("%.0f", v));
-        AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v/100)));
+        AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v / 100)));
       }
     });
   }
 
-  private void createSaveButton(TextButtonStyle textButtonStyle) {
-    saveButton = new TextButton("Save", textButtonStyle);
+  private void createSaveButton() {
+    saveButton = new TextButton("Save", game.getTextButtonStyle());
     saveButton.addListener(new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
@@ -274,13 +265,13 @@ public class SettingsMenu implements Screen {
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
     camera.update();
-    game.batch.setProjectionMatrix(camera.combined);
+    game.getBatch().setProjectionMatrix(camera.combined);
 
-    game.batch.begin();
+    game.getBatch().begin();
 
     stage.act();
     stage.draw();
-    game.batch.end();
+    game.getBatch().end();
   }
 
   @Override

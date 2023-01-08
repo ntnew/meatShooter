@@ -9,7 +9,10 @@ public class RpgStats {
 
   private double hp;
 
+  private long lvl;
+
   private long experience;
+
   /**
    * увеличивает скорость бега
    * принимает значение от 1 (не изменяет перезарядку) 2 (увеличена в 2 раза)

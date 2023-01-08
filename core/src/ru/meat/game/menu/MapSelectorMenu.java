@@ -45,7 +45,7 @@ public class MapSelectorMenu implements Screen {
     Gdx.input.setInputProcessor(stage);
 
     TextButtonStyle textButtonStyle = new TextButtonStyle();
-    textButtonStyle.font = this.game.font;
+    textButtonStyle.font = this.game.getFont();
     textButtonStyle.fontColor = Color.WHITE;
     createDeathMatchButton(textButtonStyle);
     createBackButton(textButtonStyle);
@@ -94,14 +94,14 @@ public class MapSelectorMenu implements Screen {
     }
 
     camera.update();
-    game.batch.setProjectionMatrix(camera.combined);
+    game.getBatch().setProjectionMatrix(camera.combined);
 
-    game.batch.begin();
+    game.getBatch().begin();
     if (!loading) {
-      firstMapButton.draw(game.batch, 1);
-      backButton.draw(game.batch,1);
+      firstMapButton.draw(game.getBatch(), 1);
+      backButton.draw(game.getBatch(),1);
     }
-    game.batch.end();
+    game.getBatch().end();
   }
 
   private void createDeathMatchButton(TextButtonStyle textButtonStyle) {

@@ -1,6 +1,8 @@
 package ru.meat.game;
 
-import static ru.meat.game.settings.Constants.*;
+import static ru.meat.game.settings.Constants.DEBUG;
+import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -13,13 +15,17 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import ru.meat.game.menu.MainMenu;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.PlayerService;
+import ru.meat.game.service.RpgStatsService;
 
 public class MeatShooterClass implements InputProcessor, Screen {
+
+  private MyGame game;
   private OrthographicCamera camera;
   private PlayerService playerService;
   private EnemyService enemyService;
@@ -31,7 +37,8 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
   private MapService mapService;
 
-  public MeatShooterClass(int map) {
+  public MeatShooterClass(int map, MyGame game) {
+    this.game = game;
 
     float w = Gdx.graphics.getWidth();
     float h = Gdx.graphics.getHeight();
@@ -55,7 +62,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
     spriteBatch = new SpriteBatch();
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, true, w, h);
+    worldRenderer = new WorldRenderer(world, DEBUG, w, h);
 
     playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM, Gdx.graphics.getHeight() / 2f * MAIN_ZOOM,
         world);
@@ -128,13 +135,17 @@ public class MeatShooterClass implements InputProcessor, Screen {
     spriteBatch.begin();
 
     mapService.draw(spriteBatch);
+    playerService.drawBullets(spriteBatch);
     playerService.drawPlayer(spriteBatch);
     enemyService.drawEnemies(spriteBatch, stateTime);
-    playerService.drawBullets(spriteBatch);
 
     spriteBatch.end();
     worldRenderer.render();
-//    System.out.println(enemyService.getRewardPointCount().get());
+
+    if (playerService.getPlayer().isDead()) {
+      RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
+      this.game.setScreen(new MainMenu(game));
+    }
   }
 
   private void createMoreEnemies() {

@@ -69,6 +69,11 @@ public class RpgStatsService {
     prefs.flush();
   }
 
+  public void increaseExp(long exp){
+    stats.setExperience(stats.getExperience() + exp);
+    saveStats();
+  }
+
   public void saveStats() {
     prefs.putFloat("HP", Float.parseFloat(String.format("%.0f", stats.getHp())));
     prefs.putLong("EXP", stats.getExperience());

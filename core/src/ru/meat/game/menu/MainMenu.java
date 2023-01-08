@@ -4,20 +4,16 @@ import static ru.meat.game.utils.GDXUtils.createButton;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.meat.game.MyGame;
+import ru.meat.game.service.AudioService;
 
 public class MainMenu implements Screen {
 
@@ -35,7 +31,7 @@ public class MainMenu implements Screen {
 
   public MainMenu(final MyGame game) {
     this.game = game;
-
+    AudioService.getInstance().playMainMenuMusic();
     initCam();
 
     stage = new Stage(new ScreenViewport());

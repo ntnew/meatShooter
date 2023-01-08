@@ -89,7 +89,7 @@ public class MapSelectorMenu implements Screen {
 
     }
     if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {
-      game.setScreen(new MeatShooterClass(selectedMap));
+      game.setScreen(new MeatShooterClass(selectedMap, game));
       AudioService.getInstance().smoothStopMusic();
     }
 

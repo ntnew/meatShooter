@@ -37,8 +37,6 @@ public class MyGame extends Game {
     labelStyle.font = font;
     labelStyle.fontColor = Color.WHITE;
 
-    AudioService.getInstance().playMainMenuMusic();
-
     this.setScreen(new MainMenu(this));
   }
 

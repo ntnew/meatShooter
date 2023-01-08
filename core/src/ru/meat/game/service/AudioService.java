@@ -31,14 +31,14 @@ public class AudioService {
   }
 
 
-
-
   public void playMainMenuMusic() {
-    Music music = Gdx.audio.newMusic(Gdx.files.internal("sound/main_menu.mp3"));
-    music.setOnCompletionListener(Music::dispose);
-    music.setVolume(Settings.getInstance().MUSIC_VOLUME);
-    music.play();
-    this.currentMusic = music;
+    if (currentMusic == null) {
+      Music music = Gdx.audio.newMusic(Gdx.files.internal("sound/main_menu.mp3"));
+      music.setOnCompletionListener(Music::dispose);
+      music.setVolume(Settings.getInstance().MUSIC_VOLUME);
+      music.play();
+      this.currentMusic = music;
+    }
   }
 
   /**

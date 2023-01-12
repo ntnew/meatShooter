@@ -6,32 +6,30 @@ import static ru.meat.game.utils.GDXUtils.createButton;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextArea;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import ru.meat.game.MyGame;
 import ru.meat.game.service.AudioService;
 
 public class SettingsMenu implements Screen {
 
   final MyGame game;
+
+  /**
+   * Флаг того, что игра настройки открыты из паузы
+   */
+  private final boolean pause;
 
   private final List<String> resolutions = Arrays.asList("800x600", "1280x720", "1920x1080");
 
@@ -56,8 +54,9 @@ public class SettingsMenu implements Screen {
   private Button saveButton;
   private Preferences preferences;
 
-  public SettingsMenu(final MyGame game) {
+  public SettingsMenu(final MyGame game, boolean pause) {
     this.game = game;
+    this.pause = pause;
     preferences = Gdx.app.getPreferences("My Preferences");
 
     game.initStage();
@@ -178,7 +177,9 @@ public class SettingsMenu implements Screen {
         v = v + 5;
         v = Math.min(v, 100);
         musicVolumeBox.setText(String.format("%.0f", v));
-        AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v / 100)));
+        if (AudioService.getInstance().getCurrentMusic() != null) {
+          AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v / 100)));
+        }
       }
     });
   }
@@ -191,15 +192,17 @@ public class SettingsMenu implements Screen {
         v = v - 5;
         v = Math.max(v, 0);
         musicVolumeBox.setText(String.format("%.0f", v));
-        AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v / 100)));
+        if (AudioService.getInstance().getCurrentMusic() != null) {
+          AudioService.getInstance().getCurrentMusic().setVolume(Float.parseFloat(String.valueOf(v / 100)));
+        }
       }
     });
   }
 
   private void createSaveButton() {
-    saveButton = createButton(game.getTextButtonStyle(), "Save", new ChangeListener() {
+    saveButton = createButton(game.getTextButtonStyle(), "Save", new ClickListener() {
       @Override
-      public void changed(ChangeEvent event, Actor actor) {
+      public void clicked(InputEvent event, float x, float y) {
         String[] xes = resolutionBox.getText().toString().split("x");
         int newWidth = Integer.parseInt(xes[0]);
         int newHeight = Integer.parseInt(xes[1]);
@@ -213,16 +216,30 @@ public class SettingsMenu implements Screen {
         preferences.putFloat("EFFECT_VOLUME", Float.parseFloat(effectVolumeBox.getText().toString()) / 100);
         preferences.putFloat("MUSIC_VOLUME", Float.parseFloat(musicVolumeBox.getText().toString()) / 100);
 
+        if (AudioService.getInstance().getCurrentMusic() != null) {
+          AudioService.getInstance().getCurrentMusic().setVolume(preferences.getFloat("MUSIC_VOLUME"));
+        }
+
         preferences.flush();
-        game.setScreen(new MainMenu(game));
+        if (pause) {
+          game.setScreen(new PauseMenu(game, game.getMeatShooterClass()));
+        } else {
+          game.setScreen(new MainMenu(game));
+        }
       }
     });
 
     backButton = createButton(game.getTextButtonStyle(), "Back", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
-        game.setScreen(new MainMenu(game));
-        AudioService.getInstance().getCurrentMusic().setVolume(preferences.getFloat("MUSIC_VOLUME"));
+        if (AudioService.getInstance().getCurrentMusic() != null) {
+          AudioService.getInstance().getCurrentMusic().setVolume(preferences.getFloat("MUSIC_VOLUME"));
+        }
+        if (pause) {
+          game.setScreen(new PauseMenu(game, game.getMeatShooterClass()));
+        } else {
+          game.setScreen(new MainMenu(game));
+        }
       }
     });
   }

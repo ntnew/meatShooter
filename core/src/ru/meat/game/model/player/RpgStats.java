@@ -3,14 +3,26 @@ package ru.meat.game.model.player;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Класс характеристик персонажа
+ */
 @Data
 @NoArgsConstructor
 public class RpgStats {
 
+  /**
+   * Очки жизни
+   */
   private double hp;
 
+  /**
+   * Уровень
+   */
   private long lvl;
 
+  /**
+   * Текущий свободный опыт
+   */
   private long experience;
 
   /**
@@ -21,7 +33,7 @@ public class RpgStats {
 
   /**
    * уменьшает скорость перезарядки
-   * принимает значение от 1 (не изменяет перезарядку) до 0.001 (уменьшена в 100 раз)
+   * принимает значение от 1 (не изменяет перезарядку) и более
    */
   private float reloadSpeed;
   /**
@@ -36,5 +48,8 @@ public class RpgStats {
    */
   private float damage;
 
+  /**
+   * Сопртивление урону
+   */
   private float resist;
 }

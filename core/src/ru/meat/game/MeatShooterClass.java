@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import ru.meat.game.menu.MainMenu;
+import ru.meat.game.menu.PauseMenu;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.EnemyService;
@@ -145,9 +146,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
     worldRenderer.render();
 
     if (playerService.getPlayer().isDead()) {
-      RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
-      this.game.setScreen(new MainMenu(game));
-      AudioService.getInstance().smoothStopMusic();
+      endGameSession();
     }
   }
 
@@ -230,6 +229,9 @@ public class MeatShooterClass implements InputProcessor, Screen {
     if (keycode == Keys.NUM_2) {
       playerService.changeWeapon(2);
     }
+    if (keycode == Keys.ESCAPE) {
+      game.setScreen(new PauseMenu(game, this));
+    }
     return false;
   }
 
@@ -274,4 +276,13 @@ public class MeatShooterClass implements InputProcessor, Screen {
     worldRenderer.dispose();
   }
 
+
+  public void resumeGame(){
+    Gdx.input.setInputProcessor(this);
+  }
+  public void endGameSession() {
+    RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
+    this.game.setScreen(new MainMenu(game));
+    AudioService.getInstance().smoothStopMusic();
+  }
 }

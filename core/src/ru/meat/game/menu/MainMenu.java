@@ -68,7 +68,7 @@ public class MainMenu implements Screen {
     optionsButton = createButton(game.getTextButtonStyle(), "Options", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(new SettingsMenu(game));
+        game.setScreen(new SettingsMenu(game, false));
       }
     });
 

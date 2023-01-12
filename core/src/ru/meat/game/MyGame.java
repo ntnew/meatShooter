@@ -29,6 +29,8 @@ public class MyGame extends Game {
 
   private Stage stage;
 
+  private MeatShooterClass meatShooterClass;
+
   private boolean loaded = false;
 
   public void create() {

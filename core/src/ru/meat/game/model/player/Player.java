@@ -29,11 +29,24 @@ public class Player extends Actor {
    */
   private Body body;
 
+  /**
+   * Текущие жизни игрока
+   */
   private Double hp;
 
+  /**
+   * делитель зума модельки
+   */
   private final float zoomMultiplier = 1f;
+
+  /**
+   * Длительность кадров в анимации
+   */
   private final float frameDuration = 0.03f;
 
+  /**
+   * Флаг того, что игрок умер
+   */
   private boolean isDead = false;
 
   private Animation<Texture> walkAnimation;

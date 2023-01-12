@@ -66,7 +66,7 @@ public class Weapon implements Shootable {
         AudioService.getInstance().playSound(reloadSound);
       }
       if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
-          * RpgStatsService.getInstance().getStats().getReloadSpeed()) {
+          / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
         fireCount = 0;
         reloadCounter = 0;
       }

@@ -10,6 +10,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
@@ -18,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import java.math.BigDecimal;
 import ru.meat.game.model.bodyData.BodyUserData;
+import ru.meat.game.service.AudioService;
 import ru.meat.game.settings.Constants;
 
 public class GDXUtils {
@@ -118,9 +122,16 @@ public class GDXUtils {
   }
 
 
-  public static Button createButton(TextButtonStyle textButtonStyle,  String name, ClickListener clickListener) {
+  public static Button createButton(TextButtonStyle textButtonStyle,  String name, EventListener inputListener) {
     Button button = new TextButton(name, textButtonStyle);
-    button.addListener(clickListener);
+    button.addListener(inputListener);
+    button.addListener(new ClickListener() {
+      @Override
+      public void clicked(InputEvent event, float x, float y) {
+        super.clicked(event, x, y);
+        AudioService.getInstance().playClick();
+      }
+    });
     return button;
   }
 

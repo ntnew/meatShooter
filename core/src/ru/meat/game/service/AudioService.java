@@ -29,6 +29,7 @@ public class AudioService {
 
 
   private List<String> gameMusic = Arrays.asList("sound/track1.mp3", "sound/track2.mp3");
+  private int currentMusicPos = 0;
 
   private boolean stepSoundLock = false;
 
@@ -46,13 +47,17 @@ public class AudioService {
     LoaderManager.getInstance().load("sound/track1.mp3", Music.class);
     LoaderManager.getInstance().load("sound/track2.mp3", Music.class);
     LoaderManager.getInstance().load("sound/player/hit1.mp3", Sound.class);
+    LoaderManager.getInstance().load("sound/select-click.mp3", Sound.class);
     enemyDies.forEach(x -> LoaderManager.getInstance().load(x, Sound.class));
   }
 
   private Music currentMusic;
 
-  public void playSound(String shootSound) {
-    Sound sound = LoaderManager.getInstance().get(shootSound);
+  public void playClick() {
+    playSound("sound/select-click.mp3");
+  }
+  public void playSound(String soundPath) {
+    Sound sound = LoaderManager.getInstance().get(soundPath);
     sound.play(Settings.getInstance().EFFECT_VOLUME);
   }
 
@@ -91,8 +96,7 @@ public class AudioService {
 
   public void playGameMusic() {
     if (currentMusic == null) {
-      int random = MathUtils.random(0, gameMusic.size() - 1);
-      Music music = LoaderManager.getInstance().get(gameMusic.get(random));
+      Music music = LoaderManager.getInstance().get(gameMusic.get(getRandomMusic()));
       music.setOnCompletionListener(music1 -> {
         music1.dispose();
         currentMusic = null;
@@ -103,10 +107,22 @@ public class AudioService {
     }
   }
 
+  private int getRandomMusic() {
+    int random = MathUtils.random(0, gameMusic.size() - 1);
+    if (random == currentMusicPos) {
+      getRandomMusic();
+    }
+    currentMusicPos = random;
+    return random;
+  }
+
   public void playMainMenuMusic() {
     if (currentMusic == null) {
       Music music = Gdx.audio.newMusic(Gdx.files.internal("sound/main_menu.mp3"));
-      music.setOnCompletionListener(Music::dispose);
+      music.setOnCompletionListener(music1 -> {
+        music1.dispose();
+        currentMusic = null;
+      });
       music.setVolume(Settings.getInstance().MUSIC_VOLUME);
       music.play();
       this.currentMusic = music;

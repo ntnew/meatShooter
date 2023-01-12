@@ -1,5 +1,6 @@
 package ru.meat.game.menu;
 
+import static ru.meat.game.settings.Constants.DEBUG;
 import static ru.meat.game.utils.GDXUtils.createButton;
 
 import com.badlogic.gdx.Gdx;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.Table.Debug;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -18,9 +20,6 @@ import ru.meat.game.service.AudioService;
 public class MainMenu implements Screen {
 
   final MyGame game;
-  private final Stage stage;
-  private OrthographicCamera camera;
-
   private Table table;
   private Button newGameButton;
   private Button upgradeButton;
@@ -32,31 +31,23 @@ public class MainMenu implements Screen {
   public MainMenu(final MyGame game) {
     this.game = game;
 
-    initCam();
-
-    stage = new Stage(new ScreenViewport());
-    Gdx.input.setInputProcessor(stage);
+    game.initStage();
 
     createButtons();
 
     table = new Table();
     table.setSize(300, 300);
-    table.setPosition(10, 10);
-    table.setDebug(false);
-    table.add(newGameButton);
+    table.setPosition(Gdx.graphics.getWidth()/3, Gdx.graphics.getHeight()/3);
+    table.setDebug(DEBUG);
+    table.add(newGameButton).width(100).height(30);
     table.row();
-    table.add(upgradeButton);
+    table.add(upgradeButton).width(100).height(30);
     table.row();
-    table.add(optionsButton);
+    table.add(optionsButton).width(100).height(30);
     table.row();
-    table.add(exitButton);
+    table.add(exitButton).width(100).height(30);
 
-    stage.addActor(table);
-  }
-
-  private void initCam() {
-    camera = new OrthographicCamera();
-    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    game.getStage().addActor(table);
   }
 
   private void createButtons() {
@@ -99,14 +90,7 @@ public class MainMenu implements Screen {
     AudioService.getInstance().playMainMenuMusic();
     ScreenUtils.clear(0, 0, 0, 1);
 
-    camera.update();
-    game.getBatch().setProjectionMatrix(camera.combined);
-
-    game.getBatch().begin();
-    stage.act();
-    stage.draw();
-
-    game.getBatch().end();
+    game.drawStage();
   }
 
   @Override

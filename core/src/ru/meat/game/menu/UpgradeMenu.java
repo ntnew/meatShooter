@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import java.math.BigDecimal;
@@ -25,11 +26,9 @@ import ru.meat.game.service.RpgStatsService;
 public class UpgradeMenu implements Screen {
 
   final MyGame game;
-  private final Stage stage;
-  private OrthographicCamera camera;
-
   private Table table;
 
+  private Label lvlLabel;
   private Label experience;
 
   private Label newLvlExperience;
@@ -54,10 +53,7 @@ public class UpgradeMenu implements Screen {
   public UpgradeMenu(final MyGame game) {
     this.game = game;
 
-    initCam();
-
-    stage = new Stage(new ScreenViewport());
-    Gdx.input.setInputProcessor(stage);
+    game.initStage();
 
     lvl = RpgStatsService.getInstance().getStats().getLvl();
 
@@ -66,44 +62,51 @@ public class UpgradeMenu implements Screen {
 
     table = new Table();
     table.setSize(300, 300);
-    table.setPosition(10, 10);
+    table.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 3);
     table.setDebug(DEBUG);
 
+    table.row();
+    Label label = new Label("LvL", game.getLabelStyle());
+    label.setAlignment(Align.center);
+    table.add(label).width(100).height(30);
+    table.add(lvlLabel).width(100).height(30).align(Align.center);
+
+    table.row();
     table.add(new Label("Exp", game.getLabelStyle()));
     table.add(experience);
     table.add(newLvlExperience);
 
     table.row();
-    table.add(new Label("HP", game.getLabelStyle()));
+    table.add(new Label("HP", game.getLabelStyle())).height(30);
     table.add(hpLabel);
     table.add(hpButton);
 
     table.row();
-    table.add(new Label("Dmg", game.getLabelStyle()));
+    table.add(new Label("Dmg", game.getLabelStyle())).height(30);
     table.add(dmgLabel);
     table.add(dmgButton);
 
     table.row();
-    table.add(new Label("Move speed", game.getLabelStyle()));
+    table.add(new Label("Move speed", game.getLabelStyle())).height(30);
     table.add(moveSpeedLabel);
     table.add(moveSpeedButton);
 
     table.row();
-    table.add(new Label("Fire speed", game.getLabelStyle()));
+    table.add(new Label("Fire speed", game.getLabelStyle())).height(30);
     table.add(fireSpeedLabel);
     table.add(fireSpeedButton);
 
     table.row();
-    table.add(new Label("Reloading", game.getLabelStyle()));
+    table.add(new Label("Reloading", game.getLabelStyle())).height(30);
     table.add(reloadSpeedLabel);
     table.add(reloadSpeedButton);
 
     table.row();
-    table.add(saveButton);
+    table.add(saveButton).height(30);
     table.add();
     table.add(backButton);
 
-    stage.addActor(table);
+    game.getStage().addActor(table);
   }
 
   private void createLabels() {
@@ -119,7 +122,9 @@ public class UpgradeMenu implements Screen {
     newLvlExperience = new Label(String.valueOf(lvl * LVL_EXP_STEP), game.getLabelStyle());
     experience = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getExperience()),
         game.getLabelStyle());
-    ;
+
+    lvlLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getLvl()), game.getLabelStyle());
+    lvlLabel.setAlignment(Align.center);
   }
 
   private void createButtons() {
@@ -172,8 +177,6 @@ public class UpgradeMenu implements Screen {
       }
     });
 
-
-
     saveButton = createButton(game.getTextButtonStyle(), "Save",
         new ClickListener() {
           @Override
@@ -210,14 +213,9 @@ public class UpgradeMenu implements Screen {
     experience.setText(subtract.toString());
 
     lvl += 1;
+    lvlLabel.setText(String.valueOf(lvl));
     newLvlExperience.setText(String.valueOf(lvl * LVL_EXP_STEP));
   }
-
-  private void initCam() {
-    camera = new OrthographicCamera();
-    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-  }
-
 
   @Override
   public void show() {
@@ -228,24 +226,18 @@ public class UpgradeMenu implements Screen {
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
 
-    camera.update();
-    game.getBatch().setProjectionMatrix(camera.combined);
-
     setEnableIncreaseStats(
         Long.parseLong(experience.getText().toString()) > Long.parseLong(newLvlExperience.getText().toString()));
 
-    game.getBatch().begin();
-    stage.act();
-    stage.draw();
-    game.getBatch().end();
+    game.drawStage();
   }
 
   private void setEnableIncreaseStats(boolean b) {
     reloadSpeedButton.setVisible(b);
-    moveSpeedButton.setVisible(b);;
-    hpButton.setVisible(b);;
-    fireSpeedButton.setVisible(b);;
-    dmgButton.setVisible(b);;
+    moveSpeedButton.setVisible(b);
+    hpButton.setVisible(b);
+    fireSpeedButton.setVisible(b);
+    dmgButton.setVisible(b);
   }
 
   @Override

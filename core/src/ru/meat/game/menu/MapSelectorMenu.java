@@ -1,17 +1,18 @@
 package ru.meat.game.menu;
 
+import static ru.meat.game.settings.Constants.DEBUG;
+import static ru.meat.game.utils.GDXUtils.createButton;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.meat.game.MeatShooterClass;
@@ -22,11 +23,7 @@ import ru.meat.game.model.maps.Maps;
 import ru.meat.game.service.AudioService;
 
 public class MapSelectorMenu implements Screen {
-
-  private final Stage stage;
   private final MyGame game;
-
-  private OrthographicCamera camera;
 
   private Button firstMapButton;
 
@@ -38,37 +35,24 @@ public class MapSelectorMenu implements Screen {
 
   private int selectedMap = 0;
 
+  private Table table;
+
   public MapSelectorMenu(final MyGame game) {
     this.game = game;
-    initCam();
-    stage = new Stage(new ScreenViewport());
-    Gdx.input.setInputProcessor(stage);
+    game.initStage();
+    createButtons();
 
-    TextButtonStyle textButtonStyle = new TextButtonStyle();
-    textButtonStyle.font = this.game.getFont();
-    textButtonStyle.fontColor = Color.WHITE;
-    createDeathMatchButton(textButtonStyle);
-    createBackButton(textButtonStyle);
+    table = new Table();
+    table.setSize(300, 300);
+    table.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 3);
+    table.setDebug(DEBUG);
+    table.add(firstMapButton).width(100).height(40);
+    table.row();
+    table.add(backButton).width(100).height(40);
+    game.getStage().addActor(table);
 
   }
 
-  private void createBackButton(TextButtonStyle textButtonStyle) {
-    backButton = new TextButton("Back", textButtonStyle);
-    backButton.setSize(200, 50);
-    backButton.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 2-50);
-    backButton.addListener(new ChangeListener() {
-      @Override
-      public void changed(ChangeEvent event, Actor actor) {
-        game.setScreen(new MainMenu(game));
-      }
-    });
-    stage.addActor(backButton);
-  }
-
-  private void initCam() {
-    camera = new OrthographicCamera();
-    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-  }
 
   @Override
   public void show() {
@@ -78,42 +62,39 @@ public class MapSelectorMenu implements Screen {
   @Override
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
+
     if (selectedMap != 0 && loading && !startedLoad) {
       startedLoad = true;
+      firstMapButton.setDisabled(true);
+      backButton.setDisabled(true);
       LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class);
-      LoaderManager.getInstance().load("Bullet1.png",Texture.class);
+      LoaderManager.getInstance().load("Bullet1.png", Texture.class);
       EnemiesAnimation.getInstance();
-
     }
+
     if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {
       game.setScreen(new MeatShooterClass(selectedMap, game));
       AudioService.getInstance().initSteps();
       AudioService.getInstance().smoothStopMusic();
     }
 
-    camera.update();
-    game.getBatch().setProjectionMatrix(camera.combined);
-
-    game.getBatch().begin();
-    if (!loading) {
-      firstMapButton.draw(game.getBatch(), 1);
-      backButton.draw(game.getBatch(),1);
-    }
-    game.getBatch().end();
+    game.drawStage();
   }
 
-  private void createDeathMatchButton(TextButtonStyle textButtonStyle) {
-    firstMapButton = new TextButton("Death match", textButtonStyle);
-    firstMapButton.setSize(200, 50);
-    firstMapButton.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 2);
-    firstMapButton.addListener(new ChangeListener() {
+  private void createButtons() {
+    firstMapButton = createButton(game.getTextButtonStyle(), "Death match", new ClickListener() {
       @Override
-      public void changed(ChangeEvent event, Actor actor) {
+      public void clicked(InputEvent event, float x, float y) {
         selectedMap = 1;
         loading = true;
       }
     });
-    stage.addActor(firstMapButton);
+    backButton = createButton(game.getTextButtonStyle(), "Back", new ChangeListener() {
+      @Override
+      public void changed(ChangeEvent event, Actor actor) {
+        game.setScreen(new MainMenu(game));
+      }
+    });
   }
 
   @Override

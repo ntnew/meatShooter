@@ -1,5 +1,8 @@
 package ru.meat.game.menu;
 
+import static ru.meat.game.settings.Constants.DEBUG;
+import static ru.meat.game.utils.GDXUtils.createButton;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
@@ -29,10 +32,8 @@ import ru.meat.game.service.AudioService;
 public class SettingsMenu implements Screen {
 
   final MyGame game;
-  private final Stage stage;
-  private OrthographicCamera camera;
 
-  private List<String> resolutions = Arrays.asList("800x600", "1280x720", "1920x1080");
+  private final List<String> resolutions = Arrays.asList("800x600", "1280x720", "1920x1080");
 
   private Table table;
 
@@ -59,18 +60,12 @@ public class SettingsMenu implements Screen {
     this.game = game;
     preferences = Gdx.app.getPreferences("My Preferences");
 
-    stage = new Stage(new ScreenViewport());
-    Gdx.input.setInputProcessor(stage);
+    game.initStage();
 
-    initCam();
-
-    createBackButton();
     createResolutionBox();
-    createNextButton();
-    createPreviousButton();
+    createButtons();
     createSaveButton();
 
-    createEffVolumeBox();
     createDecreaseEffVolButton();
     createAddEffVolButton();
 
@@ -80,8 +75,8 @@ public class SettingsMenu implements Screen {
 
     table = new Table();
     table.setSize(300, 300);
-    table.setPosition(10, 10);
-    table.setDebug(false);
+    table.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 3);
+    table.setDebug(DEBUG);
     Label resolution = new Label("resolution", game.getLabelStyle());
     resolution.setAlignment(Align.center);
     table.add(resolution).width(120);
@@ -103,25 +98,7 @@ public class SettingsMenu implements Screen {
     table.add();
     table.add(backButton);
 
-    stage.addActor(table);
-
-
-  }
-
-  private void initCam() {
-    camera = new OrthographicCamera();
-    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-  }
-
-  private void createBackButton() {
-    backButton = new TextButton("Back", game.getTextButtonStyle());
-    backButton.addListener(new ChangeListener() {
-      @Override
-      public void changed(ChangeEvent event, Actor actor) {
-        game.setScreen(new MainMenu(game));
-        AudioService.getInstance().getCurrentMusic().setVolume(preferences.getFloat("MUSIC_VOLUME"));
-      }
-    });
+    game.getStage().addActor(table);
   }
 
   private void createResolutionBox() {
@@ -131,9 +108,8 @@ public class SettingsMenu implements Screen {
     resolutionBox.setAlignment(Align.center);
   }
 
-  private void createNextButton() {
-    nextButton = new TextButton(">>", game.getTextButtonStyle());
-    nextButton.addListener(new ChangeListener() {
+  private void createButtons() {
+    nextButton = createButton(game.getTextButtonStyle(), ">>", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         String s = resolutions.stream().filter(x -> x.equals(resolutionBox.getText().toString())).findFirst()
@@ -145,11 +121,8 @@ public class SettingsMenu implements Screen {
         resolutionBox.setText(resolutions.get(i));
       }
     });
-  }
 
-  private void createPreviousButton() {
-    prevButton = new TextButton("<<", game.getTextButtonStyle());
-    prevButton.addListener(new ChangeListener() {
+    prevButton = createButton(game.getTextButtonStyle(), "<<", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         String s = resolutions.stream().filter(x -> x.equals(resolutionBox.getText().toString())).findFirst()
@@ -161,16 +134,13 @@ public class SettingsMenu implements Screen {
         resolutionBox.setText(resolutions.get(i));
       }
     });
-  }
 
-  private void createEffVolumeBox() {
-    float effect_volume = preferences.getFloat("EFFECT_VOLUME");
-    effectVolumeBox = new Label(String.format("%.0f", effect_volume * 100), game.getLabelStyle());
+    effectVolumeBox = new Label(String.format("%.0f", preferences.getFloat("EFFECT_VOLUME") * 100),
+        game.getLabelStyle());
   }
 
   private void createAddEffVolButton() {
-    nextEffVolButton = new TextButton(">>", game.getTextButtonStyle());
-    nextEffVolButton.addListener(new ChangeListener() {
+    nextEffVolButton = createButton(game.getTextButtonStyle(), ">>", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(effectVolumeBox.getText().toString());
@@ -183,8 +153,7 @@ public class SettingsMenu implements Screen {
   }
 
   private void createDecreaseEffVolButton() {
-    prevEffVolButton = new TextButton("<<", game.getTextButtonStyle());
-    prevEffVolButton.addListener(new ChangeListener() {
+    prevEffVolButton = createButton(game.getTextButtonStyle(), "<<", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(effectVolumeBox.getText().toString());
@@ -202,8 +171,7 @@ public class SettingsMenu implements Screen {
   }
 
   private void createAddMusicVolButton() {
-    addMusicVolButton = new TextButton(">>", game.getTextButtonStyle());
-    addMusicVolButton.addListener(new ChangeListener() {
+    addMusicVolButton = createButton(game.getTextButtonStyle(), ">>", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(musicVolumeBox.getText().toString());
@@ -216,8 +184,7 @@ public class SettingsMenu implements Screen {
   }
 
   private void createDecreaseMusicVolButton() {
-    decreaseMusicVolButton = new TextButton("<<", game.getTextButtonStyle());
-    decreaseMusicVolButton.addListener(new ChangeListener() {
+    decreaseMusicVolButton = createButton(game.getTextButtonStyle(), "<<", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(musicVolumeBox.getText().toString());
@@ -230,18 +197,14 @@ public class SettingsMenu implements Screen {
   }
 
   private void createSaveButton() {
-    saveButton = new TextButton("Save", game.getTextButtonStyle());
-    saveButton.addListener(new ChangeListener() {
+    saveButton = createButton(game.getTextButtonStyle(), "Save", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
-
-        int screenWidth = preferences.getInteger("SCREEN_WIDTH");
-
         String[] xes = resolutionBox.getText().toString().split("x");
         int newWidth = Integer.parseInt(xes[0]);
         int newHeight = Integer.parseInt(xes[1]);
 
-        if (newWidth != screenWidth) {
+        if (newWidth != preferences.getInteger("SCREEN_WIDTH")) {
           Gdx.graphics.setWindowedMode(newWidth, newHeight);
           preferences.putInteger("SCREEN_WIDTH", newWidth);
           preferences.putInteger("SCREEN_HEIGHT", newHeight);
@@ -254,6 +217,14 @@ public class SettingsMenu implements Screen {
         game.setScreen(new MainMenu(game));
       }
     });
+
+    backButton = createButton(game.getTextButtonStyle(), "Back", new ChangeListener() {
+      @Override
+      public void changed(ChangeEvent event, Actor actor) {
+        game.setScreen(new MainMenu(game));
+        AudioService.getInstance().getCurrentMusic().setVolume(preferences.getFloat("MUSIC_VOLUME"));
+      }
+    });
   }
 
   @Override
@@ -264,14 +235,7 @@ public class SettingsMenu implements Screen {
   @Override
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
-    camera.update();
-    game.getBatch().setProjectionMatrix(camera.combined);
-
-    game.getBatch().begin();
-
-    stage.act();
-    stage.draw();
-    game.getBatch().end();
+    game.drawStage();
   }
 
   @Override

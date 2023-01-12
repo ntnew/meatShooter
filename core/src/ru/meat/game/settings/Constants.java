@@ -17,7 +17,7 @@ public class Constants {
    */
   public static float PLAYER_MOVE_SPEED = 2f;
 
-  public static boolean DEBUG = false;
+  public static boolean DEBUG = true;
 
-  public static int LVL_EXP_STEP = 200;
+  public static int LVL_EXP_STEP = 100;
 }

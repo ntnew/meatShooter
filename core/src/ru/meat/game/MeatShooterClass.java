@@ -9,12 +9,16 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Cursor.SystemCursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
+import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.MainMenu;
 import ru.meat.game.menu.PauseMenu;
 import ru.meat.game.model.EnemyStatus;
@@ -24,20 +28,26 @@ import ru.meat.game.service.MapService;
 import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.PlayerService;
 import ru.meat.game.service.RpgStatsService;
+import ru.meat.game.utils.GDXUtils;
 
 public class MeatShooterClass implements InputProcessor, Screen {
 
   private MyGame game;
-  private OrthographicCamera camera;
+  private final OrthographicCamera camera;
   private PlayerService playerService;
   private EnemyService enemyService;
   private float stateTime;
+
+  private Texture bug;
+  private Sprite bugSprite;
 
   private SpriteBatch spriteBatch;
   private World world;
   private WorldRenderer worldRenderer;
 
   private MapService mapService;
+
+  private GUI gui;
 
   public MeatShooterClass(int map, MyGame game) {
     this.game = game;
@@ -69,42 +79,13 @@ public class MeatShooterClass implements InputProcessor, Screen {
     playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM, Gdx.graphics.getHeight() / 2f * MAIN_ZOOM,
         world);
     enemyService.createEnemies(world);
-  }
 
+    bug = GDXUtils.resizeTexture(Gdx.files.internal("scar1.png"),2);
+    bugSprite = new Sprite(bug);
+    bugSprite.setPosition(500,500);
 
-  /**
-   * обработать рамки камеры, чтобы не заходили за края
-   */
-  public void handleWorldBounds() {
-    float camX = camera.position.x;
-    float camY = camera.position.y;
-
-    Vector2 camMin = new Vector2(camera.viewportWidth / 2, camera.viewportHeight / 2);
-    camMin.scl(camera.zoom); //bring to center and scale by the zoom level
-    Vector2 camMax = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(),
-        mapService.getCurrentMap().getMainTexture().getHeight());
-    camMax.sub(camMin); //bring to center
-
-//keep camera within borders
-    camX = Math.min(camMax.x, Math.max(camX, camMin.x));
-    camY = Math.min(camMax.y, Math.max(camY, camMin.y));
-
-    camera.position.set(camX, camY, 0);
-
-    float camX2 = worldRenderer.getCameraBox2D().position.x;
-    float camY2 = worldRenderer.getCameraBox2D().position.y;
-
-    Vector2 camMin2 = new Vector2(worldRenderer.getCameraBox2D().viewportWidth / 2,
-        worldRenderer.getCameraBox2D().viewportHeight / 2);
-    camMin2.scl(worldRenderer.getCameraBox2D().zoom); //bring to center and scale by the zoom level
-    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth()/WORLD_TO_VIEW,
-        mapService.getCurrentMap().getMainTexture().getHeight()/WORLD_TO_VIEW);
-    camMax2.sub(camMin2); //bring to center
-
-    camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
-    camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
-
-    worldRenderer.getCameraBox2D().position.set(camX2, camY2, 0);
+    gui = new GUI(playerService.getPlayer().getHp());
+    gui.setAimCursor();
   }
 
   @Override
@@ -142,8 +123,11 @@ public class MeatShooterClass implements InputProcessor, Screen {
     playerService.drawPlayer(spriteBatch);
     enemyService.drawEnemies(spriteBatch, stateTime);
 
+    bugSprite.draw(spriteBatch);
     spriteBatch.end();
     worldRenderer.render();
+
+    gui.draw(playerService.getPlayer().getHp());
 
     if (playerService.getPlayer().isDead()) {
       endGameSession();
@@ -151,7 +135,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
   }
 
   private void createMoreEnemies() {
-    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 20) {
+    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 30) {
       // Инициализация начальной позиции
       float xBound1 = playerService.getBodyPosX() * WORLD_TO_VIEW;
       float xBound2 = playerService.getBodyPosX() * WORLD_TO_VIEW;
@@ -230,6 +214,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
       playerService.changeWeapon(2);
     }
     if (keycode == Keys.ESCAPE) {
+      Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
       game.setScreen(new PauseMenu(game, this));
     }
     return false;
@@ -278,11 +263,49 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
 
   public void resumeGame(){
+    gui.setAimCursor();
     Gdx.input.setInputProcessor(this);
   }
   public void endGameSession() {
     RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
     this.game.setScreen(new MainMenu(game));
+    Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
     AudioService.getInstance().smoothStopMusic();
   }
+
+  /**
+   * обработать рамки камеры, чтобы не заходили за края
+   */
+  public void handleWorldBounds() {
+    float camX = camera.position.x;
+    float camY = camera.position.y;
+
+    Vector2 camMin = new Vector2(camera.viewportWidth / 2, camera.viewportHeight / 2);
+    camMin.scl(camera.zoom); //bring to center and scale by the zoom level
+    Vector2 camMax = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(),
+        mapService.getCurrentMap().getMainTexture().getHeight());
+    camMax.sub(camMin); //bring to center
+
+//keep camera within borders
+    camX = Math.min(camMax.x, Math.max(camX, camMin.x));
+    camY = Math.min(camMax.y, Math.max(camY, camMin.y));
+
+    camera.position.set(camX, camY, 0);
+
+    float camX2 = worldRenderer.getCameraBox2D().position.x;
+    float camY2 = worldRenderer.getCameraBox2D().position.y;
+
+    Vector2 camMin2 = new Vector2(worldRenderer.getCameraBox2D().viewportWidth / 2,
+        worldRenderer.getCameraBox2D().viewportHeight / 2);
+    camMin2.scl(worldRenderer.getCameraBox2D().zoom); //bring to center and scale by the zoom level
+    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth()/WORLD_TO_VIEW,
+        mapService.getCurrentMap().getMainTexture().getHeight()/WORLD_TO_VIEW);
+    camMax2.sub(camMin2); //bring to center
+
+    camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
+    camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
+
+    worldRenderer.getCameraBox2D().position.set(camX2, camY2, 0);
+  }
+
 }

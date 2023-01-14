@@ -187,7 +187,7 @@ public class PlayerService {
       point.set(Gdx.input.getX(), Gdx.input.getY(), 0);
       cameraBox2D.unproject(point);
 
-      weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y);
+      weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y, !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
     }
   }
 

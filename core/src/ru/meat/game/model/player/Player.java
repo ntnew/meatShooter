@@ -89,7 +89,7 @@ public class Player extends Actor {
 
 
       weaponService = new WeaponService(new BulletService(world));
-      weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
+//      weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
 
       body = GDXUtils.createCircleForModel(world,90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);

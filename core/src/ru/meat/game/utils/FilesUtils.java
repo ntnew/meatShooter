@@ -22,22 +22,22 @@ public class FilesUtils {
   }
 
 
-  public static Animation<Texture> initAnimationFrames(String animationFilesPath, float zoomMultiplier, float frameDuration) {
-    Texture[] collect = new Texture[0];
-    try {
-      collect = Files.walk(Paths.get(animationFilesPath))
-          .filter(Files::isRegularFile)
-          .sorted((x, y) -> convertBoolToInt(compareTwoFilenames(x, y)))
-          .map(file -> resizeTexture(Gdx.files.internal(file.toAbsolutePath().toString()), zoomMultiplier))
-          .toArray(Texture[]::new);
-    } catch (NullPointerException | IOException e) {
-      e.printStackTrace();
-    }
+  public static Animation<Texture> initAnimationFrames(String animationFilesPath, float zoomMultiplier,
+      float frameDuration) {
+    Texture[] collect = collectTextures(animationFilesPath, zoomMultiplier);
 
     return new Animation<>(frameDuration, collect);
   }
 
-  public static void readSettings(){
-
+  public static Texture[] collectTextures(String filesPath, float zoomMultiplier) {
+    try {
+      return Files.walk(Paths.get(filesPath))
+          .filter(Files::isRegularFile)
+          .sorted((x, y) -> convertBoolToInt(compareTwoFilenames(x, y)))
+          .map(file -> resizeTexture(Gdx.files.internal(file.toAbsolutePath().toString()), zoomMultiplier))
+          .toArray(Texture[]::new);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

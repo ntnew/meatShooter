@@ -54,6 +54,7 @@ public class WeaponService {
         .reloadDuration(3)
         .reloadCounter(0)
         .damage(35)
+        .bulletDeflection(1)
         .bulletService(bulletService)
         .currentLockCounter(0)
         .build();

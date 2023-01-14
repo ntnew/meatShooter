@@ -2,6 +2,7 @@ package ru.meat.game.model.weapons;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -18,8 +19,6 @@ import ru.meat.game.service.RpgStatsService;
 public class Weapon implements Shootable {
 
   private final BulletService bulletService;
-
-  private final AudioService audioService;
 
   private Texture bulletTexture;
 
@@ -54,22 +53,36 @@ public class Weapon implements Shootable {
 
   private long reloadCounter;
 
+  /**
+   * разброс пули +- от точки куда выстрелил
+   */
+  private float bulletDeflection;
+
   @Override
-  public void shoot(float fromX, float fromY, float screenX, float screenY) {
+  public void shoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
     if (fireCount < clipSize) {
       fireCount += 1;
+      float deflection = bulletDeflection * (playerRunning ? 2 : 1);
       AudioService.getInstance().playSound(shootSound);
-      bulletService.createBullet(fromX, fromY, screenX, screenY, speed, damage);
+      bulletService.createBullet(fromX, fromY, MathUtils.random(screenX - deflection, screenX + deflection),
+          MathUtils.random(screenY - deflection, screenY + deflection), speed, damage);
     } else {
-      if (reloadCounter == 0) {
-        reloadCounter = TimeUtils.millis();
-        AudioService.getInstance().playSound(reloadSound);
-      }
-      if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
-          / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
-        fireCount = 0;
-        reloadCounter = 0;
-      }
+      reload();
+    }
+  }
+
+  /**
+   * произвести перезарядку оружия
+   */
+  private void reload() {
+    if (reloadCounter == 0) {
+      reloadCounter = TimeUtils.millis();
+      AudioService.getInstance().playSound(reloadSound);
+    }
+    if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
+        / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
+      fireCount = 0;
+      reloadCounter = 0;
     }
   }
 

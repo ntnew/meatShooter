@@ -24,7 +24,6 @@ import ru.meat.game.service.AudioService;
 
 public class MapSelectorMenu implements Screen {
   private final MyGame game;
-
   private Button firstMapButton;
 
   private Button backButton;
@@ -50,7 +49,6 @@ public class MapSelectorMenu implements Screen {
     table.row();
     table.add(backButton).width(100).height(40);
     game.getStage().addActor(table);
-
   }
 
 

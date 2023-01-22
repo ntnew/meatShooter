@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import java.math.BigDecimal;
+import ru.meat.game.Box2dWorld;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.settings.Constants;
@@ -87,15 +88,14 @@ public class GDXUtils {
    * @return
    */
 
-  public static Body createCircleForModel(World world, float radius, float density, BodyUserData bodyData, float x,
-      float y) {
+  public static Body createCircleForModel(float radius, float density, BodyUserData bodyData, float x, float y) {
 
     BodyDef def = new BodyDef();
 
     def.type = BodyType.DynamicBody;
     def.position.set(x / Constants.WORLD_TO_VIEW, y / Constants.WORLD_TO_VIEW);
 
-    Body box = world.createBody(def);
+    Body box = Box2dWorld.getInstance().getWorld().createBody(def);
 
     CircleShape circle = new CircleShape();
     circle.setRadius(radius);

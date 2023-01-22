@@ -72,7 +72,7 @@ public class Player extends Actor {
   private CharacterTopStatus topStatus;
   private CharacterFeetStatus feetStatus;
 
-  public Player(World world, float x, float y) {
+  public Player(float x, float y) {
     try {
       currentWeapon = WeaponEnum.PISTOL;
       topStatus = CharacterTopStatus.IDLE;
@@ -88,11 +88,11 @@ public class Player extends Actor {
       this.diedAnimation = initAnimationFrames("./assets/export/died", zoomMultiplier,frameDuration);
 
 
-      weaponService = new WeaponService(new BulletService(world));
-//      weapons.add(weaponService.handgunWeapon(zoomMultiplier, frameDuration));
+      weaponService = new WeaponService();
+      weapons.add(weaponService.shotgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
 
-      body = GDXUtils.createCircleForModel(world,90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
+      body = GDXUtils.createCircleForModel(90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
 
     } catch (Exception e) {

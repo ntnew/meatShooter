@@ -16,28 +16,19 @@ import ru.meat.game.model.weapons.BulletBodyUserData;
 @AllArgsConstructor
 public class MyContactListener implements ContactListener {
 
-
-  private final World world;
-
   @Override
   public void endContact(Contact contact) {
   }
 
   @Override
   public void beginContact(Contact contact) {
-    Fixture fa = contact.getFixtureA();
-    Fixture fb = contact.getFixtureB();
-    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
-      setDamageToEnemyFromBullet(fa, fb);
-    } else if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BulletBodyUserData) {
-      setDamageToEnemyFromBullet(fb, fa);
-    }
+
   }
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
     BodyUserData bodyUserData = (BodyUserData) fa.getUserData();
     BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
 
-    bodyUserData.setDamage(bulletBodyUserData.getDamage());
+    bodyUserData.setDamage(bodyUserData.getDamage() + bulletBodyUserData.getDamage());
 
     bulletBodyUserData.setNeedDispose(true);
     fb.setUserData(bulletBodyUserData);
@@ -71,6 +62,13 @@ public class MyContactListener implements ContactListener {
 
   @Override
   public void postSolve(Contact contact, ContactImpulse impulse) {
+    Fixture fa = contact.getFixtureA();
+    Fixture fb = contact.getFixtureB();
+    if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
+      setDamageToEnemyFromBullet(fa, fb);
+    } else if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BulletBodyUserData) {
+      setDamageToEnemyFromBullet(fb, fa);
+    }
   }
 
 }

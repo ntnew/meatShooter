@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import ru.meat.game.Box2dWorld;
 import ru.meat.game.model.Enemy;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
@@ -25,19 +26,21 @@ import ru.meat.game.utils.GDXUtils;
 public class EnemyService {
 
   @Getter
-  private List<Enemy> enemies = new ArrayList<>();
+  private final List<Enemy> enemies = new ArrayList<>();
   @Getter
-  private AtomicInteger rewardPointCount = new AtomicInteger(0);
+  private final AtomicInteger rewardPointCount = new AtomicInteger(0);
 
 
-  public Enemy createZombieEnemy(float x, float y, World world) {
-    Enemy enemy = new Enemy(x, y, 1f, 100, MathUtils.random(0.005f, 0.03f) * MAIN_ZOOM,
-        0, 300, null);
+  public Enemy createZombieEnemy(float x, float y) {
+    float zombieSpeedLowRange = 1f;
+    float zombieSpeedTopRange = 2f;
+    float speed = MathUtils.random(zombieSpeedLowRange, zombieSpeedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
+    Enemy enemy = new Enemy(x, y, 1f, 100, speed,0, 300, null);
     enemy.setRadius(80);
     enemy.setAttack(10);
     enemy.setAttackSpeed(1.5);
     enemy.setCenterMultip(FloatPair.create(2.9f, 1.78f));
-    enemy.setBody(GDXUtils.createCircleForModel(world, enemy.getRadius() / WORLD_TO_VIEW, 80,
+    enemy.setBody(GDXUtils.createCircleForModel(enemy.getRadius() / WORLD_TO_VIEW, 80,
         new EnemyBodyUserData("zombie", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y));
     enemy.setRewardPoint(5);
     return enemy;
@@ -156,23 +159,22 @@ public class EnemyService {
     enemy.setAnimationAngle(MathUtils.radiansToDegrees * MathUtils.atan2(y, x) + 10);
   }
 
-  public void createEnemies(World world) {
-    enemies.add(createZombieEnemy(50f, 50f, world));
+  public void createEnemies() {
+    enemies.add(createZombieEnemy(50f, 50f));
   }
 
   /**
    * отработать действия врагов
    *
-   * @param posX  x координата игрока
-   * @param posY  y координата игрока
-   * @param world мир box2d
+   * @param posX x координата игрока
+   * @param posY y координата игрока
    */
-  public void actionEnemies(float posX, float posY, World world) {
+  public void actionEnemies(float posX, float posY) {
     enemies.forEach(enemy -> {
       if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
         doSomething(posX, posY, enemy);
       } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
-        world.destroyBody(enemy.getBody());
+        Box2dWorld.getInstance().getWorld().destroyBody(enemy.getBody());
         enemy.setBody(null);
         AudioService.getInstance().playEnemyDie();
         rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
@@ -181,9 +183,7 @@ public class EnemyService {
   }
 
   public void drawEnemies(SpriteBatch spriteBatch, float stateTime) {
-    enemies.forEach(enemy -> {
-      drawEnemySprite(spriteBatch, enemy, stateTime);
-    });
+    enemies.forEach(enemy -> drawEnemySprite(spriteBatch, enemy, stateTime));
   }
 }
 

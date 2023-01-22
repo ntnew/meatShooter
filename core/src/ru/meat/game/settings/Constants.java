@@ -10,7 +10,7 @@ public class Constants {
   /**
    * Множитель между миром box2d и отрисованным
    */
-  public static float WORLD_TO_VIEW = 60;
+  public static float WORLD_TO_VIEW = 80;
 
   /**
    * Скорость бега игрока

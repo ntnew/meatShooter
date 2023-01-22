@@ -4,35 +4,32 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
-import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import ru.meat.game.interfaces.Shootable;
+import lombok.experimental.SuperBuilder;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.RpgStatsService;
 
 @Data
 @AllArgsConstructor
-@Builder
-public class Weapon implements Shootable {
-
-  private final BulletService bulletService;
+@SuperBuilder
+public abstract class Weapon {
 
   private Texture bulletTexture;
 
   private WeaponEnum name;
 
-  private float speed;
+  protected float speed;
 
   private Animation<Texture> idleAnimation;
   private Animation<Texture> moveAnimation;
   private Animation<Texture> meleeAttackAnimation;
   private Animation<Texture> shootAnimation;
   private Animation<Texture> reloadAnimation;
-  private String shootSound;
-  private String reloadSound;
+
+  protected String shootSound;
+  protected String reloadSound;
 
   private long currentLockCounter;
   /**
@@ -40,54 +37,46 @@ public class Weapon implements Shootable {
    */
   private long fireRate;
 
-  private int damage;
+  protected int damage;
 
-  private int clipSize;
+  protected int clipSize;
 
-  private int fireCount;
+  protected int fireCount;
 
   /**
    * сколько длится перезарядка в секундах
    */
-  private float reloadDuration;
+  protected float reloadDuration;
 
-  private long reloadCounter;
+  protected long reloadCounter;
 
   /**
    * разброс пули +- от точки куда выстрелил
    */
-  private float bulletDeflection;
+  protected float bulletDeflection;
 
-  @Override
+  /**
+   * Сделать выстрел
+   * @param fromX из координаты Х
+   * @param fromY из координаты У
+   * @param screenX в точку на экране Х
+   * @param screenY в точку на экране У
+   * @param playerRunning флаг двигается ли игрок
+   */
   public void shoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
     if (fireCount < clipSize) {
       fireCount += 1;
-      float deflection = bulletDeflection * (playerRunning ? 2 : 1);
       AudioService.getInstance().playSound(shootSound);
-      bulletService.createBullet(fromX, fromY, MathUtils.random(screenX - deflection, screenX + deflection),
-          MathUtils.random(screenY - deflection, screenY + deflection), speed, damage);
+      implementShoot(fromX, fromY, screenX, screenY, playerRunning);
     } else {
-      reload();
+      implementReload();
     }
   }
+
+  protected abstract void implementShoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning);
 
   /**
    * произвести перезарядку оружия
    */
-  private void reload() {
-    if (reloadCounter == 0) {
-      reloadCounter = TimeUtils.millis();
-      AudioService.getInstance().playSound(reloadSound);
-    }
-    if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
-        / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
-      fireCount = 0;
-      reloadCounter = 0;
-    }
-  }
-
-  @Override
-  public void updateState() {
-    bulletService.updateBullets();
-  }
+  protected abstract void implementReload();
 }

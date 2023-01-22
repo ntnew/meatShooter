@@ -6,8 +6,8 @@ public interface Shootable {
 
   void shoot(float fromX, float fromY, float screenX, float screenY, boolean playerRuning);
 
-  /**
-   * Использовать для удаления пуль
-   */
-  void updateState();
+//  /**
+//   * Использовать для удаления пуль
+//   */
+//  void updateState();
 }

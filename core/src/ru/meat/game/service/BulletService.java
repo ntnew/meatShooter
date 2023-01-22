@@ -2,22 +2,21 @@ package ru.meat.game.service;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
+import ru.meat.game.Box2dWorld;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.weapons.Bullet;
 import ru.meat.game.model.weapons.BulletBodyUserData;
@@ -27,7 +26,15 @@ import ru.meat.game.settings.Constants;
 @Data
 public class BulletService {
 
-  private final World world;
+  private static BulletService instance;
+  private final SpriteBatch batch;
+
+  public static BulletService getInstance() {
+    if (instance == null) {
+      instance = new BulletService();
+    }
+    return instance;
+  }
 
   private List<Bullet> bullets = new ArrayList<>();
 
@@ -38,8 +45,8 @@ public class BulletService {
    */
   private Texture texture;
 
-  public BulletService(World world) {
-    this.world = world;
+  public BulletService() {
+    batch = new SpriteBatch();
     texture = GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get("Bullet1.png"), 1 / MAIN_ZOOM);
   }
 
@@ -74,10 +81,10 @@ public class BulletService {
 
     def.type = BodyType.DynamicBody;
     def.position.set(x, y);
-    Body box = world.createBody(def);
+    Body box = Box2dWorld.getInstance().getWorld().createBody(def);
 
     CircleShape circle = new CircleShape();
-    circle.setRadius((float) 2 * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
+    circle.setRadius((float) 4 * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
 
     box.createFixture(circle, (float) 100);
     box.getFixtureList().get(0)
@@ -105,13 +112,15 @@ public class BulletService {
   private void deleteBulletBody(int i) {
     try {
       bullets.get(i).getBody().setActive(false);
-      world.destroyBody(bullets.get(i).getBody());
+      Box2dWorld.getInstance().getWorld().destroyBody(bullets.get(i).getBody());
     } catch (Exception e) {
 
     }
   }
 
-  public void drawBullets(SpriteBatch spriteBatch, float x, float y) {
+  public void drawBullets(OrthographicCamera camera) {
+    batch.setProjectionMatrix(camera.combined);
+    batch.begin();
     bullets.forEach(b -> {
           try {
             Array<Fixture> fixtureList = b.getBody().getFixtureList();
@@ -123,12 +132,13 @@ public class BulletService {
                   position.y * Constants.WORLD_TO_VIEW - sprite.getHeight() / 2);
 
               sprite.rotate(b.getModelAngle());
-              sprite.draw(spriteBatch);
+              sprite.draw(batch);
             }
           } catch (NullPointerException e) {
 
           }
         }
     );
+    batch.end();
   }
 }

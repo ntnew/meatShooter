@@ -8,7 +8,8 @@ import lombok.Getter;
 
 public enum WeaponEnum {
   PISTOL(1),
-  RIFLE(2);
+  RIFLE(2),
+  SHOTGUN(3);
 
   @Getter
   private final int pos;

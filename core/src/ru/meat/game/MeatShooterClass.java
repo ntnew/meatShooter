@@ -1,6 +1,5 @@
 package ru.meat.game;
 
-import static ru.meat.game.settings.Constants.DEBUG;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
@@ -12,23 +11,19 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Cursor.SystemCursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.World;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.MainMenu;
 import ru.meat.game.menu.PauseMenu;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.service.AudioService;
+import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.MapService;
-import ru.meat.game.service.MyContactListener;
 import ru.meat.game.service.PlayerService;
 import ru.meat.game.service.RpgStatsService;
-import ru.meat.game.utils.GDXUtils;
 
 public class MeatShooterClass implements InputProcessor, Screen {
 
@@ -37,14 +32,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
   private PlayerService playerService;
   private EnemyService enemyService;
   private float stateTime;
-
-  private Texture bug;
-  private Sprite bugSprite;
-
   private SpriteBatch spriteBatch;
-  private World world;
-  private WorldRenderer worldRenderer;
-
   private MapService mapService;
 
   private GUI gui;
@@ -56,33 +44,21 @@ public class MeatShooterClass implements InputProcessor, Screen {
     float h = Gdx.graphics.getHeight();
 
     enemyService = new EnemyService();
-    this.mapService = new MapService();
-    mapService.initMap(map);
-
-    world = new World(new Vector2(0, 0), true);
-    world.step(1 / 60f, 6, 6);
-
-    world.setContactListener(new MyContactListener(world));
 
     camera = new OrthographicCamera();
     camera.zoom = MAIN_ZOOM;
     camera.setToOrtho(false, w, h);
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
-
     camera.update();
 
+    this.mapService = new MapService();
+    mapService.initMap(map);
     spriteBatch = new SpriteBatch();
     Gdx.input.setInputProcessor(this);
 
-    worldRenderer = new WorldRenderer(world, DEBUG, w, h);
-
-    playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM, Gdx.graphics.getHeight() / 2f * MAIN_ZOOM,
-        world);
-    enemyService.createEnemies(world);
-
-    bug = GDXUtils.resizeTexture(Gdx.files.internal("scar1.png"),2);
-    bugSprite = new Sprite(bug);
-    bugSprite.setPosition(500,500);
+    playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM,
+        Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
+    enemyService.createEnemies();
 
     gui = new GUI(playerService.getPlayer().getHp());
     gui.setAimCursor();
@@ -95,37 +71,40 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
   @Override
   public void render(float delta) {
-    AudioService.getInstance().playGameMusic();
-    createMoreEnemies();
-    camera.update();
-    worldRenderer.getCameraBox2D().update();
-
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-    stateTime += Gdx.graphics.getDeltaTime();
 
-    world.step(1 / 60f, 6, 2);
+    AudioService.getInstance().playGameMusic();
+    createMoreEnemies();
+
+    camera.update();
+    Box2dWorld.getInstance().update();
+
+
 
     playerService.updateState();
-    playerService.handleMoveKey(camera, worldRenderer.getCameraBox2D());
+    BulletService.getInstance().updateBullets();
+
+    playerService.handleMoveKey(camera, Box2dWorld.getInstance().getCameraBox2D());
     handleWorldBounds();
 
-    enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY(), world);
+    enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY());
     handleMouse();
 
     //рисовать текстуры
     spriteBatch.setProjectionMatrix(camera.combined);
+    mapService.draw(camera);
+    //тут место для отрисовки крови
+    BulletService.getInstance().drawBullets(camera);
+
     spriteBatch.begin();
-
-    mapService.draw(spriteBatch);
-    playerService.drawBullets(spriteBatch);
     playerService.drawPlayer(spriteBatch);
+    stateTime += Gdx.graphics.getDeltaTime();
     enemyService.drawEnemies(spriteBatch, stateTime);
-
-    bugSprite.draw(spriteBatch);
     spriteBatch.end();
-    worldRenderer.render();
+
+    Box2dWorld.getInstance().render();
 
     gui.draw(playerService.getPlayer().getHp());
 
@@ -171,8 +150,7 @@ public class MeatShooterClass implements InputProcessor, Screen {
       enemyService.getEnemies().add(
           enemyService.createZombieEnemy(
               MathUtils.random(xBound1, xBound2),
-              MathUtils.random(yBound1, yBound2),
-              world));
+              MathUtils.random(yBound1, yBound2)));
     }
   }
 
@@ -198,9 +176,9 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
   private void handleMouse() {
     if (!playerService.getPlayer().isDead()) {
-      playerService.rotateModel(worldRenderer.getCameraBox2D());
+      playerService.rotateModel(Box2dWorld.getInstance().getCameraBox2D());
       if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-        playerService.shoot(worldRenderer.getCameraBox2D());
+        playerService.shoot(Box2dWorld.getInstance().getCameraBox2D());
       }
     }
   }
@@ -258,14 +236,15 @@ public class MeatShooterClass implements InputProcessor, Screen {
   @Override
   public void dispose() {
 //    super.dispose();
-    worldRenderer.dispose();
+    Box2dWorld.getInstance().dispose();
   }
 
 
-  public void resumeGame(){
+  public void resumeGame() {
     gui.setAimCursor();
     Gdx.input.setInputProcessor(this);
   }
+
   public void endGameSession() {
     RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
     this.game.setScreen(new MainMenu(game));
@@ -292,20 +271,20 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
     camera.position.set(camX, camY, 0);
 
-    float camX2 = worldRenderer.getCameraBox2D().position.x;
-    float camY2 = worldRenderer.getCameraBox2D().position.y;
+    float camX2 = Box2dWorld.getInstance().getCameraBox2D().position.x;
+    float camY2 = Box2dWorld.getInstance().getCameraBox2D().position.y;
 
-    Vector2 camMin2 = new Vector2(worldRenderer.getCameraBox2D().viewportWidth / 2,
-        worldRenderer.getCameraBox2D().viewportHeight / 2);
-    camMin2.scl(worldRenderer.getCameraBox2D().zoom); //bring to center and scale by the zoom level
-    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth()/WORLD_TO_VIEW,
-        mapService.getCurrentMap().getMainTexture().getHeight()/WORLD_TO_VIEW);
+    Vector2 camMin2 = new Vector2(Box2dWorld.getInstance().getCameraBox2D().viewportWidth / 2,
+        Box2dWorld.getInstance().getCameraBox2D().viewportHeight / 2);
+    camMin2.scl(Box2dWorld.getInstance().getCameraBox2D().zoom); //bring to center and scale by the zoom level
+    Vector2 camMax2 = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth() / WORLD_TO_VIEW,
+        mapService.getCurrentMap().getMainTexture().getHeight() / WORLD_TO_VIEW);
     camMax2.sub(camMin2); //bring to center
 
     camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
     camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
 
-    worldRenderer.getCameraBox2D().position.set(camX2, camY2, 0);
+    Box2dWorld.getInstance().getCameraBox2D().position.set(camX2, camY2, 0);
   }
 
 }

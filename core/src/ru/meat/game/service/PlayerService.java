@@ -39,8 +39,8 @@ public class PlayerService {
 
   private float modelFrontAngle = 0;
 
-  public PlayerService(float x, float y, World world) {
-    player = new Player(world, x, y);
+  public PlayerService(float x, float y) {
+    player = new Player(x, y);
   }
 
   public void updateState() {
@@ -48,8 +48,6 @@ public class PlayerService {
       feetStateTime += Gdx.graphics.getDeltaTime();
     }
     topStateTime += Gdx.graphics.getDeltaTime();
-
-    getActualWeapon().updateState();
 
     handlePlayerHp();
   }
@@ -271,10 +269,6 @@ public class PlayerService {
    */
   private float getSpeed() {
     return speed * moveMultiplier * MAIN_ZOOM * RpgStatsService.getInstance().getStats().getMoveSpeed();
-  }
-
-  public void drawBullets(SpriteBatch spriteBatch) {
-    getActualWeapon().getBulletService().drawBullets(spriteBatch, getBodyPosX(), getBodyPosY());
   }
 
   /**

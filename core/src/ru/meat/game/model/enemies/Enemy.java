@@ -1,9 +1,11 @@
-package ru.meat.game.model;
+package ru.meat.game.model.enemies;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
 import com.badlogic.gdx.physics.box2d.Body;
 import lombok.Data;
+import ru.meat.game.model.EnemyStatus;
+import ru.meat.game.model.FloatPair;
 
 @Data
 //@Builder

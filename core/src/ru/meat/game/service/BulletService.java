@@ -40,14 +40,8 @@ public class BulletService {
 
   private final ArrayList<Integer> bulletsToRemove = new ArrayList<>();
 
-  /**
-   * текстура пули
-   */
-  private Texture texture;
-
   public BulletService() {
     batch = new SpriteBatch();
-    texture = GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get("Bullet1.png"), 1 / MAIN_ZOOM);
   }
 
   /**
@@ -61,9 +55,9 @@ public class BulletService {
    * @param damage
    * @return обект пули
    */
-  public void createBullet(float fromX, float fromY, float screenX, float screenY, float bulletSpeed, int damage) {
+  public void createBullet(float fromX, float fromY, float screenX, float screenY, float bulletSpeed, int damage, Texture texture,float bulletRadius) {
     Bullet bullet = new Bullet();
-    Body bulletBody = createCircleForBullet(fromX, fromY, damage);
+    Body bulletBody = createCircleForBullet(fromX, fromY, damage, bulletRadius);
     bulletBody.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
     bulletBody.setBullet(true);
     bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed * MAIN_ZOOM,
@@ -75,7 +69,7 @@ public class BulletService {
     bullets.add(bullet);
   }
 
-  private Body createCircleForBullet(float x, float y, int damage) {
+  private Body createCircleForBullet(float x, float y, int damage, float bulletRadius) {
 
     BodyDef def = new BodyDef();
 
@@ -84,7 +78,7 @@ public class BulletService {
     Body box = Box2dWorld.getInstance().getWorld().createBody(def);
 
     CircleShape circle = new CircleShape();
-    circle.setRadius((float) 4 * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
+    circle.setRadius(bulletRadius * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
 
     box.createFixture(circle, (float) 100);
     box.getFixtureList().get(0)
@@ -140,5 +134,9 @@ public class BulletService {
         }
     );
     batch.end();
+  }
+
+  public static void dispose(){
+    instance = null;
   }
 }

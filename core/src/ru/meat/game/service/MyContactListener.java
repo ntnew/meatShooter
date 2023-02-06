@@ -5,11 +5,10 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
 import lombok.AllArgsConstructor;
 import ru.meat.game.model.bodyData.BodyUserData;
-import ru.meat.game.model.bodyData.EnemyBodyUserData;
+import ru.meat.game.model.enemies.EnemyBodyUserData;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 
 

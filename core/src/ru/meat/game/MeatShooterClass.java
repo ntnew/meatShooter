@@ -40,14 +40,11 @@ public class MeatShooterClass implements InputProcessor, Screen {
   public MeatShooterClass(int map, MyGame game) {
     this.game = game;
 
-    float w = Gdx.graphics.getWidth();
-    float h = Gdx.graphics.getHeight();
-
     enemyService = new EnemyService();
 
     camera = new OrthographicCamera();
     camera.zoom = MAIN_ZOOM;
-    camera.setToOrtho(false, w, h);
+    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
     camera.update();
 
@@ -80,7 +77,6 @@ public class MeatShooterClass implements InputProcessor, Screen {
 
     camera.update();
     Box2dWorld.getInstance().update();
-
 
 
     playerService.updateState();
@@ -250,6 +246,8 @@ public class MeatShooterClass implements InputProcessor, Screen {
     this.game.setScreen(new MainMenu(game));
     Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
     AudioService.getInstance().smoothStopMusic();
+    Box2dWorld.dispose();
+    BulletService.dispose();
   }
 
   /**

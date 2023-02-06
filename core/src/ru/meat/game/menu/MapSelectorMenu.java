@@ -5,6 +5,7 @@ import static ru.meat.game.utils.GDXUtils.createButton;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -65,7 +66,9 @@ public class MapSelectorMenu implements Screen {
       startedLoad = true;
       firstMapButton.setDisabled(true);
       backButton.setDisabled(true);
-      LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class);
+      TextureParameter param = new TextureParameter();
+      param.genMipMaps = true;
+      LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, param);
       LoaderManager.getInstance().load("Bullet1.png", Texture.class);
       EnemiesAnimation.getInstance();
     }

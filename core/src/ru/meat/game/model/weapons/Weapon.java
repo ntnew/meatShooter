@@ -16,9 +16,12 @@ import ru.meat.game.service.RpgStatsService;
 @SuperBuilder
 public abstract class Weapon {
 
-  private Texture bulletTexture;
-
   private WeaponEnum name;
+  /**
+   * текстура пули
+   */
+  protected Texture bulletTexture;
+
 
   protected float speed;
 
@@ -56,6 +59,13 @@ public abstract class Weapon {
   protected float bulletDeflection;
 
   /**
+   * радиус пули
+   */
+  protected float box2dRadius;
+
+
+  protected boolean reloading = false;
+  /**
    * Сделать выстрел
    * @param fromX из координаты Х
    * @param fromY из координаты У
@@ -64,11 +74,12 @@ public abstract class Weapon {
    * @param playerRunning флаг двигается ли игрок
    */
   public void shoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
-    if (fireCount < clipSize) {
+    if (!reloading && fireCount < clipSize) {
       fireCount += 1;
-      AudioService.getInstance().playSound(shootSound);
+      AudioService.getInstance().playShootSound(shootSound);
       implementShoot(fromX, fromY, screenX, screenY, playerRunning);
-    } else {
+    } else if (!reloading){
+      reloading = true;
       implementReload();
     }
   }

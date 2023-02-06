@@ -6,7 +6,6 @@ import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +14,8 @@ import lombok.EqualsAndHashCode;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
-import ru.meat.game.service.BulletService;
 import ru.meat.game.service.RpgStatsService;
-import ru.meat.game.service.WeaponService;
+import ru.meat.game.model.weapons.WeaponFactory;
 import ru.meat.game.utils.GDXUtils;
 
 @EqualsAndHashCode(callSuper = true)
@@ -67,8 +65,6 @@ public class Player extends Actor {
 
   private List<Weapon> weapons = new ArrayList<>();
 
-  private WeaponService weaponService;
-
   private CharacterTopStatus topStatus;
   private CharacterFeetStatus feetStatus;
 
@@ -87,10 +83,8 @@ public class Player extends Actor {
       this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
       this.diedAnimation = initAnimationFrames("./assets/export/died", zoomMultiplier,frameDuration);
 
-
-      weaponService = new WeaponService();
-      weapons.add(weaponService.shotgunWeapon(zoomMultiplier, frameDuration));
-      weapons.add(weaponService.rifleWeapon(zoomMultiplier, frameDuration));
+      weapons.add(WeaponFactory.shotgunWeapon(zoomMultiplier, frameDuration));
+      weapons.add(WeaponFactory.rifleWeapon(zoomMultiplier, frameDuration));
 
       body = GDXUtils.createCircleForModel(90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());

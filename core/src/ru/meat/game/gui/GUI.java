@@ -30,6 +30,9 @@ public class GUI {
 
   public GUI(double fullHp) {
     this.textures = FilesUtils.collectTextures("./assets/gui/hpBar/", 1);
+    for (int i = 0; i < this.textures.length; i++) {
+      textures[i].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+    }
 
     this.fullHp = fullHp;
 

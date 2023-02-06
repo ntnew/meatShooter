@@ -23,4 +23,7 @@ public class Constants {
 
   public static float GUI_ZOOM = 1.4f;
 
+
+  public static float SHOOT_SOUND_MULTIPLY = 0.8f;
+
 }

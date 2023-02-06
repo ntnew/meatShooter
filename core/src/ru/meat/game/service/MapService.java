@@ -3,6 +3,7 @@ package ru.meat.game.service;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import lombok.Data;
@@ -22,7 +23,9 @@ public class MapService {
   public void initMap(int mapPos){
     Maps map = Maps.getNameByPos(mapPos);
     currentMap = new Map(FloatPair.create(0f,0f), LoaderManager.getInstance().get(map.getName()));
+    currentMap.getMainTexture().setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
     batch = new SpriteBatch();
+
 
 //    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get(map.getName()), map.getScale()));
 // изменение размера медленно работает TODO переделать масштабирование

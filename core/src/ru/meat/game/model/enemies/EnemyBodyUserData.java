@@ -1,12 +1,13 @@
-package ru.meat.game.model.bodyData;
+package ru.meat.game.model.enemies;
 
 import lombok.Data;
+import ru.meat.game.model.bodyData.BodyUserData;
 
 /**
  * Клас, который кладётся в body box2d для передачи информации контактов
  */
 @Data
-public class EnemyBodyUserData extends BodyUserData{
+public class EnemyBodyUserData extends BodyUserData {
 
   /**
    * Нужно ли атаковать игрока

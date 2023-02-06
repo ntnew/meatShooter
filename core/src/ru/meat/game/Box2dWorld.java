@@ -46,15 +46,16 @@ public class Box2dWorld {
   }
 
 
-  public void dispose() {
-    world.dispose();
+  public static void dispose() {
+    instance.getWorld().dispose();
+    instance = null;
   }
 
   public void render() {
     renderer.render(world, cameraBox2D.combined);
   }
 
-  public void update(){
+  public void update() {
     cameraBox2D.update();
     Box2dWorld.getInstance().getWorld().step(1 / 60f, 6, 2);
   }

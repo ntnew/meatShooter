@@ -1,5 +1,7 @@
 package ru.meat.game.service;
 
+import static ru.meat.game.settings.Constants.SHOOT_SOUND_MULTIPLY;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -24,7 +26,10 @@ public class AudioService {
     return instance;
   }
 
-  private List<String> enemyDies = Arrays.asList("sound/enemy/die2.mp3", "sound/enemy/die1.mp3", "sound/enemy/die3.mp3",
+  private List<String> enemyDies = Arrays.asList(
+      "sound/enemy/die2.mp3",
+      "sound/enemy/die1.mp3",
+      "sound/enemy/die3.mp3",
       "sound/enemy/die4.mp3");
 
 
@@ -63,6 +68,11 @@ public class AudioService {
   public void playSound(String soundPath) {
     Sound sound = LoaderManager.getInstance().get(soundPath);
     sound.play(Settings.getInstance().EFFECT_VOLUME);
+  }
+
+  public void playShootSound(String soundPath) {
+    Sound sound = LoaderManager.getInstance().get(soundPath);
+    sound.play(Settings.getInstance().EFFECT_VOLUME * SHOOT_SOUND_MULTIPLY);
   }
 
   public void playEnemyDie() {

@@ -17,7 +17,7 @@ public class Rifle extends Weapon {
   protected void implementShoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
     float deflection = bulletDeflection * (playerRunning ? 2 : 1);
     BulletService.getInstance().createBullet(fromX, fromY, MathUtils.random(screenX - deflection, screenX + deflection),
-        MathUtils.random(screenY - deflection, screenY + deflection), speed, damage);
+        MathUtils.random(screenY - deflection, screenY + deflection), speed, damage, bulletTexture, box2dRadius);
   }
 
   @Override
@@ -25,11 +25,22 @@ public class Rifle extends Weapon {
     if (reloadCounter == 0) {
       reloadCounter = TimeUtils.millis();
       AudioService.getInstance().playSound(reloadSound);
+      new MMM().start();
     }
-    if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
-        / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
-      fireCount = 0;
-      reloadCounter = 0;
+  }
+
+  class MMM extends Thread {
+    @Override
+    public void run() {
+      while (true) {
+        if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
+            / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
+          reloading = false;
+          fireCount = 0;
+          reloadCounter = 0;
+          break;
+        }
+      }
     }
   }
 }

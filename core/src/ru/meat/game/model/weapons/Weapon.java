@@ -10,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.RpgStatsService;
+import ru.meat.game.utils.GDXUtils;
 
 @Data
 @AllArgsConstructor
@@ -77,7 +78,17 @@ public abstract class Weapon {
     if (!reloading && fireCount < clipSize) {
       fireCount += 1;
       AudioService.getInstance().playShootSound(shootSound);
-      implementShoot(fromX, fromY, screenX, screenY, playerRunning);
+
+      float catetPrilezjaschiy = (screenX - fromX);
+      float newGip = 20;
+      float catetProtivo = (screenY - fromY);
+      float gip = GDXUtils.calcGipotenuza(catetPrilezjaschiy, catetProtivo);
+      float sin = catetProtivo / gip;
+      float cos = catetPrilezjaschiy / gip;
+      float newCatetForY = sin * newGip;
+      float newCatetForX = cos * newGip;
+
+      implementShoot(fromX, fromY, fromX+newCatetForX, fromY+newCatetForY, playerRunning);
     } else if (!reloading){
       reloading = true;
       implementReload();

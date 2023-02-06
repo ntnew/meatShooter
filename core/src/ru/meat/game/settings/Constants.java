@@ -5,7 +5,7 @@ public class Constants {
   /**
    * Основной зум камер
    */
-  public static float MAIN_ZOOM = 3f;
+  public static float MAIN_ZOOM = 4f;
 
   /**
    * Множитель между миром box2d и отрисованным

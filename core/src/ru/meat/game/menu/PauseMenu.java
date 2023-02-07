@@ -10,8 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import ru.meat.game.MeatShooterClass;
+import ru.meat.game.game.DeathMatch;
 import ru.meat.game.MyGame;
+import ru.meat.game.game.GameZone;
 
 public class PauseMenu implements Screen {
 
@@ -24,9 +25,9 @@ public class PauseMenu implements Screen {
 
   private Table table;
 
-  public PauseMenu(final MyGame game, MeatShooterClass currentGameScreen) {
+  public PauseMenu(final MyGame game, GameZone currentGameScreen) {
     this.game = game;
-    this.game.setMeatShooterClass(currentGameScreen);
+    this.game.setGameZone(currentGameScreen);
 
     game.initStage();
     createButtons();
@@ -61,7 +62,7 @@ public class PauseMenu implements Screen {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         super.clicked(event, x, y);
-        game.getMeatShooterClass().endGameSession();
+        game.getGameZone().endGameSession();
       }
     });
 
@@ -77,8 +78,8 @@ public class PauseMenu implements Screen {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         super.clicked(event, x, y);
-        game.setScreen(game.getMeatShooterClass());
-        game.getMeatShooterClass().resumeGame();
+        game.setScreen(game.getGameZone());
+        game.getGameZone().resumeGame();
       }
     });
   }

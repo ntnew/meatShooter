@@ -8,6 +8,11 @@ public class Constants {
   public static float MAIN_ZOOM = 4f;
 
   /**
+   * зум камеры меню
+   */
+  public static float MENU_ZOOM = 0.5f;
+
+  /**
    * Множитель между миром box2d и отрисованным
    */
   public static float WORLD_TO_VIEW = 80;

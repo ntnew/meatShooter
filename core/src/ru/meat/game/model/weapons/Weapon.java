@@ -79,6 +79,7 @@ public abstract class Weapon {
       fireCount += 1;
       AudioService.getInstance().playShootSound(shootSound);
 
+      //найти  новую точку на экране с новоой гипотенузой
       float catetPrilezjaschiy = (screenX - fromX);
       float newGip = 20;
       float catetProtivo = (screenY - fromY);

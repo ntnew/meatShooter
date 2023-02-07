@@ -1,8 +1,9 @@
 package ru.meat.game;
 
+import static ru.meat.game.settings.Constants.MENU_ZOOM;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -12,9 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import lombok.Data;
+import ru.meat.game.game.GameZone;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.menu.MainMenu;
 import ru.meat.game.service.AudioService;
+import ru.meat.game.service.BloodService;
 import ru.meat.game.settings.Settings;
 
 @Data
@@ -29,7 +32,7 @@ public class MyGame extends Game {
 
   private Stage stage;
 
-  private MeatShooterClass meatShooterClass;
+  private GameZone gameZone;
 
   private boolean loaded = false;
 
@@ -51,6 +54,7 @@ public class MyGame extends Game {
     labelStyle.fontColor = Color.WHITE;
 
     AudioService.getInstance();
+    BloodService.getInstance();
   }
 
   public void render() {
@@ -68,7 +72,9 @@ public class MyGame extends Game {
 
   private void initCam() {
     menuCamera = new OrthographicCamera();
+    menuCamera.zoom = MENU_ZOOM;
     menuCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    menuCamera.update();
   }
 
   private void updateCamera() {
@@ -77,7 +83,7 @@ public class MyGame extends Game {
   }
 
   public void initStage() {
-    stage = new Stage(new ScreenViewport());
+    stage = new Stage(new ScreenViewport(menuCamera));
     Gdx.input.setInputProcessor(stage);
   }
 

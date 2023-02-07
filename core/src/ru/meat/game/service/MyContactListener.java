@@ -1,5 +1,7 @@
 package ru.meat.game.service;
 
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
+
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
@@ -7,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.TimeUtils;
 import lombok.AllArgsConstructor;
+import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.enemies.EnemyBodyUserData;
 import ru.meat.game.model.weapons.BulletBodyUserData;
@@ -23,15 +26,7 @@ public class MyContactListener implements ContactListener {
   public void beginContact(Contact contact) {
 
   }
-  private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
-    BodyUserData bodyUserData = (BodyUserData) fa.getUserData();
-    BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
 
-    bodyUserData.setDamage(bodyUserData.getDamage() + bulletBodyUserData.getDamage());
-
-    bulletBodyUserData.setNeedDispose(true);
-    fb.setUserData(bulletBodyUserData);
-  }
 
   @Override
   public void preSolve(Contact contact, Manifold oldManifold) {
@@ -53,7 +48,8 @@ public class MyContactListener implements ContactListener {
     enemyData.setNeedAttack(true);
 
     BodyUserData playerUserData = (BodyUserData) fb.getUserData();
-    if (enemyData.getPreviousAttackTime() == null || TimeUtils.timeSinceMillis(enemyData.getPreviousAttackTime()) > enemyData.getAttackSpeed()*1000) {
+    if (enemyData.getPreviousAttackTime() == null
+        || TimeUtils.timeSinceMillis(enemyData.getPreviousAttackTime()) > enemyData.getAttackSpeed() * 1000) {
       playerUserData.setDamage(playerUserData.getDamage() + enemyData.getAttack());
       enemyData.setPreviousAttackTime(TimeUtils.millis());
     }
@@ -65,9 +61,27 @@ public class MyContactListener implements ContactListener {
     Fixture fb = contact.getFixtureB();
     if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
       setDamageToEnemyFromBullet(fa, fb);
+      addBlood(
+          new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
+
     } else if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BulletBodyUserData) {
       setDamageToEnemyFromBullet(fb, fa);
+      addBlood(
+          new FloatPair(fb.getBody().getPosition().x * WORLD_TO_VIEW, fb.getBody().getPosition().y * WORLD_TO_VIEW));
     }
   }
 
+  private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
+    BodyUserData bodyUserData = (BodyUserData) fa.getUserData();
+    BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
+
+    bodyUserData.setDamage(bodyUserData.getDamage() + bulletBodyUserData.getDamage());
+
+    bulletBodyUserData.setNeedDispose(true);
+    fb.setUserData(bulletBodyUserData);
+  }
+
+  private void addBlood(FloatPair coord) {
+    BloodService.getInstance().createLittleBloodSpot(coord);
+  }
 }

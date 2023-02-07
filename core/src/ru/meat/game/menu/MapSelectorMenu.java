@@ -9,14 +9,12 @@ import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import ru.meat.game.MeatShooterClass;
+import ru.meat.game.game.DeathMatch;
 import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.enemies.EnemiesAnimation;
@@ -69,12 +67,12 @@ public class MapSelectorMenu implements Screen {
       TextureParameter param = new TextureParameter();
       param.genMipMaps = true;
       LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, param);
-      LoaderManager.getInstance().load("Bullet1.png", Texture.class);
+      LoaderManager.getInstance().load("Bullet1.png", Texture.class, param);
       EnemiesAnimation.getInstance();
     }
 
     if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {
-      game.setScreen(new MeatShooterClass(selectedMap, game));
+      game.setScreen(new DeathMatch(selectedMap, game));
       AudioService.getInstance().initSteps();
       AudioService.getInstance().smoothStopMusic();
     }

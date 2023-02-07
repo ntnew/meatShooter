@@ -6,7 +6,6 @@ import static ru.meat.game.utils.GDXUtils.createButton;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -18,7 +17,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import ru.meat.game.MyGame;
 import ru.meat.game.service.AudioService;
 
@@ -222,7 +220,7 @@ public class SettingsMenu implements Screen {
 
         preferences.flush();
         if (pause) {
-          game.setScreen(new PauseMenu(game, game.getMeatShooterClass()));
+          game.setScreen(new PauseMenu(game, game.getGameZone()));
         } else {
           game.setScreen(new MainMenu(game));
         }
@@ -236,7 +234,7 @@ public class SettingsMenu implements Screen {
           AudioService.getInstance().getCurrentMusic().setVolume(preferences.getFloat("MUSIC_VOLUME"));
         }
         if (pause) {
-          game.setScreen(new PauseMenu(game, game.getMeatShooterClass()));
+          game.setScreen(new PauseMenu(game, game.getGameZone()));
         } else {
           game.setScreen(new MainMenu(game));
         }

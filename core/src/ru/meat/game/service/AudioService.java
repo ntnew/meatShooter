@@ -107,7 +107,9 @@ public class AudioService {
     playSound("sound/player/hit1.mp3");
   }
 
-
+  /**
+   * Играть игровую музыку, если кончилась, включать следующую
+   */
   public void playGameMusic() {
     if (currentMusic == null) {
       Music music = LoaderManager.getInstance().get(gameMusic.get(getRandomMusic()));

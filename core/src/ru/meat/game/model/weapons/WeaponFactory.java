@@ -6,10 +6,6 @@ import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
 import com.badlogic.gdx.graphics.Texture;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.model.weapons.Rifle;
-import ru.meat.game.model.weapons.Shotgun;
-import ru.meat.game.model.weapons.Weapon;
-import ru.meat.game.model.weapons.WeaponEnum;
 import ru.meat.game.utils.GDXUtils;
 
 @Data
@@ -40,7 +36,7 @@ public class WeaponFactory {
 //  }
 
   public static Weapon rifleWeapon(float zoom, float frameDuration) {
-    return Rifle.builder()
+    return Weapon.builder()
         .name(WeaponEnum.RIFLE)
         .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
         .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
@@ -52,19 +48,22 @@ public class WeaponFactory {
         .shootSound("sound/weapons/ak47.mp3")
         .reloadSound("sound/weapons/ak47reload.mp3")
         .clipSize(30)
+        .reloadBulletPerTick(30)
         .fireCount(0)
         .reloadDuration(3)
         .reloadCounter(0)
+        .shotInOneBullet(1)
         .bulletTexture(GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get("Bullet1.png"), 1 / MAIN_ZOOM))
         .box2dRadius(4)
         .damage(35)
         .bulletDeflection(1)
         .currentLockCounter(0)
+        .moveSpeedMultiplier(1f)
         .build();
   }
 
   public static Weapon shotgunWeapon(float zoom, float frameDuration) {
-    return Shotgun.builder()
+    return Weapon.builder()
         .name(WeaponEnum.SHOTGUN)
         .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
         .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
@@ -76,6 +75,7 @@ public class WeaponFactory {
         .shootSound("sound/weapons/shotgun.mp3")
         .reloadSound("sound/weapons/shotgunReload.mp3")
         .clipSize(8)
+        .reloadBulletPerTick(1)
         .fireCount(0)
         .reloadDuration(0.7f)
         .reloadCounter(0)
@@ -85,6 +85,59 @@ public class WeaponFactory {
         .shotInOneBullet(10)
         .bulletDeflection(2)
         .currentLockCounter(0)
+        .moveSpeedMultiplier(1f)
+        .build();
+  }
+  public static Weapon doubleBarrelShotgunWeapon(float zoom, float frameDuration) {
+    return Weapon.builder()
+        .name(WeaponEnum.DOUBLE_BARREL)
+        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
+        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
+        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
+        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
+        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
+        .speed(pistolBulletSpeed)
+        .fireRate(300)
+        .shootSound("sound/weapons/2barrelShot.mp3")
+        .reloadSound("sound/weapons/2barrelReload.mp3")
+        .clipSize(2)
+        .fireCount(0)
+        .reloadDuration(1.2f)
+        .reloadCounter(0)
+        .damage(25)
+        .bulletTexture(GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get("Bullet1.png"), 2 / MAIN_ZOOM))
+        .box2dRadius(2)
+        .shotInOneBullet(12)
+        .reloadBulletPerTick(2)
+        .bulletDeflection(2)
+        .currentLockCounter(0)
+        .moveSpeedMultiplier(1f)
+        .build();
+  }
+  public static Weapon machineGun(float zoom, float frameDuration) {
+    return Weapon.builder()
+        .name(WeaponEnum.MACHINE_GUN)
+        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
+        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
+        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
+        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
+        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
+        .speed(pistolBulletSpeed)
+        .fireRate(90)
+        .shootSound("sound/weapons/m249.mp3")
+        .reloadSound("sound/weapons/m249reload.mp3")
+        .clipSize(150)
+        .reloadBulletPerTick(150)
+        .fireCount(0)
+        .reloadDuration(5)
+        .reloadCounter(0)
+        .bulletTexture(GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get("Bullet1.png"), 1 / MAIN_ZOOM))
+        .box2dRadius(4)
+        .damage(35)
+        .shotInOneBullet(1)
+        .bulletDeflection(2)
+        .currentLockCounter(0)
+        .moveSpeedMultiplier(0.7f)
         .build();
   }
 }

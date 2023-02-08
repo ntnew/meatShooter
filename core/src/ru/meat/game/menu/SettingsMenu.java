@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import ru.meat.game.MyGame;
 import ru.meat.game.service.AudioService;
+import ru.meat.game.settings.Settings;
 
 public class SettingsMenu implements Screen {
 
@@ -219,6 +220,7 @@ public class SettingsMenu implements Screen {
         }
 
         preferences.flush();
+        Settings.reloadSettings();
         if (pause) {
           game.setScreen(new PauseMenu(game, game.getGameZone()));
         } else {

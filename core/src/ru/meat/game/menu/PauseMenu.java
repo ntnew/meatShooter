@@ -80,6 +80,7 @@ public class PauseMenu implements Screen {
         super.clicked(event, x, y);
         game.setScreen(game.getGameZone());
         game.getGameZone().resumeGame();
+        game.getStage().clear();
       }
     });
   }

@@ -44,6 +44,10 @@ public class Settings {
     prefs.flush();
   }
 
+  public static void reloadSettings(){
+    instance = new Settings();
+  }
+
   /**
    * Громкость эффектов
    */

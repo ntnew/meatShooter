@@ -109,25 +109,4 @@ public class DeathMatch extends GameZone {
               MathUtils.random(yBound1, yBound2)));
     }
   }
-
-
-
-
-//  @Override
-//  public boolean keyDown(int keycode) {
-//    if (keycode == Keys.NUM_1) {
-//      playerService.changeWeapon(1);
-//    }
-//    if (keycode == Keys.NUM_2) {
-//      playerService.changeWeapon(2);
-//    }
-//    if (keycode == Keys.ESCAPE) {
-//      Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
-//      game.setScreen(new PauseMenu(game, this));
-//    }
-//    return false;
-//  }
-
-
-
 }

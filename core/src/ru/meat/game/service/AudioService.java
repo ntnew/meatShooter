@@ -52,6 +52,13 @@ public class AudioService {
     LoaderManager.getInstance().load("sound/weapons/ak47reload.mp3", Sound.class);
     LoaderManager.getInstance().load("sound/weapons/shotgun.mp3", Sound.class);
     LoaderManager.getInstance().load("sound/weapons/shotgunReload.mp3", Sound.class);
+    LoaderManager.getInstance().load("sound/weapons/2barrelShot.mp3", Sound.class);
+    LoaderManager.getInstance().load("sound/weapons/2barrelReload.mp3", Sound.class);
+    LoaderManager.getInstance().load("sound/weapons/m249.mp3", Sound.class);
+    LoaderManager.getInstance().load("sound/weapons/m249reload.mp3", Sound.class);
+
+
+
 
     LoaderManager.getInstance().load("sound/track1.mp3", Music.class);
     LoaderManager.getInstance().load("sound/track2.mp3", Music.class);

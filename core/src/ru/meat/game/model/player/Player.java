@@ -70,7 +70,7 @@ public class Player extends Actor {
 
   public Player(float x, float y) {
     try {
-      currentWeapon = WeaponEnum.PISTOL;
+      currentWeapon = WeaponEnum.SHOTGUN;
       topStatus = CharacterTopStatus.IDLE;
       feetStatus = CharacterFeetStatus.IDLE;
 
@@ -85,6 +85,8 @@ public class Player extends Actor {
 
       weapons.add(WeaponFactory.shotgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(WeaponFactory.rifleWeapon(zoomMultiplier, frameDuration));
+      weapons.add(WeaponFactory.doubleBarrelShotgunWeapon(zoomMultiplier, frameDuration));
+      weapons.add(WeaponFactory.machineGun(zoomMultiplier, frameDuration));
 
       body = GDXUtils.createCircleForModel(90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());

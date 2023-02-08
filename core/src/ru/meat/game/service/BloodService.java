@@ -64,6 +64,10 @@ public class BloodService {
     batch.end();
   }
 
+  /**
+   * Создать маленькую текстуру крови
+   * @param coord координаты где создать в мире текстур
+   */
   public void createLittleBloodSpot(FloatPair coord) {
     int random = MathUtils.random(0, littleBloodPngName.size() - 1);
 

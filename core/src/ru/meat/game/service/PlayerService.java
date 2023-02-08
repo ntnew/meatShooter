@@ -268,7 +268,7 @@ public class PlayerService {
    * Получить скорость движения игрока
    */
   private float getSpeed() {
-    return speed * moveMultiplier * MAIN_ZOOM * RpgStatsService.getInstance().getStats().getMoveSpeed();
+    return speed * moveMultiplier * MAIN_ZOOM * RpgStatsService.getInstance().getStats().getMoveSpeed() * getActualWeapon().getMoveSpeedMultiplier();
   }
 
   /**

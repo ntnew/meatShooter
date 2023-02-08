@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import ru.meat.game.service.AudioService;
@@ -14,8 +15,8 @@ import ru.meat.game.utils.GDXUtils;
 
 @Data
 @AllArgsConstructor
-@SuperBuilder
-public abstract class Weapon {
+@Builder
+public class Weapon {
 
   private WeaponEnum name;
   /**
@@ -24,6 +25,9 @@ public abstract class Weapon {
   protected Texture bulletTexture;
 
 
+  /**
+   * Скорость полёта пули
+   */
   protected float speed;
 
   private Animation<Texture> idleAnimation;
@@ -41,10 +45,19 @@ public abstract class Weapon {
    */
   private long fireRate;
 
+  /**
+   * урон 1 пули
+   */
   protected int damage;
 
+  /**
+   * размер магазина
+   */
   protected int clipSize;
 
+  /**
+   * число сделанных выстрелов
+   */
   protected int fireCount;
 
   /**
@@ -64,14 +77,34 @@ public abstract class Weapon {
    */
   protected float box2dRadius;
 
+  private volatile boolean wantShoot = false;
 
-  protected boolean reloading = false;
+  /**
+   * Пуль в одном выстреле
+   */
+  private int shotInOneBullet;
+  /**
+   * Перезаряжает пуль за раз
+   */
+  private int reloadBulletPerTick;
+
+  /**
+   * Флаг, идёт ли перезарядка
+   */
+  private boolean reloading = false;
+
+  /**
+   * множитель скорости передвижения
+   */
+  private float moveSpeedMultiplier = 1;
+
   /**
    * Сделать выстрел
-   * @param fromX из координаты Х
-   * @param fromY из координаты У
-   * @param screenX в точку на экране Х
-   * @param screenY в точку на экране У
+   *
+   * @param fromX         из координаты Х
+   * @param fromY         из координаты У
+   * @param screenX       в точку на экране Х
+   * @param screenY       в точку на экране У
    * @param playerRunning флаг двигается ли игрок
    */
   public void shoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
@@ -89,17 +122,52 @@ public abstract class Weapon {
       float newCatetForY = sin * newGip;
       float newCatetForX = cos * newGip;
 
-      implementShoot(fromX, fromY, fromX+newCatetForX, fromY+newCatetForY, playerRunning);
-    } else if (!reloading){
+      screenX = fromX + newCatetForX;
+      screenY = fromY + newCatetForY;
+
+      wantShoot = true;
+      float deflection = bulletDeflection * (playerRunning ? 2 : 1);
+      for (int i = 0; i < shotInOneBullet; i++) {
+        BulletService.getInstance()
+            .createBullet(fromX, fromY, MathUtils.random(screenX - deflection, screenX + deflection),
+                MathUtils.random(screenY - deflection, screenY + deflection), speed, damage, bulletTexture,
+                box2dRadius);
+      }
+
+    } else if (!reloading) {
       reloading = true;
       implementReload();
     }
   }
 
-  protected abstract void implementShoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning);
-
   /**
    * произвести перезарядку оружия
    */
-  protected abstract void implementReload();
+  private void implementReload() {
+    if (reloadCounter == 0) {
+
+      new ThreadForReload().start();
+    }
+  }
+
+  class ThreadForReload extends Thread {
+
+    @Override
+    public void run() {
+      while (fireCount > 0) {
+        AudioService.getInstance().playSound(reloadSound);
+        reloadCounter = TimeUtils.millis();
+        while (true) {
+          if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
+              / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
+            fireCount -= reloadBulletPerTick;
+            reloadCounter = 0;
+            break;
+          }
+        }
+      }
+      reloading = false;
+      fireCount = Math.max(fireCount, 0);
+    }
+  }
 }

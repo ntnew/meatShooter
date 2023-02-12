@@ -81,14 +81,17 @@ public class Player extends Actor {
       this.runAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/run/", zoomMultiplier, frameDuration);
       this.strafeLeftAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_left/", zoomMultiplier, frameDuration);
       this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
-      this.diedAnimation = initAnimationFrames("./assets/export/died", zoomMultiplier,frameDuration);
+      this.diedAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
 
       weapons.add(WeaponFactory.shotgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(WeaponFactory.rifleWeapon(zoomMultiplier, frameDuration));
       weapons.add(WeaponFactory.doubleBarrelShotgunWeapon(zoomMultiplier, frameDuration));
       weapons.add(WeaponFactory.machineGun(zoomMultiplier, frameDuration));
+      weapons.add(WeaponFactory.m79(zoomMultiplier, frameDuration));
+      weapons.add(WeaponFactory.m32(zoomMultiplier, frameDuration));
 
-      body = GDXUtils.createCircleForModel(90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y);
+
+      body = GDXUtils.createCircleForModel(90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y,true);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
 
     } catch (Exception e) {

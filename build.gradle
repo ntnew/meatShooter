@@ -53,10 +53,6 @@ project(":desktop") {
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
-        // https://mvnrepository.com/artifact/org.projectlombok/lombok
-        compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
-        annotationProcessor 'org.projectlombok:lombok:1.18.22'
-
     }
 }
 
@@ -127,8 +123,11 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-        // https://mvnrepository.com/artifact/org.projectlombok/lombok
+        // https://mvnrepository.com/artifact/com.esotericsoftware.spine/spine-libgdx
+        implementation group: 'com.esotericsoftware.spine', name: 'spine-libgdx', version: '3.8.55.1'
+
+
         compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
-        annotationProcessor 'org.projectlombok:lombok:1.18.22'
+        annotationProcessor 'org.projectlombok:lombok:1.18.24'
     }
 }

@@ -1,5 +1,7 @@
 package ru.meat.game.service;
 
+import static ru.meat.game.settings.Constants.EXPLODE_SOUND_MULTIPLY;
+import static ru.meat.game.settings.Constants.PATH_WEAPON_SOUND;
 import static ru.meat.game.settings.Constants.SHOOT_SOUND_MULTIPLY;
 
 import com.badlogic.gdx.Gdx;
@@ -10,6 +12,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.settings.Settings;
@@ -26,11 +29,38 @@ public class AudioService {
     return instance;
   }
 
-  private List<String> enemyDies = Arrays.asList(
-      "sound/enemy/die2.mp3",
-      "sound/enemy/die1.mp3",
-      "sound/enemy/die3.mp3",
-      "sound/enemy/die4.mp3");
+  private List<String> enemyBugDies = Arrays.asList(
+      "sound/enemy/dieBug2.mp3",
+      "sound/enemy/dieBug1.mp3",
+      "sound/enemy/dieBug3.mp3",
+      "sound/enemy/dieBug4.mp3",
+      "sound/enemy/dieBug5.mp3",
+      "sound/enemy/dieBug6.mp3",
+      "sound/enemy/dieBug7.mp3");
+
+  private List<String> weaponSounds = Arrays.asList(
+      "glockShoot.mp3",
+      "ak47.mp3",
+      "ak47reload.mp3",
+      "shotgun.mp3",
+      "shotgunReload.mp3",
+      "2barrelShot.mp3",
+      "2barrelReload.mp3",
+      "m249.mp3",
+      "m249reload.mp3",
+      "m79reload.mp3",
+      "m79open.mp3",
+      "m79shoot.mp3",
+      "m32open.mp3",
+      "m32reload.mp3",
+      "m32close.mp3"
+  );
+
+  private List<String> explosionsSounds = Arrays.asList(
+      "exp1.mp3",
+      "exp2.mp3",
+      "exp3.mp3"
+  );
 
 
   private List<String> gameMusic = Arrays.asList("sound/track1.mp3", "sound/track2.mp3");
@@ -47,24 +77,15 @@ public class AudioService {
     LoaderManager.getInstance().load("sound/player/step1.mp3", Music.class);
     LoaderManager.getInstance().load("sound/player/step2.mp3", Music.class);
 
-    LoaderManager.getInstance().load("glockShoot.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/ak47.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/ak47reload.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/shotgun.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/shotgunReload.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/2barrelShot.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/2barrelReload.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/m249.mp3", Sound.class);
-    LoaderManager.getInstance().load("sound/weapons/m249reload.mp3", Sound.class);
 
-
-
+    weaponSounds.forEach(x -> LoaderManager.getInstance().load(PATH_WEAPON_SOUND + x, Sound.class));
+    explosionsSounds.forEach(x -> LoaderManager.getInstance().load(PATH_WEAPON_SOUND + x, Sound.class));
 
     LoaderManager.getInstance().load("sound/track1.mp3", Music.class);
     LoaderManager.getInstance().load("sound/track2.mp3", Music.class);
     LoaderManager.getInstance().load("sound/player/hit1.mp3", Sound.class);
     LoaderManager.getInstance().load("sound/select-click.mp3", Sound.class);
-    enemyDies.forEach(x -> LoaderManager.getInstance().load(x, Sound.class));
+    enemyBugDies.forEach(x -> LoaderManager.getInstance().load(x, Sound.class));
   }
 
   private Music currentMusic;
@@ -77,14 +98,23 @@ public class AudioService {
     sound.play(Settings.getInstance().EFFECT_VOLUME);
   }
 
+  public void playReloadSound(String soundPath) {
+    playSound(PATH_WEAPON_SOUND + soundPath);
+  }
   public void playShootSound(String soundPath) {
-    Sound sound = LoaderManager.getInstance().get(soundPath);
+    Sound sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + soundPath);
     sound.play(Settings.getInstance().EFFECT_VOLUME * SHOOT_SOUND_MULTIPLY);
   }
 
+  public void playExplosionSound() {
+    int random = MathUtils.random(0, explosionsSounds.size() - 1);
+    Sound sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + explosionsSounds.get(random));
+    sound.play(Settings.getInstance().EFFECT_VOLUME*EXPLODE_SOUND_MULTIPLY);
+  }
+
   public void playEnemyDie() {
-    int random = MathUtils.random(0, enemyDies.size() - 1);
-    Sound sound = LoaderManager.getInstance().get(enemyDies.get(random));
+    int random = MathUtils.random(0, enemyBugDies.size() - 1);
+    Sound sound = LoaderManager.getInstance().get(enemyBugDies.get(random));
     sound.play(Settings.getInstance().EFFECT_VOLUME);
   }
 
@@ -176,7 +206,7 @@ public class AudioService {
   }
 
   public void playTestShoot(float volume) {
-    Sound sound = Gdx.audio.newSound(Gdx.files.internal("glockShoot.mp3"));
+    Sound sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + "glockShoot.mp3");
     sound.play(volume);
   }
 }

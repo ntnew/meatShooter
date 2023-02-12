@@ -88,11 +88,11 @@ public class GDXUtils {
    * @return
    */
 
-  public static Body createCircleForModel(float radius, float density, BodyUserData bodyData, float x, float y) {
+  public static Body createCircleForModel(float radius, float density, BodyUserData bodyData, float x, float y, boolean dynamic) {
 
     BodyDef def = new BodyDef();
 
-    def.type = BodyType.DynamicBody;
+    def.type = dynamic ? BodyType.DynamicBody : BodyType.StaticBody;
     def.position.set(x / Constants.WORLD_TO_VIEW, y / Constants.WORLD_TO_VIEW);
 
     Body box = Box2dWorld.getInstance().getWorld().createBody(def);

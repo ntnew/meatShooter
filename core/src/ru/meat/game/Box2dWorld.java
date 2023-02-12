@@ -43,6 +43,7 @@ public class Box2dWorld {
 
     renderer = new Box2DDebugRenderer();
     renderer.setDrawBodies(DEBUG);
+    renderer.setDrawContacts(DEBUG);
   }
 
 

@@ -3,6 +3,8 @@ package ru.meat.game.model.enemies;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
 import com.badlogic.gdx.physics.box2d.Body;
+import com.esotericsoftware.spine.AnimationState;
+import com.esotericsoftware.spine.Skeleton;
 import lombok.Data;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
@@ -12,6 +14,9 @@ import ru.meat.game.model.FloatPair;
 public class Enemy {
 
   private Body body;
+
+  private AnimationState state;
+  private Skeleton skeleton;
 
   private float enemyPing = 100;
   private float enemyPingCounter = 0;

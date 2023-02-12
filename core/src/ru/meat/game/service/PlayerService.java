@@ -61,7 +61,6 @@ public class PlayerService {
       player.setHp(player.getHp() - userData.getDamage());
       userData.setDamage(0);
       AudioService.getInstance().playHit();
-      System.out.println(player.getHp());
     }
 
     if (player.getHp() <= 0) {

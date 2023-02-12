@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.SuperBuilder;
+import lombok.SneakyThrows;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.RpgStatsService;
@@ -19,16 +19,22 @@ import ru.meat.game.utils.GDXUtils;
 public class Weapon {
 
   private WeaponEnum name;
+
+  private BulletType bulletType;
   /**
    * текстура пули
    */
-  protected Texture bulletTexture;
+  private Texture bulletTexture;
+  /**
+   * размер текстуры пули
+   */
+  private float textureScale;
 
 
   /**
    * Скорость полёта пули
    */
-  protected float speed;
+  private float speed;
 
   private Animation<Texture> idleAnimation;
   private Animation<Texture> moveAnimation;
@@ -36,8 +42,11 @@ public class Weapon {
   private Animation<Texture> shootAnimation;
   private Animation<Texture> reloadAnimation;
 
-  protected String shootSound;
-  protected String reloadSound;
+  private String shootSound;
+  private String reloadSound;
+  private String preReloadSound;
+  private Long preReloadDuration;
+  private String postReloadSound;
 
   private long currentLockCounter;
   /**
@@ -48,36 +57,34 @@ public class Weapon {
   /**
    * урон 1 пули
    */
-  protected int damage;
+  private int damage;
 
   /**
    * размер магазина
    */
-  protected int clipSize;
+  private int clipSize;
 
   /**
    * число сделанных выстрелов
    */
-  protected int fireCount;
+  private int fireCount;
 
   /**
    * сколько длится перезарядка в секундах
    */
-  protected float reloadDuration;
+  private float reloadDuration;
 
-  protected long reloadCounter;
+  private long reloadCounter;
 
   /**
    * разброс пули +- от точки куда выстрелил
    */
-  protected float bulletDeflection;
+  private float bulletDeflection;
 
   /**
    * радиус пули
    */
-  protected float box2dRadius;
-
-  private volatile boolean wantShoot = false;
+  private float box2dRadius;
 
   /**
    * Пуль в одном выстреле
@@ -91,12 +98,12 @@ public class Weapon {
   /**
    * Флаг, идёт ли перезарядка
    */
-  private boolean reloading = false;
+  private boolean reloading;
 
   /**
    * множитель скорости передвижения
    */
-  private float moveSpeedMultiplier = 1;
+  private float moveSpeedMultiplier;
 
   /**
    * Сделать выстрел
@@ -112,7 +119,7 @@ public class Weapon {
       fireCount += 1;
       AudioService.getInstance().playShootSound(shootSound);
 
-      //найти  новую точку на экране с новоой гипотенузой
+      //найти  новую точку на экране с новоой гипотенузой для одинаковости выстрелов
       float catetPrilezjaschiy = (screenX - fromX);
       float newGip = 20;
       float catetProtivo = (screenY - fromY);
@@ -125,13 +132,14 @@ public class Weapon {
       screenX = fromX + newCatetForX;
       screenY = fromY + newCatetForY;
 
-      wantShoot = true;
       float deflection = bulletDeflection * (playerRunning ? 2 : 1);
       for (int i = 0; i < shotInOneBullet; i++) {
         BulletService.getInstance()
-            .createBullet(fromX, fromY, MathUtils.random(screenX - deflection, screenX + deflection),
-                MathUtils.random(screenY - deflection, screenY + deflection), speed, damage, bulletTexture,
-                box2dRadius);
+            .createBullet(fromX, fromY,
+                MathUtils.random(screenX - deflection, screenX + deflection),
+                MathUtils.random(screenY - deflection, screenY + deflection),
+                speed, damage, bulletTexture,
+                box2dRadius, bulletType, textureScale);
       }
 
     } else if (!reloading) {
@@ -145,17 +153,21 @@ public class Weapon {
    */
   private void implementReload() {
     if (reloadCounter == 0) {
-
       new ThreadForReload().start();
     }
   }
 
   class ThreadForReload extends Thread {
 
+    @SneakyThrows
     @Override
     public void run() {
+      if (preReloadSound != null) {
+        AudioService.getInstance().playReloadSound(preReloadSound);
+        Thread.sleep(preReloadDuration);
+      }
       while (fireCount > 0) {
-        AudioService.getInstance().playSound(reloadSound);
+        AudioService.getInstance().playReloadSound(reloadSound);
         reloadCounter = TimeUtils.millis();
         while (true) {
           if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
@@ -168,6 +180,9 @@ public class Weapon {
       }
       reloading = false;
       fireCount = Math.max(fireCount, 0);
+      if (postReloadSound != null) {
+        AudioService.getInstance().playReloadSound(postReloadSound);
+      }
     }
   }
 }

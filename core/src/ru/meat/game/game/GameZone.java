@@ -18,6 +18,7 @@ import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.MainMenu;
 import ru.meat.game.menu.PauseMenu;
+import ru.meat.game.model.weapons.explosions.Explosions;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
 import ru.meat.game.service.BulletService;
@@ -91,6 +92,8 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     renderSpec(delta);
 
+    Explosions.getInstance().drawExplosions(camera);
+
     Box2dWorld.getInstance().render();
 
     gui.draw(playerService.getPlayer().getHp());
@@ -143,6 +146,12 @@ public abstract class GameZone implements Screen, InputProcessor {
     }
     if (keycode == Keys.NUM_5) {
       playerService.changeWeapon(5);
+    }
+    if (keycode == Keys.NUM_6) {
+      playerService.changeWeapon(6);
+    }
+    if (keycode == Keys.NUM_7) {
+      playerService.changeWeapon(7);
     }
 
     if (keycode == Keys.ESCAPE) {

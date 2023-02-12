@@ -13,6 +13,9 @@ import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.enemies.EnemyBodyUserData;
 import ru.meat.game.model.weapons.BulletBodyUserData;
+import ru.meat.game.model.weapons.BulletType;
+import ru.meat.game.model.weapons.explosions.ExplosionBodyUserData;
+import ru.meat.game.model.weapons.explosions.Explosions;
 
 
 @AllArgsConstructor
@@ -60,15 +63,39 @@ public class MyContactListener implements ContactListener {
     Fixture fa = contact.getFixtureA();
     Fixture fb = contact.getFixtureB();
     if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BulletBodyUserData) {
+      contactForBullets(fa, fb);
+    } else if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BulletBodyUserData) {
+      contactForBullets(fb, fa);
+    } else if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof ExplosionBodyUserData) {
+      setDamageToEnemyFromExplosion(fa, fb);
+    } else if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof ExplosionBodyUserData) {
+      setDamageToEnemyFromExplosion(fb, fa);
+    }
+  }
+
+  /**
+   * @param fa фикстура врага
+   * @param fb фикстура пули
+   */
+  private void contactForBullets(Fixture fa, Fixture fb) {
+    if (((BulletBodyUserData) fb.getUserData()).getType().equals(BulletType.COMMON)) {
       setDamageToEnemyFromBullet(fa, fb);
       addBlood(
           new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
-
-    } else if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BulletBodyUserData) {
-      setDamageToEnemyFromBullet(fb, fa);
-      addBlood(
-          new FloatPair(fb.getBody().getPosition().x * WORLD_TO_VIEW, fb.getBody().getPosition().y * WORLD_TO_VIEW));
+    } else if (((BulletBodyUserData) fb.getUserData()).getType().equals(BulletType.EXPLOSIVE)) {
+      BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
+      if (!bulletBodyUserData.isNeedDispose()) {
+        createExplosion(
+            new FloatPair(fb.getBody().getPosition().x * WORLD_TO_VIEW, fb.getBody().getPosition().y * WORLD_TO_VIEW),
+            bulletBodyUserData.getDamage());
+      }
+      bulletBodyUserData.setNeedDispose(true);
+      fb.setUserData(bulletBodyUserData);
     }
+  }
+
+  private void createExplosion(FloatPair floatPair, float damage) {
+    Explosions.getInstance().createExplosion(floatPair, damage);
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
@@ -79,6 +106,18 @@ public class MyContactListener implements ContactListener {
 
     bulletBodyUserData.setNeedDispose(true);
     fb.setUserData(bulletBodyUserData);
+  }
+
+  private void setDamageToEnemyFromExplosion(Fixture fa, Fixture fb) {
+    BodyUserData bodyUserData = (BodyUserData) fa.getUserData();
+    ExplosionBodyUserData explosionBodyUserData = (ExplosionBodyUserData) fb.getUserData();
+
+    bodyUserData.setDamage(bodyUserData.getDamage() + explosionBodyUserData.getDamage());
+
+    fb.setUserData(explosionBodyUserData);
+
+    addBlood(
+        new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
   }
 
   private void addBlood(FloatPair coord) {

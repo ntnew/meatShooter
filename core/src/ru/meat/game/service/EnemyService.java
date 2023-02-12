@@ -1,12 +1,14 @@
 package ru.meat.game.service;
 
-import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.esotericsoftware.spine.SkeletonRenderer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,7 +17,6 @@ import lombok.NoArgsConstructor;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.model.enemies.Enemy;
 import ru.meat.game.model.EnemyStatus;
-import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.enemies.EnemyBodyUserData;
 import ru.meat.game.model.enemies.EnemiesAnimation;
@@ -28,55 +29,6 @@ public class EnemyService {
   private final List<Enemy> enemies = new ArrayList<>();
   @Getter
   private final AtomicInteger rewardPointCount = new AtomicInteger(0);
-
-
-  public Enemy createZombieEnemy(float x, float y) {
-    float zombieSpeedLowRange = 1f;
-    float zombieSpeedTopRange = 2f;
-    float speed = MathUtils.random(zombieSpeedLowRange, zombieSpeedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
-    Enemy enemy = new Enemy(x, y, 1f, 100, speed,0, 300, null);
-    enemy.setRadius(80);
-    enemy.setAttack(10);
-    enemy.setAttackSpeed(1.5);
-    enemy.setCenterMultip(FloatPair.create(2.9f, 1.78f));
-    enemy.setBody(GDXUtils.createCircleForModel(enemy.getRadius() / WORLD_TO_VIEW, 80,
-        new EnemyBodyUserData("zombie", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y));
-    enemy.setRewardPoint(5);
-    return enemy;
-  }
-
-  public void drawEnemySprite(SpriteBatch batch, Enemy enemy, float stateTime) {
-    Sprite sprite = new Sprite(getActualFrame(stateTime, enemy));
-    sprite.setX(enemy.getPosX() * WORLD_TO_VIEW - (sprite.getWidth() / enemy.getCenterMultip().getX()));
-    sprite.setY(
-        enemy.getPosY() * WORLD_TO_VIEW - (sprite.getHeight() - sprite.getHeight() / enemy.getCenterMultip().getY()));
-
-    sprite.setOrigin(sprite.getWidth() / enemy.getCenterMultip().getX(),
-        sprite.getHeight() - sprite.getHeight() / enemy.getCenterMultip().getY());
-    sprite.setRotation(enemy.getAnimationAngle());
-    sprite.draw(batch);
-  }
-
-  private Texture getActualFrame(float stateTime, Enemy enemy) {
-    if (enemy.getStatus().equals(EnemyStatus.ATTACK)) {
-      Texture keyFrame = EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrame(stateTime, true);
-      Texture lastKeyframe = EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames()[
-          EnemiesAnimation.getInstance().getAttackAnimation().getKeyFrames().length - 1];
-      if (keyFrame.equals(lastKeyframe)) {
-        enemy.setStatus(EnemyStatus.MOVE);
-        EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
-        userData.setNeedAttack(false);
-      }
-      return keyFrame;
-    } else if (enemy.getStatus().equals(EnemyStatus.IDLE)) {
-      return EnemiesAnimation.getInstance().getIdleAnimation().getKeyFrame(stateTime);
-    } else if (enemy.getStatus().equals(EnemyStatus.MOVE)) {
-      return EnemiesAnimation.getInstance().getWalkAnimation().getKeyFrame(stateTime);
-    } else if (enemy.getStatus().equals(EnemyStatus.DIED)) {
-      return EnemiesAnimation.getInstance().getDieAnimation().getKeyFrame(stateTime, true);
-    }
-    return EnemiesAnimation.getInstance().getIdleAnimation().getKeyFrame(stateTime);
-  }
 
   /**
    * Метод действия врага
@@ -91,6 +43,7 @@ public class EnemyService {
     if (enemy.getHp() <= 0) {
       enemy.setStatus(EnemyStatus.DIED);
       enemy.getBody().setActive(false);
+      enemy.getState().setAnimation(0, "dead", false);
     } else {
       enemy.getBody().setAwake(true);
       enemy.setPosX(enemy.getBody().getPosition().x);
@@ -99,9 +52,19 @@ public class EnemyService {
       //если расстояние меньше расстояния атаки, то атаковать
       EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
       if (userData.isNeedAttack()) {
-        enemy.setStatus(EnemyStatus.ATTACK);
+        if (!enemy.getStatus().equals(EnemyStatus.ATTACK)) {
+          enemy.setStatus(EnemyStatus.ATTACK);
+          enemy.getState().setAnimation(0, "attack", false);
+          enemy.getState().addAnimation(0, "walk", true, 0);
+        }
+        userData.setNeedAttack(false);
       } else {
+        if (!enemy.getStatus().equals(EnemyStatus.MOVE) && enemy.getState().getTracks().isEmpty()){
+          enemy.getState().setAnimation(0, "walk", true);
+        }
         enemy.setStatus(EnemyStatus.MOVE);
+//        if (enemy.getState().)
+
         //если расстояние меньше 10х расстояний атаки, то идти напрямик к игроку
 //        if (isEnemyTooCloseToPlayer(x, y, enemy)) {
 //          enemy.setDestination(FloatPair.create(x, y));
@@ -155,11 +118,9 @@ public class EnemyService {
    * @param y координата добавлено 10 градусов, чтобы можелька чуть более на ццентр игрока смотрела
    */
   public void rotateModel(float x, float y, Enemy enemy) {
-    enemy.setAnimationAngle(MathUtils.radiansToDegrees * MathUtils.atan2(y, x) + 10);
-  }
-
-  public void createEnemies() {
-    enemies.add(createZombieEnemy(50f, 50f));
+    float v = MathUtils.radiansToDegrees * MathUtils.atan2(y, x);
+    enemy.setAnimationAngle(v + 10);
+    enemy.getSkeleton().getRootBone().setRotation(v-90);
   }
 
   /**
@@ -170,6 +131,9 @@ public class EnemyService {
    */
   public void actionEnemies(float posX, float posY) {
     enemies.forEach(enemy -> {
+      enemy.getState().update(Gdx.graphics.getDeltaTime()); // Update the animation time.
+      enemy.getState().apply(enemy.getSkeleton()); // Poses skeleton using current animations. This sets the bones' local SRT.
+      enemy.getSkeleton().updateWorldTransform();
       if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
         doSomething(posX, posY, enemy);
       } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
@@ -181,8 +145,13 @@ public class EnemyService {
     });
   }
 
-  public void drawEnemies(SpriteBatch spriteBatch, float stateTime) {
-    enemies.forEach(enemy -> drawEnemySprite(spriteBatch, enemy, stateTime));
+  public void drawEnemies(Batch spriteBatch,  SkeletonRenderer renderer) {
+    enemies.forEach(enemy -> drawSpineAni(spriteBatch, enemy, renderer));
+  }
+
+  private void drawSpineAni(Batch batch, Enemy enemy, SkeletonRenderer renderer){
+    enemy.getSkeleton().setPosition(enemy.getPosX() * WORLD_TO_VIEW, enemy.getPosY() * WORLD_TO_VIEW );
+    renderer.draw(batch, enemy.getSkeleton());
   }
 }
 

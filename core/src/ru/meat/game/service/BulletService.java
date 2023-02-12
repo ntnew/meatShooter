@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
-import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.weapons.Bullet;
 import ru.meat.game.model.weapons.BulletBodyUserData;
+import ru.meat.game.model.weapons.BulletType;
 import ru.meat.game.utils.GDXUtils;
 import ru.meat.game.settings.Constants;
 
@@ -53,23 +53,33 @@ public class BulletService {
    * @param screenY     точка у куда стреляют
    * @param bulletSpeed множитель скорости пули
    * @param damage
+   * @param bulletType
+   * @param bulletScale
    * @return обект пули
    */
-  public void createBullet(float fromX, float fromY, float screenX, float screenY, float bulletSpeed, int damage, Texture texture,float bulletRadius) {
+  public void createBullet(float fromX, float fromY, float screenX, float screenY, float bulletSpeed, int damage,
+      Texture texture, float bulletRadius,
+      BulletType bulletType, float bulletScale) {
     Bullet bullet = new Bullet();
-    Body bulletBody = createCircleForBullet(fromX, fromY, damage, bulletRadius);
+    //создать данные для бокс2д
+    Body bulletBody = createCircleForBullet(fromX, fromY, damage, bulletRadius, bulletType);
     bulletBody.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
     bulletBody.setBullet(true);
     bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed * MAIN_ZOOM,
         (screenY - fromY) * bulletSpeed * MAIN_ZOOM);
     bullet.setBody(bulletBody);
-    bullet.setTexture(texture);
-    bullet.setModelAngle(bulletBody.getLinearVelocity().angleDeg());
+
+    //создать спрайт текстуры
+    Sprite sprite = new Sprite(texture);
+    sprite.setScale(bulletScale);
+    sprite.setOrigin(sprite.getWidth() - sprite.getWidth() / 12, sprite.getHeight() / 2);
+    sprite.rotate(bulletBody.getLinearVelocity().angleDeg());
+    bullet.setSprite(sprite);
 
     bullets.add(bullet);
   }
 
-  private Body createCircleForBullet(float x, float y, int damage, float bulletRadius) {
+  private Body createCircleForBullet(float x, float y, int damage, float bulletRadius, BulletType bulletType) {
 
     BodyDef def = new BodyDef();
 
@@ -82,7 +92,11 @@ public class BulletService {
 
     box.createFixture(circle, (float) 100);
     box.getFixtureList().get(0)
-        .setUserData(new BulletBodyUserData("bullet", damage * RpgStatsService.getInstance().getStats().getDamage()));
+        .setUserData(
+            new BulletBodyUserData("bullet",
+                damage * RpgStatsService.getInstance().getStats().getDamage(),
+                false,
+                bulletType));
 
     circle.dispose();
 
@@ -120,13 +134,12 @@ public class BulletService {
             Array<Fixture> fixtureList = b.getBody().getFixtureList();
             if (!fixtureList.isEmpty()) {
               Vector2 position = fixtureList.get(0).getBody().getPosition();
-              Sprite sprite = new Sprite(b.getTexture());
-              sprite.setOrigin(sprite.getWidth() - sprite.getWidth() / 12, sprite.getHeight() / 2);
-              sprite.setPosition(position.x * Constants.WORLD_TO_VIEW - sprite.getWidth() + sprite.getWidth() / 12,
-                  position.y * Constants.WORLD_TO_VIEW - sprite.getHeight() / 2);
 
-              sprite.rotate(b.getModelAngle());
-              sprite.draw(batch);
+              b.getSprite().setPosition(
+                  position.x * Constants.WORLD_TO_VIEW - b.getSprite().getWidth() + b.getSprite().getWidth() / 12,
+                  position.y * Constants.WORLD_TO_VIEW - b.getSprite().getHeight() / 2);
+
+              b.getSprite().draw(batch);
             }
           } catch (NullPointerException e) {
 
@@ -136,7 +149,7 @@ public class BulletService {
     batch.end();
   }
 
-  public static void dispose(){
+  public static void dispose() {
     instance = null;
   }
 }

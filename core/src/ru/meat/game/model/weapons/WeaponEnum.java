@@ -11,7 +11,11 @@ public enum WeaponEnum {
   RIFLE(2),
   SHOTGUN(3),
   DOUBLE_BARREL(4),
-  MACHINE_GUN(5);
+  MACHINE_GUN(5),
+
+  //GrenadeLaunchers
+  M79(6),
+  M32(7);
 
   @Getter
   private final int pos;

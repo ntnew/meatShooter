@@ -68,6 +68,8 @@ public class MapSelectorMenu implements Screen {
       param.genMipMaps = true;
       LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, param);
       LoaderManager.getInstance().load("Bullet1.png", Texture.class, param);
+      LoaderManager.getInstance().load("GBullet.png", Texture.class, param);
+      LoaderManager.getInstance().load("ani/explosion.png", Texture.class, param);
       EnemiesAnimation.getInstance();
     }
 

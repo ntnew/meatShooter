@@ -4,66 +4,23 @@ import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.graphics.Cursor.SystemCursor;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
-import ru.meat.game.Box2dWorld;
 import ru.meat.game.MyGame;
-import ru.meat.game.gui.GUI;
-import ru.meat.game.menu.MainMenu;
-import ru.meat.game.menu.PauseMenu;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.enemies.EnemyFactory;
-import ru.meat.game.model.weapons.explosions.Explosions;
-import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
-import ru.meat.game.service.MapService;
-import ru.meat.game.service.PlayerService;
-import ru.meat.game.service.RpgStatsService;
 
 public class DeathMatch extends GameZone {
 
-  private float stateTime;
-  private SpriteBatch spriteBatch;
-
-  PolygonSpriteBatch batch;
-
-
-
-  private SkeletonRenderer renderer;
-  private SkeletonRendererDebug debugRenderer;
-
-
-
-
   public DeathMatch(int map, MyGame game) {
-    super(game);
-    enemyService = new EnemyService();
+    super(game, map);
 
-    this.mapService = new MapService();
-    mapService.initMap(map);
-    spriteBatch = new SpriteBatch();
-
-    renderer = new SkeletonRenderer();
-    renderer.setPremultipliedAlpha(true);
-    debugRenderer = new SkeletonRendererDebug();
-    debugRenderer.setBoundingBoxes(false);
-    debugRenderer.setRegionAttachments(false);
-
-
-    batch = new PolygonSpriteBatch ();
-
-
-//    enemyService.createEnemies();
     enemyService.getEnemies().add(EnemyFactory.createLittleBug(100, 100));
   }
 
@@ -71,28 +28,23 @@ public class DeathMatch extends GameZone {
   protected void renderSpec(float delta) {
     createMoreEnemies();
 
-
-
-   enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY());
-
+    enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY());
 
     //рисовать текстуры
     spriteBatch.setProjectionMatrix(camera.combined);
-    batch.setProjectionMatrix(camera.combined);
+    polyBatch.setProjectionMatrix(camera.combined);
     debugRenderer.getShapeRenderer().setProjectionMatrix(camera.combined);
 
+    polyBatch.begin();
     BloodService.getInstance().drawBloodSpots(camera);
-
     BulletService.getInstance().drawBullets(camera);
 
-    batch.begin();
     spriteBatch.begin();
 
     playerService.drawPlayer(spriteBatch);
-    stateTime += Gdx.graphics.getDeltaTime();
-    enemyService.drawEnemies(batch, renderer);
+    enemyService.drawEnemies(polyBatch, renderer);
     spriteBatch.end();
-    batch.end();
+    polyBatch.end();
   }
 
   private void createMoreEnemies() {

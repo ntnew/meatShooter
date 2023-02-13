@@ -111,4 +111,9 @@ public class Explosions {
     });
     batch.end();
   }
+
+  public void dispose(){
+    explosions.clear();
+    expBodies.clear();
+  }
 }

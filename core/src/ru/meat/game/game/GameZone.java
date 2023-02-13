@@ -11,12 +11,17 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Cursor.SystemCursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.esotericsoftware.spine.SkeletonRenderer;
+import com.esotericsoftware.spine.SkeletonRendererDebug;
+import java.time.LocalDateTime;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
-import ru.meat.game.menu.MainMenu;
+import ru.meat.game.menu.EndGameMenu;
 import ru.meat.game.menu.PauseMenu;
 import ru.meat.game.model.weapons.explosions.Explosions;
 import ru.meat.game.service.AudioService;
@@ -29,7 +34,6 @@ import ru.meat.game.service.RpgStatsService;
 
 @Data
 public abstract class GameZone implements Screen, InputProcessor {
-
 
   protected MapService mapService;
 
@@ -47,7 +51,17 @@ public abstract class GameZone implements Screen, InputProcessor {
   protected final OrthographicCamera camera;
 
 
-  public GameZone(MyGame game) {
+  protected LocalDateTime beginDate;
+
+  protected SpriteBatch spriteBatch;
+
+  protected PolygonSpriteBatch polyBatch;
+
+  protected SkeletonRenderer renderer;
+  protected SkeletonRendererDebug debugRenderer;
+
+
+  public GameZone(MyGame game, int map) {
     this.game = game;
 
     Gdx.input.setInputProcessor(this);
@@ -59,11 +73,27 @@ public abstract class GameZone implements Screen, InputProcessor {
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
     camera.update();
 
+    this.mapService = new MapService();
+    mapService.initMap(map);
     //создание игрока и интерфейса
     playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM,
         Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
     gui = new GUI(playerService.getPlayer().getHp());
     gui.setAimCursor();
+
+    beginDate = LocalDateTime.now();
+
+    enemyService = new EnemyService();
+
+    spriteBatch = new SpriteBatch();
+
+    renderer = new SkeletonRenderer();
+    renderer.setPremultipliedAlpha(true);
+    debugRenderer = new SkeletonRendererDebug();
+    debugRenderer.setBoundingBoxes(false);
+    debugRenderer.setRegionAttachments(false);
+
+    polyBatch = new PolygonSpriteBatch();
   }
 
   @Override
@@ -209,12 +239,15 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   public void endGameSession() {
     RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
-    this.game.setScreen(new MainMenu(game));
+    this.game.setScreen(
+        new EndGameMenu(game, enemyService.getRewardPointCount().get(), mapService.getMapInfo().getPosition(),
+            beginDate, enemyService.getKillCount().get()));
     Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
     AudioService.getInstance().smoothStopMusic();
     Box2dWorld.dispose();
     BulletService.dispose();
     BloodService.getInstance().dispose();
+    Explosions.getInstance().dispose();
   }
 
 

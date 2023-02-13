@@ -14,6 +14,7 @@ import com.esotericsoftware.spine.SkeletonJson;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
 import lombok.Data;
+import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.utils.FilesUtils;
 
 @Data
@@ -39,10 +40,10 @@ public class EnemiesAnimation {
   public EnemiesAnimation() {
     loading = true;
 
-    atlas = new TextureAtlas(Gdx.files.internal("./assets/ani/littleBug/bug.atlas"));
+    atlas = LoaderManager.getInstance().get("ani/littleBug/bug.atlas");
 
     SkeletonJson json = new SkeletonJson(atlas); // This loads skeleton JSON data, which is stateless.
-    json.setScale(0.3f);
+    json.setScale(0.25f);
     skeletonData = json.readSkeletonData(Gdx.files.internal("./assets/ani/littleBug/bug.json"));
 
 

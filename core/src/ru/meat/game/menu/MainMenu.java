@@ -37,7 +37,7 @@ public class MainMenu implements Screen {
 
     table = new Table();
     table.setSize(300, 300);
-    table.setPosition(Gdx.graphics.getWidth()/3, Gdx.graphics.getHeight()/3);
+    table.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 3);
     table.setDebug(DEBUG);
     table.add(newGameButton).width(100).height(30);
     table.row();
@@ -117,7 +117,4 @@ public class MainMenu implements Screen {
   public void dispose() {
 
   }
-
-  //...Rest of class omitted for succinctness.
-
 }

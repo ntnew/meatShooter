@@ -102,6 +102,11 @@ public class Enemy {
    */
   private int rewardPoint;
 
+  /**
+   * Прозрачность
+   */
+  private float transparency;
+
   public Enemy(float posX, float posY, float zoom, int hp, float speed,
       float animationAngle, float enemyPing, FloatPair playerCoord) {
     this.enemyPing = enemyPing;
@@ -112,6 +117,8 @@ public class Enemy {
     this.speedY = 0;
     this.posX = posX;
     this.posY = posY;
+
+    this.transparency = 1;
 
     this.status = EnemyStatus.IDLE;
     this.animationAngle = animationAngle;

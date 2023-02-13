@@ -20,6 +20,8 @@ public class EnemyFactory {
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getSkeletonData());
     skeleton.setPosition(50, 50);
+    float random = MathUtils.random(0.8f, 1.2f);
+    skeleton.setScale(random,random);
     enemy.setSkeleton(skeleton);
 
     AnimationStateData stateData = new AnimationStateData(EnemiesAnimation.getInstance().getSkeletonData()); // Defines mixing (crossfading) between animations.
@@ -28,7 +30,7 @@ public class EnemyFactory {
     enemy.setState(new AnimationState(stateData));
     enemy.getState().setTimeScale(2.8f);
 
-    enemy.setRadius(80);
+    enemy.setRadius(70);
     enemy.setAttack(10);
     enemy.setAttackSpeed(1.5);
     enemy.setCenterMultip(FloatPair.create(2.9f, 1.78f));

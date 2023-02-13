@@ -10,6 +10,6 @@ import ru.meat.game.model.FloatPair;
 @AllArgsConstructor
 public class BloodSpot {
 
- private   Sprite sprite;
+  private Sprite sprite;
 
 }

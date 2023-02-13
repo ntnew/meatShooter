@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -19,7 +20,9 @@ import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.maps.Maps;
+import ru.meat.game.model.weapons.explosions.Explosions;
 import ru.meat.game.service.AudioService;
+import ru.meat.game.service.BloodService;
 
 public class MapSelectorMenu implements Screen {
   private final MyGame game;
@@ -70,7 +73,10 @@ public class MapSelectorMenu implements Screen {
       LoaderManager.getInstance().load("Bullet1.png", Texture.class, param);
       LoaderManager.getInstance().load("GBullet.png", Texture.class, param);
       LoaderManager.getInstance().load("ani/explosion.png", Texture.class, param);
-      EnemiesAnimation.getInstance();
+      LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
+      LoaderManager.getInstance().load("ani/littleBug/bug.json", TextureAtlas.class);
+      LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
+      BloodService.getInstance();
     }
 
     if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {

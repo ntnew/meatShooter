@@ -1,5 +1,8 @@
 package ru.meat.game.service;
 
+import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
+
 import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,9 +21,6 @@ import ru.meat.game.model.enemies.BloodSpot;
 @Data
 public class BloodService {
 
-
-  private SpriteBatch batch;
-
   private List<String> littleBloodPngName = Arrays.asList(
       "blood/spot/1.png",
       "blood/spot/2.png",
@@ -31,8 +31,11 @@ public class BloodService {
       "blood/spot/6.png",
       "blood/spot/7.png");
 
+  private SpriteBatch batch;
+
   public List<BloodSpot> spots = new ArrayList<>();
 
+  public final float bloodDiffusion = 300 / MAIN_ZOOM;
   private static BloodService instance;
 
   public static BloodService getInstance() {
@@ -48,7 +51,6 @@ public class BloodService {
 
     littleBloodPngName.forEach(x -> LoaderManager.getInstance().load(x, Texture.class, param));
     bigBloodPngName.forEach(x -> LoaderManager.getInstance().load(x, Texture.class, param));
-
 
     batch = new SpriteBatch();
   }
@@ -66,6 +68,7 @@ public class BloodService {
 
   /**
    * Создать маленькую текстуру крови
+   *
    * @param coord координаты где создать в мире текстур
    */
   public void createLittleBloodSpot(FloatPair coord) {
@@ -75,13 +78,15 @@ public class BloodService {
     texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
     Sprite sprite = new Sprite(texture);
 
-    sprite.setPosition(coord.getX() - sprite.getWidth()/2, coord.getY()-sprite.getHeight()/2);
+    sprite.setPosition(coord.getX() - sprite.getWidth() / 2 + MathUtils.random(-bloodDiffusion, +bloodDiffusion),
+        coord.getY() - sprite.getHeight() / 2 - MathUtils.random(-bloodDiffusion, +bloodDiffusion));
+
     sprite.rotate(MathUtils.random(0, 359));
 
     spots.add(new BloodSpot(sprite));
   }
 
-  public void dispose(){
+  public void dispose() {
     spots.clear();
   }
 }

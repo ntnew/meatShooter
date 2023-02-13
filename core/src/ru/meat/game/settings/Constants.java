@@ -31,7 +31,7 @@ public class Constants {
 
   public static float SHOOT_SOUND_MULTIPLY = 0.8f;
 
-  public static float EXPLODE_SOUND_MULTIPLY = 1.4f;
+  public static float EXPLODE_SOUND_MULTIPLY = 1.6f;
 
   public static String PATH_WEAPON_SOUND = "sound/weapons/";
 

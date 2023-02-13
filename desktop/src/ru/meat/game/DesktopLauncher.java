@@ -11,7 +11,6 @@ public class DesktopLauncher {
 		config.setForegroundFPS(60);
 		config.setTitle("Meat Shooter");
 
-
     new Lwjgl3Application(new MyGame(), config);
 	}
 }

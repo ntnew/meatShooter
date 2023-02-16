@@ -35,7 +35,7 @@ public class BloodService {
 
   public List<BloodSpot> spots = new ArrayList<>();
 
-  public final float bloodDiffusion = 300 / MAIN_ZOOM;
+  public final float bloodDiffusion = 230 / MAIN_ZOOM;
   private static BloodService instance;
 
   public static BloodService getInstance() {

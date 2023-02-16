@@ -33,7 +33,6 @@ public class DeathMatch extends GameZone {
     //рисовать текстуры
     spriteBatch.setProjectionMatrix(camera.combined);
     polyBatch.setProjectionMatrix(camera.combined);
-    debugRenderer.getShapeRenderer().setProjectionMatrix(camera.combined);
 
     polyBatch.begin();
     BloodService.getInstance().drawBloodSpots(camera);

@@ -21,6 +21,9 @@ public class Enemy {
   private float enemyPing = 100;
   private float enemyPingCounter = 0;
 
+  /**
+   * Радиус модельки бокс2д
+   */
   private float radius;
 
   /**
@@ -87,10 +90,6 @@ public class Enemy {
    * Статус действия модельки
    */
   private EnemyStatus status;
-
-  private final float frameDuration = 0.05f;
-  private final float attackFrameDuration = 0.1f;
-
 
   /**
    * Угол поворота модельки, меняется в зависимости от направления движения

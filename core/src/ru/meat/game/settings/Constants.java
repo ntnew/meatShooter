@@ -5,7 +5,7 @@ public class Constants {
   /**
    * Основной зум камер
    */
-  public static float MAIN_ZOOM = 4f;
+  public static float MAIN_ZOOM = 4.5f;
 
   /**
    * зум камеры меню
@@ -22,7 +22,7 @@ public class Constants {
    */
   public static float PLAYER_MOVE_SPEED = 2f;
 
-  public static boolean DEBUG = false;
+  public static boolean DEBUG = true;
 
   public static int LVL_EXP_STEP = 100;
 
@@ -34,5 +34,4 @@ public class Constants {
   public static float EXPLODE_SOUND_MULTIPLY = 1.6f;
 
   public static String PATH_WEAPON_SOUND = "sound/weapons/";
-
 }

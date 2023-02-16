@@ -15,7 +15,9 @@ public enum WeaponEnum {
 
   //GrenadeLaunchers
   M79(6),
-  M32(7);
+  M32(7),
+
+  AA12(8);
 
   @Getter
   private final int pos;

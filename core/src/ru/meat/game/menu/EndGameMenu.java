@@ -109,7 +109,6 @@ public class EndGameMenu implements Screen {
         game.setScreen(new DeathMatch(selectedMap, game));
         AudioService.getInstance().initSteps();
         AudioService.getInstance().smoothStopMusic();
-        System.out.println("here");
       }
     });
 
@@ -117,7 +116,6 @@ public class EndGameMenu implements Screen {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         game.setScreen(new MainMenu(game));
-        System.out.println("here");
       }
     });
   }

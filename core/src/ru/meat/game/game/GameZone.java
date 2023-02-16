@@ -14,8 +14,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.esotericsoftware.spine.SkeletonRenderer;
-import com.esotericsoftware.spine.SkeletonRendererDebug;
 import java.time.LocalDateTime;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
@@ -23,11 +23,13 @@ import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.EndGameMenu;
 import ru.meat.game.menu.PauseMenu;
+import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.weapons.explosions.Explosions;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
+import ru.meat.game.service.FaderService;
 import ru.meat.game.service.MapService;
 import ru.meat.game.service.PlayerService;
 import ru.meat.game.service.RpgStatsService;
@@ -48,6 +50,9 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   protected EnemyService enemyService;
 
+  /**
+   * Основная камера с текстурами
+   */
   protected final OrthographicCamera camera;
 
 
@@ -58,7 +63,9 @@ public abstract class GameZone implements Screen, InputProcessor {
   protected PolygonSpriteBatch polyBatch;
 
   protected SkeletonRenderer renderer;
-  protected SkeletonRendererDebug debugRenderer;
+  private boolean started = false;
+
+  private long comparatorTime = 0;
 
 
   public GameZone(MyGame game, int map) {
@@ -89,9 +96,6 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     renderer = new SkeletonRenderer();
     renderer.setPremultipliedAlpha(true);
-    debugRenderer = new SkeletonRendererDebug();
-    debugRenderer.setBoundingBoxes(false);
-    debugRenderer.setRegionAttachments(false);
 
     polyBatch = new PolygonSpriteBatch();
   }
@@ -103,11 +107,14 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   @Override
   public void render(float delta) {
+    AudioService.getInstance().playGameMusic();
+    if (TimeUtils.timeSinceMillis(comparatorTime) > 3000) {
+      sortEnemies();
+    }
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-    AudioService.getInstance().playGameMusic();
     camera.update();
     Box2dWorld.getInstance().update();
     playerService.updateState();
@@ -128,9 +135,32 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     gui.draw(playerService.getPlayer().getHp());
 
-    if (playerService.getPlayer().isDead()) {
-      endGameSession();
+    if (!started) {
+      started = FaderService.getInstance().drawFadeIn();
     }
+
+    if (playerService.getPlayer().isDead()) {
+      if (FaderService.getInstance().drawFadeOut()) {
+        endGameSession();
+      }
+    }
+  }
+
+  /**
+   * Остортировать врагов, чтобы сначала рисовались трупы
+   */
+  private void sortEnemies() {
+    comparatorTime = TimeUtils.millis();
+    enemyService.getEnemies().sort((x, y) -> {
+      if (x.getStatus().equals(EnemyStatus.DIED) && !y.getStatus().equals(EnemyStatus.DIED)) {
+        return -1;
+      } else if ((x.getStatus().equals(EnemyStatus.DIED) && y.getStatus().equals(EnemyStatus.DIED))
+          || (!x.getStatus().equals(EnemyStatus.DIED) && !y.getStatus().equals(EnemyStatus.DIED))) {
+        return 0;
+      } else {
+        return 1;
+      }
+    });
   }
 
   /**
@@ -238,6 +268,10 @@ public abstract class GameZone implements Screen, InputProcessor {
   }
 
   public void endGameSession() {
+
+    Gdx.gl.glClearColor(0, 0, 0, 1);
+    Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
     this.game.setScreen(
         new EndGameMenu(game, enemyService.getRewardPointCount().get(), mapService.getMapInfo().getPosition(),
@@ -248,6 +282,7 @@ public abstract class GameZone implements Screen, InputProcessor {
     BulletService.dispose();
     BloodService.getInstance().dispose();
     Explosions.getInstance().dispose();
+
   }
 
 

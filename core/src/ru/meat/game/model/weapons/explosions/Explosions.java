@@ -1,5 +1,7 @@
 package ru.meat.game.model.weapons.explosions;
 
+import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -74,7 +76,7 @@ public class Explosions {
     explosionBodyUserData.setName("explosion");
 
     Gdx.app.postRunnable(() -> {
-      Body body = GDXUtils.createCircleForModel(3, 100, explosionBodyUserData, pos.getX(), pos.getY(), true);
+      Body body = GDXUtils.createCircleForModel(12/MAIN_ZOOM, 100, explosionBodyUserData, pos.getX(), pos.getY(), true);
       body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
       expBodies.add(body);
     });
@@ -106,7 +108,7 @@ public class Explosions {
       sprite.setPosition(x.getPos().getX() - sprite.getWidth() / 2,
           x.getPos().getY() - sprite.getHeight() / 2);
       sprite.rotate(x.getAngle());
-      sprite.setScale(3);
+      sprite.setScale(12/MAIN_ZOOM);
       sprite.draw(batch);
     });
     batch.end();

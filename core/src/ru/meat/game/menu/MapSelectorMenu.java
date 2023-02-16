@@ -23,20 +23,17 @@ import ru.meat.game.model.maps.Maps;
 import ru.meat.game.model.weapons.explosions.Explosions;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
+import ru.meat.game.service.FaderService;
 
 public class MapSelectorMenu implements Screen {
+
   private final MyGame game;
   private Button firstMapButton;
 
   private Button backButton;
-
-  private boolean loading = false;
-
-  private boolean startedLoad = false;
-
   private int selectedMap = 0;
 
-  private Table table;
+  private final Table table;
 
   public MapSelectorMenu(final MyGame game) {
     this.game = game;
@@ -45,7 +42,7 @@ public class MapSelectorMenu implements Screen {
 
     table = new Table();
     table.setSize(300, 300);
-    table.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 3);
+    table.setPosition(Gdx.graphics.getWidth() / 3f, Gdx.graphics.getHeight() / 3f);
     table.setDebug(DEBUG);
     table.add(firstMapButton).width(100).height(40);
     table.row();
@@ -56,30 +53,23 @@ public class MapSelectorMenu implements Screen {
 
   @Override
   public void show() {
-
+    TextureParameter param = new TextureParameter();
+    param.genMipMaps = true;
+    LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, param);
+    LoaderManager.getInstance().load("Bullet1.png", Texture.class, param);
+    LoaderManager.getInstance().load("GBullet.png", Texture.class, param);
+    LoaderManager.getInstance().load("ani/explosion.png", Texture.class, param);
+    LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/littleBug/bug.json", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
+    BloodService.getInstance();
   }
 
   @Override
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
 
-    if (selectedMap != 0 && loading && !startedLoad) {
-      startedLoad = true;
-      firstMapButton.setDisabled(true);
-      backButton.setDisabled(true);
-      TextureParameter param = new TextureParameter();
-      param.genMipMaps = true;
-      LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, param);
-      LoaderManager.getInstance().load("Bullet1.png", Texture.class, param);
-      LoaderManager.getInstance().load("GBullet.png", Texture.class, param);
-      LoaderManager.getInstance().load("ani/explosion.png", Texture.class, param);
-      LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
-      LoaderManager.getInstance().load("ani/littleBug/bug.json", TextureAtlas.class);
-      LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
-      BloodService.getInstance();
-    }
-
-    if (loading && startedLoad && LoaderManager.getInstance().update() && !EnemiesAnimation.getInstance().isLoading()) {
+    if (LoaderManager.getInstance().update()) {
       game.setScreen(new DeathMatch(selectedMap, game));
       AudioService.getInstance().initSteps();
       AudioService.getInstance().smoothStopMusic();
@@ -93,7 +83,8 @@ public class MapSelectorMenu implements Screen {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         selectedMap = 1;
-        loading = true;
+        firstMapButton.setDisabled(true);
+        backButton.setDisabled(true);
       }
     });
     backButton = createButton(game.getTextButtonStyle(), "Back", new ChangeListener() {

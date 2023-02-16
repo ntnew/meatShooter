@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import lombok.Data;
+import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.utils.FilesUtils;
 
 @Data
@@ -21,6 +22,7 @@ public class GUI {
   private SpriteBatch batch;
   private OrthographicCamera camera;
   private final Texture[] textures;
+
   private Cursor cursor;
 
   /**

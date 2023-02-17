@@ -22,7 +22,7 @@ public class Constants {
    */
   public static float PLAYER_MOVE_SPEED = 2f;
 
-  public static boolean DEBUG = true;
+  public static boolean DEBUG = false;
 
   public static int LVL_EXP_STEP = 100;
 
@@ -34,4 +34,6 @@ public class Constants {
   public static float EXPLODE_SOUND_MULTIPLY = 1.6f;
 
   public static String PATH_WEAPON_SOUND = "sound/weapons/";
+
+  public static boolean MOBILE;
 }

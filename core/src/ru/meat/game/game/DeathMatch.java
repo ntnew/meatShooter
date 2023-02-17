@@ -47,7 +47,7 @@ public class DeathMatch extends GameZone {
   }
 
   private void createMoreEnemies() {
-    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 30) {
+    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 40) {
       // Инициализация начальной позиции
       float xBound1 = playerService.getBodyPosX() * WORLD_TO_VIEW;
       float xBound2 = playerService.getBodyPosX() * WORLD_TO_VIEW;
@@ -80,10 +80,17 @@ public class DeathMatch extends GameZone {
         yBound2 = yBound2 - deltaByY / 2 - 80;
       }
 //      Создание врага
-      enemyService.getEnemies().add(
-          EnemyFactory.createLittleBug(
-              MathUtils.random(xBound1, xBound2),
-              MathUtils.random(yBound1, yBound2)));
+      if (MathUtils.random(0, 100) > 30) {
+        enemyService.getEnemies().add(
+            EnemyFactory.createLittleBug(
+                MathUtils.random(xBound1, xBound2),
+                MathUtils.random(yBound1, yBound2)));
+      } else {
+        enemyService.getEnemies().add(
+            EnemyFactory.createSpider(
+                MathUtils.random(xBound1, xBound2),
+                MathUtils.random(yBound1, yBound2)));
+      }
     }
   }
 }

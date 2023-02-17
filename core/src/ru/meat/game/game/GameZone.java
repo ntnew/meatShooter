@@ -1,6 +1,7 @@
 package ru.meat.game.game;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.MOBILE;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.SneakyThrows;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
@@ -67,6 +69,8 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   private long comparatorTime = 0;
 
+  private ThreadForZoom threadForZoom;
+
 
   public GameZone(MyGame game, int map) {
     this.game = game;
@@ -108,7 +112,7 @@ public abstract class GameZone implements Screen, InputProcessor {
   @Override
   public void render(float delta) {
     AudioService.getInstance().playGameMusic();
-    if (TimeUtils.timeSinceMillis(comparatorTime) > 3000) {
+    if (TimeUtils.timeSinceMillis(comparatorTime) > 4000) {
       sortEnemies();
     }
     Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -119,9 +123,11 @@ public abstract class GameZone implements Screen, InputProcessor {
     Box2dWorld.getInstance().update();
     playerService.updateState();
     BulletService.getInstance().updateBullets();
-    playerService.handleMoveKey(camera, Box2dWorld.getInstance().getCameraBox2D());
 
-    handleMouse();
+    if (!MOBILE) {
+      playerService.handleMoveKey(camera, Box2dWorld.getInstance().getCameraBox2D());
+      handleMouse();
+    }
 
     handleWorldBounds();
 
@@ -135,11 +141,17 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     gui.draw(playerService.getPlayer().getHp());
 
+    //Нарисовать осветление экрана при старте
     if (!started) {
       started = FaderService.getInstance().drawFadeIn();
     }
 
     if (playerService.getPlayer().isDead()) {
+      if (threadForZoom == null) {
+        threadForZoom = new ThreadForZoom();
+        threadForZoom.start();
+      }
+      //нарисовать затемнение экрана при смерти
       if (FaderService.getInstance().drawFadeOut()) {
         endGameSession();
       }
@@ -213,6 +225,9 @@ public abstract class GameZone implements Screen, InputProcessor {
     if (keycode == Keys.NUM_7) {
       playerService.changeWeapon(7);
     }
+    if (keycode == Keys.NUM_8) {
+      playerService.changeWeapon(8);
+    }
 
     if (keycode == Keys.ESCAPE) {
       Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
@@ -268,7 +283,6 @@ public abstract class GameZone implements Screen, InputProcessor {
   }
 
   public void endGameSession() {
-
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -282,7 +296,6 @@ public abstract class GameZone implements Screen, InputProcessor {
     BulletService.dispose();
     BloodService.getInstance().dispose();
     Explosions.getInstance().dispose();
-
   }
 
 
@@ -329,6 +342,24 @@ public abstract class GameZone implements Screen, InputProcessor {
       playerService.rotateModel(Box2dWorld.getInstance().getCameraBox2D());
       if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
         playerService.shoot(Box2dWorld.getInstance().getCameraBox2D());
+      }
+    }
+  }
+
+  class ThreadForZoom extends Thread {
+    private long timeStamp = 0;
+
+    @SneakyThrows
+    @Override
+    public void run() {
+      while (true) {
+        if (timeStamp == 0 || TimeUtils.timeSinceMillis(timeStamp) > 10) {
+          camera.zoom = camera.zoom - 0.02f;
+          timeStamp = TimeUtils.millis();
+        }
+        if (camera.zoom < 1) {
+          break;
+        }
       }
     }
   }

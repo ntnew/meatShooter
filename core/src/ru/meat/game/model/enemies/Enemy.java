@@ -42,12 +42,6 @@ public class Enemy {
    */
   private FloatPair turnSpeed = new FloatPair(1f * MAIN_ZOOM, 1f * MAIN_ZOOM);
 
-
-  /**
-   * множитель на центр
-   */
-  private FloatPair centerMultip = new FloatPair(1f, 1f);
-
   /**
    * делитель размера модельки
    */
@@ -131,4 +125,6 @@ public class Enemy {
     }
   }
 
+  public void doSomething(float posX, float posY) {
+  }
 }

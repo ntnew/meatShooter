@@ -62,6 +62,10 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/littleBug/bug.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
+
+    LoaderManager.getInstance().load("ani/spider/spider.atlas", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/spider/spider.json", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
     BloodService.getInstance();
   }
 

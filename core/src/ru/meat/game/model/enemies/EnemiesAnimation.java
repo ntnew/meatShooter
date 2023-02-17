@@ -13,11 +13,9 @@ import ru.meat.game.loader.LoaderManager;
 @Data
 public class EnemiesAnimation {
 
-  private SpriteBatch batch;
-
-  private TextureAtlas atlas;
-
   private SkeletonData littleBugSkeletonData;
+
+  private SkeletonData spiderSkeletonData;
 
   private static EnemiesAnimation instance;
 
@@ -29,10 +27,13 @@ public class EnemiesAnimation {
   }
 
   public EnemiesAnimation() {
-    atlas = LoaderManager.getInstance().get("ani/littleBug/bug.atlas");
 
-    SkeletonJson json = new SkeletonJson(atlas); // This loads skeleton JSON data, which is stateless.
-    json.setScale(1f/MAIN_ZOOM);
-    littleBugSkeletonData = json.readSkeletonData(Gdx.files.internal("ani/littleBug/bug.json"));
+    SkeletonJson bugJson = new SkeletonJson((TextureAtlas) LoaderManager.getInstance().get("ani/littleBug/bug.atlas"));
+    bugJson.setScale(1f/MAIN_ZOOM);
+    littleBugSkeletonData = bugJson.readSkeletonData(Gdx.files.internal("ani/littleBug/bug.json"));
+
+    SkeletonJson spiderJson = new SkeletonJson((TextureAtlas) LoaderManager.getInstance().get("ani/spider/spider.atlas"));
+    spiderJson.setScale(2f/MAIN_ZOOM);
+    spiderSkeletonData = spiderJson.readSkeletonData(Gdx.files.internal("ani/spider/spider.json"));
   }
 }

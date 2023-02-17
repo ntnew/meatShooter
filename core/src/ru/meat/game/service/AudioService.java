@@ -40,20 +40,13 @@ public class AudioService {
 
   private List<String> weaponSounds = Arrays.asList(
       "glockShoot.mp3",
-      "ak47.mp3",
-      "ak47reload.mp3",
-      "shotgun.mp3",
-      "shotgunReload.mp3",
-      "2barrelShot.mp3",
-      "2barrelReload.mp3",
-      "m249.mp3",
-      "m249reload.mp3",
-      "m79reload.mp3",
-      "m79open.mp3",
-      "m79shoot.mp3",
-      "m32open.mp3",
-      "m32reload.mp3",
-      "m32close.mp3"
+      "ak47.mp3", "ak47reload.mp3",
+      "shotgun.mp3", "shotgunReload.mp3",
+      "2barrelShot.mp3", "2barrelReload.mp3",
+      "m249.mp3", "m249reload.mp3",
+      "m79reload.mp3","m79open.mp3", "m79shoot.mp3",
+      "m32open.mp3", "m32reload.mp3", "m32close.mp3",
+      "aa12shoot.mp3", "aa12open.mp3", "aa12reload.mp3", "aa12close.mp3"
   );
 
   private List<String> explosionsSounds = Arrays.asList(
@@ -77,7 +70,6 @@ public class AudioService {
     LoaderManager.getInstance().load("sound/player/step1.mp3", Music.class);
     LoaderManager.getInstance().load("sound/player/step2.mp3", Music.class);
 
-
     weaponSounds.forEach(x -> LoaderManager.getInstance().load(PATH_WEAPON_SOUND + x, Sound.class));
     explosionsSounds.forEach(x -> LoaderManager.getInstance().load(PATH_WEAPON_SOUND + x, Sound.class));
 
@@ -93,6 +85,7 @@ public class AudioService {
   public void playClick() {
     playSound("sound/select-click.mp3");
   }
+
   public void playSound(String soundPath) {
     Sound sound = LoaderManager.getInstance().get(soundPath);
     sound.play(Settings.getInstance().EFFECT_VOLUME);
@@ -101,6 +94,7 @@ public class AudioService {
   public void playReloadSound(String soundPath) {
     playSound(PATH_WEAPON_SOUND + soundPath);
   }
+
   public void playShootSound(String soundPath) {
     Sound sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + soundPath);
     sound.play(Settings.getInstance().EFFECT_VOLUME * SHOOT_SOUND_MULTIPLY);
@@ -109,7 +103,7 @@ public class AudioService {
   public void playExplosionSound() {
     int random = MathUtils.random(0, explosionsSounds.size() - 1);
     Sound sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + explosionsSounds.get(random));
-    sound.play(Settings.getInstance().EFFECT_VOLUME*EXPLODE_SOUND_MULTIPLY);
+    sound.play(Settings.getInstance().EFFECT_VOLUME * EXPLODE_SOUND_MULTIPLY);
   }
 
   public void playEnemyDie() {

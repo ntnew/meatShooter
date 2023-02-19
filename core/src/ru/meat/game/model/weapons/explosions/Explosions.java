@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.loader.LoaderManager;
@@ -71,7 +72,7 @@ public class Explosions {
   public void createExplosion(FloatPair pos, float damage) {
     AudioService.getInstance().playExplosionSound();
     explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359)));
-    ExplosionBodyUserData explosionBodyUserData = new ExplosionBodyUserData(TimeUtils.millis());
+    ExplosionBodyUserData explosionBodyUserData = new ExplosionBodyUserData(UUID.randomUUID() ,TimeUtils.millis());
     explosionBodyUserData.setDamage(damage);
     explosionBodyUserData.setName("explosion");
 

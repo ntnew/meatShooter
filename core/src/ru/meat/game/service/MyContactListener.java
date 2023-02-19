@@ -33,7 +33,6 @@ public class MyContactListener implements ContactListener {
 
   @Override
   public void preSolve(Contact contact, Manifold oldManifold) {
-
     Fixture fa = contact.getFixtureA();
     Fixture fb = contact.getFixtureB();
     if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BodyUserData
@@ -109,15 +108,15 @@ public class MyContactListener implements ContactListener {
   }
 
   private void setDamageToEnemyFromExplosion(Fixture fa, Fixture fb) {
-    BodyUserData bodyUserData = (BodyUserData) fa.getUserData();
+    EnemyBodyUserData bodyUserData = (EnemyBodyUserData) fa.getUserData();
     ExplosionBodyUserData explosionBodyUserData = (ExplosionBodyUserData) fb.getUserData();
-
-    bodyUserData.setDamage(bodyUserData.getDamage() + explosionBodyUserData.getDamage());
-
-    fb.setUserData(explosionBodyUserData);
-
-    addBlood(
-        new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
+    if (!bodyUserData.getIdContactedBullets().contains(explosionBodyUserData.getId())) {
+      bodyUserData.setDamage(bodyUserData.getDamage() + explosionBodyUserData.getDamage());
+      bodyUserData.getIdContactedBullets().add(explosionBodyUserData.getId());
+      fb.setUserData(explosionBodyUserData);
+      addBlood(
+          new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
+    }
   }
 
   private void addBlood(FloatPair coord) {

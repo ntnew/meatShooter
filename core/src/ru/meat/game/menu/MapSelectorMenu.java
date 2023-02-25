@@ -1,11 +1,11 @@
 package ru.meat.game.menu;
 
 import static ru.meat.game.settings.Constants.DEBUG;
+import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
 import static ru.meat.game.utils.GDXUtils.createButton;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -17,13 +17,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import ru.meat.game.game.DeathMatch;
 import ru.meat.game.MyGame;
+import ru.meat.game.gui.GUI;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.maps.Maps;
-import ru.meat.game.model.weapons.explosions.Explosions;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
-import ru.meat.game.service.FaderService;
 
 public class MapSelectorMenu implements Screen {
 
@@ -53,12 +51,11 @@ public class MapSelectorMenu implements Screen {
 
   @Override
   public void show() {
-    TextureParameter param = new TextureParameter();
-    param.genMipMaps = true;
-    LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, param);
-    LoaderManager.getInstance().load("Bullet1.png", Texture.class, param);
-    LoaderManager.getInstance().load("GBullet.png", Texture.class, param);
-    LoaderManager.getInstance().load("ani/explosion.png", Texture.class, param);
+
+    LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, TEXTURE_PARAMETERS);
+    LoaderManager.getInstance().load("Bullet1.png", Texture.class, TEXTURE_PARAMETERS);
+    LoaderManager.getInstance().load("GBullet.png", Texture.class, TEXTURE_PARAMETERS);
+    LoaderManager.getInstance().load("ani/explosion.png", Texture.class, TEXTURE_PARAMETERS);
     LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/littleBug/bug.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
@@ -66,6 +63,11 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load("ani/spider/spider.atlas", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/spider/spider.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
+
+
+    LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
+
+    GUI.loadHpBarTextures();
     BloodService.getInstance();
   }
 

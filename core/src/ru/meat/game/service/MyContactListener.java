@@ -79,8 +79,6 @@ public class MyContactListener implements ContactListener {
   private void contactForBullets(Fixture fa, Fixture fb) {
     if (((BulletBodyUserData) fb.getUserData()).getType().equals(BulletType.COMMON)) {
       setDamageToEnemyFromBullet(fa, fb);
-      addBlood(
-          new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
     } else if (((BulletBodyUserData) fb.getUserData()).getType().equals(BulletType.EXPLOSIVE)) {
       BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
       if (!bulletBodyUserData.isNeedDispose()) {
@@ -98,11 +96,16 @@ public class MyContactListener implements ContactListener {
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {
-    BodyUserData bodyUserData = (BodyUserData) fa.getUserData();
+    EnemyBodyUserData bodyUserData = (EnemyBodyUserData) fa.getUserData();
     BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
 
-    bodyUserData.setDamage(bodyUserData.getDamage() + bulletBodyUserData.getDamage());
-
+    if (!bodyUserData.getIdContactedBullets().contains(bulletBodyUserData.getId())) {
+      bodyUserData.setDamage(bodyUserData.getDamage() + bulletBodyUserData.getDamage());
+      bodyUserData.getIdContactedBullets().add(bulletBodyUserData.getId());
+      BloodService.getInstance().createBleeding(fb.getBody().getPosition().x, fb.getBody().getPosition().y);
+      addBlood(
+          new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
+    }
     bulletBodyUserData.setNeedDispose(true);
     fb.setUserData(bulletBodyUserData);
   }
@@ -114,8 +117,11 @@ public class MyContactListener implements ContactListener {
       bodyUserData.setDamage(bodyUserData.getDamage() + explosionBodyUserData.getDamage());
       bodyUserData.getIdContactedBullets().add(explosionBodyUserData.getId());
       fb.setUserData(explosionBodyUserData);
-      addBlood(
-          new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
+      //создать несколько точек крови от взрыва
+      for (int i = 0; i < 4; i++) {
+        addBlood(
+            new FloatPair(fa.getBody().getPosition().x * WORLD_TO_VIEW, fa.getBody().getPosition().y * WORLD_TO_VIEW));
+      }
     }
   }
 

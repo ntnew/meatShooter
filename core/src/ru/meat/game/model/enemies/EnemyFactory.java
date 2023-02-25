@@ -53,7 +53,7 @@ public class EnemyFactory {
     float speedLowRange = 1.1f;
     float speedTopRange = 1.8f;
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
-    Enemy enemy = new Enemy(x, y, 1f, 1000, speed, 0, 300, null) {
+    Enemy enemy = new Enemy(x, y, 1f, 500, speed, 0, 300, null) {
       @Override
       public void doSomething(float posX, float posY) {
         simpleActions(posX, posY, this);

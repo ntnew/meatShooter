@@ -12,4 +12,5 @@ public class BloodSpot {
 
   private Sprite sprite;
 
+  private float stateTime;
 }

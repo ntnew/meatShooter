@@ -144,8 +144,8 @@ public class AudioService {
   public void playGameMusic() {
     if (currentMusic == null) {
       Music music = LoaderManager.getInstance().get(gameMusic.get(getRandomMusic()));
-      music.setOnCompletionListener(music1 -> {
-        music1.dispose();
+      music.setOnCompletionListener(m -> {
+        m.dispose();
         currentMusic = null;
       });
       music.setVolume(Settings.getInstance().MUSIC_VOLUME);

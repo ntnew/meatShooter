@@ -1,6 +1,15 @@
 package ru.meat.game.settings;
 
+import com.badlogic.gdx.assets.loaders.TextureLoader.TextureParameter;
+
 public class Constants {
+
+  public static TextureParameter TEXTURE_PARAMETERS;
+
+  static {
+    TEXTURE_PARAMETERS = new TextureParameter();
+    TEXTURE_PARAMETERS.genMipMaps = true;
+  }
 
   /**
    * Основной зум камер

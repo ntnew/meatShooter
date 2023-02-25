@@ -135,6 +135,8 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     renderSpec(delta);
 
+    BloodService.getInstance().drawBleeds(camera);
+
     Explosions.getInstance().drawExplosions(camera);
 
     Box2dWorld.getInstance().render();

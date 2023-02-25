@@ -27,13 +27,9 @@ public class PlayerService {
 
   private Player player;
 
-  private float moveMultiplier = 1f;
-
   private float feetStateTime;
 
   private float topStateTime;
-
-  private float speed = PLAYER_MOVE_SPEED ;
 
   private float moveDirectionAngle = 0;
 
@@ -267,7 +263,7 @@ public class PlayerService {
    * Получить скорость движения игрока
    */
   private float getSpeed() {
-    return speed * moveMultiplier * MAIN_ZOOM * RpgStatsService.getInstance().getStats().getMoveSpeed() * getActualWeapon().getMoveSpeedMultiplier();
+    return PLAYER_MOVE_SPEED * MAIN_ZOOM * RpgStatsService.getInstance().getStats().getMoveSpeed() * getActualWeapon().getMoveSpeedMultiplier();
   }
 
   /**

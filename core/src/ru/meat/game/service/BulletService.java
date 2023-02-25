@@ -15,6 +15,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.model.weapons.Bullet;
@@ -93,7 +94,7 @@ public class BulletService {
     box.createFixture(circle, (float) 100);
     box.getFixtureList().get(0)
         .setUserData(
-            new BulletBodyUserData("bullet",
+            new BulletBodyUserData(UUID.randomUUID(), "bullet",
                 damage * RpgStatsService.getInstance().getStats().getDamage(),
                 false,
                 bulletType));

@@ -53,12 +53,6 @@ public class Player extends Actor {
   private Animation<Texture> strafeLeftAnimation;
   private Animation<Texture> strafeRightAnimation;
 
-
-  private Animation<Texture> rifleIdleAnimation;
-  private Animation<Texture> rifleSnootAnimation;
-  private Animation<Texture> rifleMoveAnimation;
-  private Animation<Texture> rifleReloadAnimation;
-
   private Animation<Texture> diedAnimation;
 
   private WeaponEnum currentWeapon;

@@ -3,6 +3,7 @@ package ru.meat.game.loader;
 import com.badlogic.gdx.assets.AssetManager;
 
 public class LoaderManager extends AssetManager {
+
   private static LoaderManager instance;
 
   public static LoaderManager getInstance() {
@@ -10,10 +11,6 @@ public class LoaderManager extends AssetManager {
       instance = new LoaderManager();
     }
     return instance;
-  }
-
-  public void init() {
-
   }
 
   @Override

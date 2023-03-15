@@ -22,4 +22,13 @@ public class Explosion {
    * угол анимации
    */
   private float angle;
+
+  private ExplosionType type;
+
+  /**
+   * Время создания взрыва
+   */
+  private Long bornDate;
+
+  private float scale;
 }

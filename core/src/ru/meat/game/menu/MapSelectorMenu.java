@@ -20,8 +20,11 @@ import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.maps.Maps;
+import ru.meat.game.model.player.PlayerAnimationFactory;
+import ru.meat.game.model.weapons.explosions.Explosions;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
+import ru.meat.game.service.BulletService;
 
 public class MapSelectorMenu implements Screen {
 
@@ -55,7 +58,8 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, TEXTURE_PARAMETERS);
     LoaderManager.getInstance().load("Bullet1.png", Texture.class, TEXTURE_PARAMETERS);
     LoaderManager.getInstance().load("GBullet.png", Texture.class, TEXTURE_PARAMETERS);
-    LoaderManager.getInstance().load("ani/explosion.png", Texture.class, TEXTURE_PARAMETERS);
+    Explosions.initResources();
+    BulletService.initResources();
     LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/littleBug/bug.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
@@ -64,9 +68,12 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load("ani/spider/spider.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
 
+    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.atlas", TextureAtlas.class);
+//    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.json", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.png", Texture.class);
 
-    LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
 
+    PlayerAnimationFactory.loadAni();
     GUI.loadHpBarTextures();
     BloodService.getInstance();
   }
@@ -75,7 +82,7 @@ public class MapSelectorMenu implements Screen {
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
 
-    if (LoaderManager.getInstance().update()) {
+    if (LoaderManager.getInstance().update() && selectedMap != 0) {
       game.setScreen(new DeathMatch(selectedMap, game));
       AudioService.getInstance().initSteps();
       AudioService.getInstance().smoothStopMusic();

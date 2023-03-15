@@ -3,7 +3,7 @@ package ru.meat.game.model.player;
 public enum CharacterFeetStatus {
   IDLE,
   WALK,
-  RUN,
+  MOVE,
   STRAFE_LEFT,
   STRAFE_RIGHT
 }

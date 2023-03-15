@@ -34,7 +34,7 @@ public class EnemyService {
     if (userData != null && userData.getDamage() != 0) {
       enemy.setHp(enemy.getHp() - userData.getDamage());
       userData.setDamage(0);
-      System.out.println(enemy.getHp());
+//      System.out.println(enemy.getHp());
     }
   }
 
@@ -61,7 +61,16 @@ public class EnemyService {
       enemy.getState().update(Gdx.graphics.getDeltaTime());
       enemy.getState().apply(enemy.getSkeleton());
       enemy.getSkeleton().updateWorldTransform();
+
+      if (enemy.getHp() <= 0 && !enemy.getStatus().equals(EnemyStatus.DIED)) {
+        enemy.setStatus(EnemyStatus.DIED);
+        enemy.getBody().setActive(false);
+        enemy.getState().setAnimation(0, "dead", false);
+      }
       if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
+        enemy.getBody().setAwake(true);
+        updateEnemyHp(enemy);
+        updateEnemyPos(enemy);
         enemy.doSomething(posX, posY);
       } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
         Box2dWorld.getInstance().getWorld().destroyBody(enemy.getBody());
@@ -72,6 +81,11 @@ public class EnemyService {
         killCount.set(killCount.get() + 1);
       }
     });
+  }
+
+  private void updateEnemyPos(Enemy enemy) {
+    enemy.setPosX(enemy.getBody().getPosition().x);
+    enemy.setPosY(enemy.getBody().getPosition().y);
   }
 
   public void drawEnemies(Batch spriteBatch, SkeletonRenderer renderer) {

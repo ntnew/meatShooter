@@ -7,20 +7,23 @@ import lombok.Getter;
 @AllArgsConstructor
 
 public enum WeaponEnum {
-  PISTOL(1),
-  RIFLE(2),
-  SHOTGUN(3),
-  DOUBLE_BARREL(4),
-  MACHINE_GUN(5),
+  PISTOL(1,"shotgun"),
+  RIFLE(2,"rifle"),
+  SHOTGUN(3, "shotgun"),
+  DOUBLE_BARREL(4,"double_barrel"),
+  MACHINE_GUN(5, "machine_gun"),
 
   //GrenadeLaunchers
-  M79(6),
-  M32(7),
+  M79(6, "m79"),
+  M32(7,"m32"),
 
-  AA12(8);
+  AA12(8,"shotgun_new");
 
   @Getter
   private final int pos;
+
+  @Getter
+  private final String aniTag;
 
 
   public static WeaponEnum getByPos(int pos) {

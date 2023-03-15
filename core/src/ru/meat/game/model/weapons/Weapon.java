@@ -38,12 +38,6 @@ public class Weapon {
    */
   private float speed;
 
-  private Animation<Texture> idleAnimation;
-  private Animation<Texture> moveAnimation;
-  private Animation<Texture> meleeAttackAnimation;
-  private Animation<Texture> shootAnimation;
-  private Animation<Texture> reloadAnimation;
-
   private String shootSound;
   private String reloadSound;
   private String preReloadSound;

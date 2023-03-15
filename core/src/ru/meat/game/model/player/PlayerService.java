@@ -1,4 +1,4 @@
-package ru.meat.game.service;
+package ru.meat.game.model.player;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.PLAYER_MOVE_SPEED;
@@ -7,43 +7,72 @@ import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.esotericsoftware.spine.SkeletonRenderer;
+import java.util.Objects;
 import lombok.Data;
-import ru.meat.game.model.player.CharacterFeetStatus;
-import ru.meat.game.model.player.CharacterTopStatus;
-import ru.meat.game.model.player.Player;
+import lombok.SneakyThrows;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
+import ru.meat.game.service.AudioService;
+import ru.meat.game.service.RpgStatsService;
+import ru.meat.game.utils.GDXUtils;
 
 @Data
 public class PlayerService {
 
   private Player player;
 
-  private float feetStateTime;
-
-  private float topStateTime;
-
-  private float moveDirectionAngle = 0;
+  private float feetRotationAngle = 0;
 
   private float modelFrontAngle = 0;
 
+  private float transformX = 0;
+
+  private float transformY;
+
+
   public PlayerService(float x, float y) {
     player = new Player(x, y);
+    new ThreadForFeetAngle().start();
   }
 
   public void updateState() {
-    if (CharacterFeetStatus.RUN.equals(player.getFeetStatus())) {
-      feetStateTime += Gdx.graphics.getDeltaTime();
+    //Обновить верхнюю часть анимации
+    if (!player.isDead()
+        && getActualWeapon().isReloading()
+        && ((!player.getTopState().getTracks().isEmpty()
+        && !Objects.equals("reload_" + player.getCurrentWeapon().getAniTag(),
+        player.getTopState().getTracks().get(player.getTopState().getTracks().size - 1).getAnimation().getName()))
+        || player.getTopState().getTracks().isEmpty())) {
+      player.getTopState()
+          .setAnimation(0, "reload_" + player.getCurrentWeapon().getAniTag(), true);
     }
-    topStateTime += Gdx.graphics.getDeltaTime();
+
+    if (player.isDead()
+        && ((!Objects.equals("death_" + player.getCurrentWeapon().getAniTag(),
+        player.getTopState().getTracks().get(0).getAnimation().getName()))
+        || player.getTopState().getTracks().isEmpty())) {
+      player.getTopState().setAnimation(0, "death_" + player.getCurrentWeapon().getAniTag(), false);
+    }
+
+    player.getTopState().update(Gdx.graphics.getDeltaTime());
+    player.getTopState().apply(player.getTopSkeleton());
+    player.getTopSkeleton().updateWorldTransform();
+
+    // обновить нижнюю часть анимации
+    if (!player.isDead() && CharacterFeetStatus.MOVE.equals(player.getFeetStatus())) {
+      player.getFeetState().update(Gdx.graphics.getDeltaTime());
+    }
+
+    player.getBody().setActive(!player.isDead());
+
+    player.getFeetState().apply(player.getFeetSkeleton());
+    player.getFeetSkeleton().updateWorldTransform();
 
     handlePlayerHp();
   }
@@ -75,84 +104,26 @@ public class PlayerService {
     tmpVec3 = camera.unproject(tmpVec3);
 
     modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - getBodyPosY(),
-        tmpVec3.x - getBodyPosX()) + 20;
+        tmpVec3.x - getBodyPosX());
   }
 
-  public void drawPlayer(SpriteBatch batch) {
-    if (player.isDead()) {
-      drawDie(batch);
-    } else {
-      drawFeetSprite(batch);
-      drawTopSprite(batch);
+  public void drawPlayer(PolygonSpriteBatch polyBatch, SkeletonRenderer renderer) {
+    if (!player.isDead()) {
+      drawFeetSprite(polyBatch, renderer);
     }
+    drawTopSprite(polyBatch, renderer);
   }
 
-  private void drawDie(SpriteBatch batch) {
-    Sprite sprite = new Sprite(player.getDiedAnimation().getKeyFrame(Gdx.graphics.getDeltaTime()));
-    sprite.setX(getBodyPosX() * WORLD_TO_VIEW + (20f / player.getZoomMultiplier()) - sprite.getWidth() / 2);
-    sprite.setY(getBodyPosY() * WORLD_TO_VIEW + (30f / player.getZoomMultiplier()) - sprite.getHeight() / 2);
-    sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    sprite.setRotation(modelFrontAngle - 20);
-    sprite.draw(batch);
+  private void drawFeetSprite(PolygonSpriteBatch polyBatch, SkeletonRenderer renderer) {
+    player.getFeetSkeleton().setPosition(getBodyPosX() * WORLD_TO_VIEW, getBodyPosY() * WORLD_TO_VIEW);
+    player.getFeetSkeleton().getRootBone().setRotation(feetRotationAngle);
+    renderer.draw(polyBatch, player.getFeetSkeleton());
   }
 
-  private void drawFeetSprite(SpriteBatch batch) {
-    Sprite sprite = new Sprite(getActualFrame(feetStateTime));
-    sprite.setX(
-        player.getBody().getPosition().x * WORLD_TO_VIEW + (20f / player.getZoomMultiplier()) - sprite.getWidth() / 2);
-    sprite.setY(
-        player.getBody().getPosition().y * WORLD_TO_VIEW + (30f / player.getZoomMultiplier()) - sprite.getHeight() / 2);
-    sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    sprite.setRotation(modelFrontAngle - 20);
-    sprite.draw(batch);
-  }
-
-  private void drawTopSprite(SpriteBatch batch) {
-    Sprite sprite = new Sprite(getActualFrameTop(topStateTime));
-    sprite.setX(player.getBody().getPosition().x * WORLD_TO_VIEW - sprite.getWidth() / 2);
-    sprite.setY(player.getBody().getPosition().y * WORLD_TO_VIEW - sprite.getHeight() / 2);
-    sprite.setOrigin(sprite.getWidth() / 2, sprite.getHeight() / 2);
-    sprite.setRotation(modelFrontAngle - 20);
-    sprite.draw(batch);
-  }
-
-  private Texture getActualFrame(float stateTime) {
-    float v = modelFrontAngle + 360 + 20;
-    v = angleMathAdd(v);
-    if (angleMathAdd(45 + v) > moveDirectionAngle && moveDirectionAngle >= angleMathAdd(v - 45)) {
-      return player.getRunAnimation().getKeyFrame(stateTime, true);
-    } else if (angleMathAdd(135 + v) > moveDirectionAngle && moveDirectionAngle >= angleMathAdd(v + 45)) {
-      return player.getStrafeRightAnimation().getKeyFrame(stateTime, true);
-    } else if (angleMathAdd(v - 45) > moveDirectionAngle && moveDirectionAngle >= angleMathAdd(v - 135)) {
-      return player.getStrafeLeftAnimation().getKeyFrame(stateTime, true);
-    } else {
-      return player.getRunAnimation().getKeyFrame(stateTime, true);
-    }
-  }
-
-  private float angleMathAdd(float v) {
-    if (v < 0) {
-      return v + 360;
-    } else if (v > 360) {
-      return v - 360;
-    } else if (v == 360) {
-      return 0;
-    }
-    return v;
-  }
-
-  public Texture getActualFrameTop(float stateTime) {
-    Weapon animationStack = getActualWeapon();
-    if (player.getTopStatus() == CharacterTopStatus.MOVE) {
-      return animationStack.getMoveAnimation().getKeyFrame(stateTime, true);
-    } else if (player.getTopStatus() == CharacterTopStatus.RELOAD) {
-      return animationStack.getReloadAnimation().getKeyFrame(stateTime, true);
-    } else if (player.getTopStatus() == CharacterTopStatus.SHOOT) {
-      return animationStack.getShootAnimation().getKeyFrame(stateTime, true);
-    } else if (player.getTopStatus() == CharacterTopStatus.MELEE_ATTACK) {
-      return animationStack.getMeleeAttackAnimation().getKeyFrame(stateTime, true);
-    }
-    return animationStack.getIdleAnimation().getKeyFrame(stateTime, true);
+  private void drawTopSprite(PolygonSpriteBatch polyBatch, SkeletonRenderer renderer) {
+    player.getTopSkeleton().setPosition(getBodyPosX() * WORLD_TO_VIEW, getBodyPosY() * WORLD_TO_VIEW);
+    player.getTopSkeleton().getRootBone().setRotation(modelFrontAngle);
+    renderer.draw(polyBatch, player.getTopSkeleton());
   }
 
   private void changeTopStatus(CharacterTopStatus status) {
@@ -180,7 +151,12 @@ public class PlayerService {
       point.set(Gdx.input.getX(), Gdx.input.getY(), 0);
       cameraBox2D.unproject(point);
 
-      weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y, !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
+      weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y,
+          !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
+      if (!weapon.isReloading()) {
+        player.getTopState()
+            .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
+      }
     }
   }
 
@@ -195,6 +171,8 @@ public class PlayerService {
 
   public void changeWeapon(int i) {
     player.setCurrentWeapon(WeaponEnum.getByPos(i));
+    player.getTopState()
+        .setAnimation(0, "move_" + player.getCurrentWeapon().getAniTag(), true);
   }
 
   /**
@@ -226,8 +204,12 @@ public class PlayerService {
         x = getSpeed();
       }
 
+      transformX = x;
+      transformY = y;
+
       player.getBody().setTransform(getBodyPosX() + x / WORLD_TO_VIEW, getBodyPosY() + y / WORLD_TO_VIEW, 0);
 
+      //Держит камеру примерно по центру игрока
       if ((getBodyPosX() > cameraBox2D.position.x && x < 0) || (getBodyPosX() < cameraBox2D.position.x && x > 0)) {
         x = 0;
       }
@@ -244,6 +226,7 @@ public class PlayerService {
     }
   }
 
+
   /**
    * Сменить статус действия текстур
    */
@@ -251,7 +234,7 @@ public class PlayerService {
     if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(
         Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.D)) {
       AudioService.getInstance().playStep();
-      changeFeetStatus(CharacterFeetStatus.RUN);
+      changeFeetStatus(CharacterFeetStatus.MOVE);
       changeTopStatus(CharacterTopStatus.MOVE);
     } else {
       changeFeetStatus(CharacterFeetStatus.IDLE);
@@ -263,7 +246,11 @@ public class PlayerService {
    * Получить скорость движения игрока
    */
   private float getSpeed() {
-    return PLAYER_MOVE_SPEED * MAIN_ZOOM * RpgStatsService.getInstance().getStats().getMoveSpeed() * getActualWeapon().getMoveSpeedMultiplier();
+    return
+        PLAYER_MOVE_SPEED
+            * MAIN_ZOOM
+            * RpgStatsService.getInstance().getStats().getMoveSpeed()
+            * getActualWeapon().getMoveSpeedMultiplier();
   }
 
   /**
@@ -278,5 +265,25 @@ public class PlayerService {
    */
   public float getBodyPosY() {
     return player.getBody().getPosition().y;
+  }
+
+  class ThreadForFeetAngle extends Thread {
+
+    float currentAngle;
+
+    @SneakyThrows
+    @Override
+    public void run() {
+      feetRotationAngle = 0;
+      currentAngle = feetRotationAngle;
+      while (!player.isDead()) {
+        Thread.sleep(150);
+        float v = GDXUtils.calcAngleBetweenTwoPoints(getBodyPosX(), getBodyPosY(), getBodyPosX() + transformX,
+            getBodyPosY() + transformY);
+//        if (v )
+        feetRotationAngle = v;
+//        System.out.println(v);
+      }
+    }
   }
 }

@@ -1,13 +1,11 @@
 package ru.meat.game.model.weapons;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
-import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.utils.GDXUtils;
 
 @Data
 public class WeaponFactory {
@@ -17,14 +15,9 @@ public class WeaponFactory {
 
   private final static String assetsDir = "./assets/Top_Down_survivor/";
 
-  public static Weapon rifleWeapon(float zoom, float frameDuration) {
+  public static Weapon rifleWeapon() {
     return Weapon.builder()
         .name(WeaponEnum.RIFLE)
-        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
-        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
-        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
-        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
-        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(pistolBulletSpeed)
         .bulletType(BulletType.COMMON)
         .fireRate(100)
@@ -47,14 +40,9 @@ public class WeaponFactory {
         .build();
   }
 
-  public static Weapon shotgunWeapon(float zoom, float frameDuration) {
+  public static Weapon shotgunWeapon() {
     return Weapon.builder()
         .name(WeaponEnum.SHOTGUN)
-        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
-        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
-        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
-        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
-        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(pistolBulletSpeed)
         .bulletType(BulletType.COMMON)
         .fireRate(800)
@@ -77,14 +65,9 @@ public class WeaponFactory {
         .build();
   }
 
-  public static Weapon doubleBarrelShotgunWeapon(float zoom, float frameDuration) {
+  public static Weapon doubleBarrelShotgunWeapon() {
     return Weapon.builder()
         .name(WeaponEnum.DOUBLE_BARREL)
-        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
-        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
-        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
-        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
-        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(pistolBulletSpeed)
         .bulletType(BulletType.COMMON)
         .fireRate(300)
@@ -107,14 +90,9 @@ public class WeaponFactory {
         .build();
   }
 
-  public static Weapon machineGun(float zoom, float frameDuration) {
+  public static Weapon machineGun() {
     return Weapon.builder()
         .name(WeaponEnum.MACHINE_GUN)
-        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
-        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
-        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
-        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
-        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(pistolBulletSpeed)
         .bulletType(BulletType.COMMON)
         .fireRate(90)
@@ -137,16 +115,11 @@ public class WeaponFactory {
         .build();
   }
 
-  public static Weapon m79(float zoom, float frameDuration) {
+  public static Weapon m79() {
     Texture texture = LoaderManager.getInstance().get("GBullet.png");
     texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
     return Weapon.builder()
         .name(WeaponEnum.M79)
-        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
-        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
-        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
-        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
-        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(grenadeSpeed)
         .bulletType(BulletType.EXPLOSIVE)
         .fireRate(100)
@@ -171,14 +144,9 @@ public class WeaponFactory {
         .build();
   }
 
-  public static Weapon m32(float zoom, float frameDuration) {
+  public static Weapon m32() {
     return Weapon.builder()
         .name(WeaponEnum.M32)
-        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
-        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
-        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
-        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
-        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(grenadeSpeed)
         .bulletType(BulletType.EXPLOSIVE)
         .fireRate(500)
@@ -204,14 +172,9 @@ public class WeaponFactory {
         .build();
   }
 
-  public static Weapon aa12(float zoom, float frameDuration) {
+  public static Weapon aa12() {
     return Weapon.builder()
         .name(WeaponEnum.AA12)
-        .idleAnimation(initAnimationFrames(assetsDir + "rifle/idle/", zoom, frameDuration))
-        .reloadAnimation(initAnimationFrames(assetsDir + "rifle/reload/", zoom, frameDuration))
-        .shootAnimation(initAnimationFrames(assetsDir + "rifle/shoot/", zoom, frameDuration))
-        .moveAnimation(initAnimationFrames(assetsDir + "rifle/move/", zoom, frameDuration))
-        .meleeAttackAnimation(initAnimationFrames(assetsDir + "handgun/meleeattack/", zoom, frameDuration))
         .speed(pistolBulletSpeed)
         .bulletType(BulletType.COMMON)
         .fireRate(300)

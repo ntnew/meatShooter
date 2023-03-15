@@ -18,8 +18,8 @@ public class Enemy {
   private AnimationState state;
   private Skeleton skeleton;
 
-  private float enemyPing = 100;
-  private float enemyPingCounter = 0;
+  private float actionPing;
+  private Long actionCounter;
 
   /**
    * Радиус модельки бокс2д
@@ -100,9 +100,8 @@ public class Enemy {
    */
   private float transparency;
 
-  public Enemy(float posX, float posY, float zoom, int hp, float speed,
-      float animationAngle, float enemyPing, FloatPair playerCoord) {
-    this.enemyPing = enemyPing;
+  public Enemy(float posX, float posY, float zoom, int hp, float speed, float actionPing, FloatPair playerCoord) {
+    this.actionPing = actionPing;
     this.zoom = zoom;
     this.hp = hp;
     this.speed = speed;
@@ -114,14 +113,13 @@ public class Enemy {
     this.transparency = 1;
 
     this.status = EnemyStatus.IDLE;
-    this.animationAngle = animationAngle;
+    this.animationAngle = 0;
 
     if (playerCoord != null) {
       this.destination = playerCoord;
     } else {
       this.destination = new FloatPair(posX, posY);
       this.floatDestination = new FloatPair(posX, posY);
-      this.enemyPingCounter = this.enemyPing;
     }
   }
 

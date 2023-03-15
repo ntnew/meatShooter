@@ -33,7 +33,7 @@ import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.FaderService;
 import ru.meat.game.service.MapService;
-import ru.meat.game.service.PlayerService;
+import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.service.RpgStatsService;
 
 @Data
@@ -121,6 +121,7 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     camera.update();
     Box2dWorld.getInstance().update();
+//    System.out.println(playerService.getModelFrontAngle());
     playerService.updateState();
     BulletService.getInstance().updateBullets();
 
@@ -134,6 +135,33 @@ public abstract class GameZone implements Screen, InputProcessor {
     mapService.draw(camera);
 
     renderSpec(delta);
+
+    enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY());
+
+    //рисовать текстуры
+    spriteBatch.setProjectionMatrix(camera.combined);
+    polyBatch.setProjectionMatrix(camera.combined);
+
+    polyBatch.begin();
+    BloodService.getInstance().drawBloodSpots(camera);
+
+    spriteBatch.begin();
+
+    //Если игрок умер, то рисуем раньше врагов
+    if (playerService.getPlayer().isDead()){
+      playerService.drawPlayer(polyBatch, renderer);
+    }
+    enemyService.drawEnemies(polyBatch, renderer);
+//    System.out.println(playerService.getBodyPosX() + " ---- " + playerService.getBodyPosY());
+    BulletService.getInstance().drawBullets(camera);
+
+    //Если игрок жив, то рисуем после врагов
+    if (!playerService.getPlayer().isDead()){
+      playerService.drawPlayer(polyBatch, renderer);
+    }
+
+    spriteBatch.end();
+    polyBatch.end();
 
     BloodService.getInstance().drawBleeds(camera);
 
@@ -289,6 +317,7 @@ public abstract class GameZone implements Screen, InputProcessor {
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
+    playerService.getPlayer().setDead(true);
     this.game.setScreen(
         new EndGameMenu(game, enemyService.getRewardPointCount().get(), mapService.getMapInfo().getPosition(),
             beginDate, enemyService.getKillCount().get()));

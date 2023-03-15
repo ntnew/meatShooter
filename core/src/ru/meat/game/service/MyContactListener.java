@@ -38,11 +38,24 @@ public class MyContactListener implements ContactListener {
     if (fa.getUserData() instanceof EnemyBodyUserData && fb.getUserData() instanceof BodyUserData
         && ((BodyUserData) fb.getUserData()).getName().equals("player")) {
       attackPlayer(fa, fb);
-    }
-    if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BodyUserData
+    } else if (fb.getUserData() instanceof EnemyBodyUserData && fa.getUserData() instanceof BodyUserData
         && ((BodyUserData) fa.getUserData()).getName().equals("player")) {
       attackPlayer(fb, fa);
+    } else if (fa.getUserData() instanceof BulletBodyUserData && fb.getUserData() instanceof BodyUserData
+        && ((BodyUserData) fb.getUserData()).getName().equals("player")) {
+      contactPlayerWithAcid(fb, fa);
+    } else if (fb.getUserData() instanceof BulletBodyUserData && fa.getUserData() instanceof BodyUserData
+        && ((BodyUserData) fa.getUserData()).getName().equals("player")) {
+      contactPlayerWithAcid(fa, fb);
     }
+  }
+
+  private void contactPlayerWithAcid(Fixture fa, Fixture fb) {
+    Explosions.getInstance().createAcidExplosion(
+        new FloatPair(fb.getBody().getPosition().x * WORLD_TO_VIEW, fb.getBody().getPosition().y * WORLD_TO_VIEW));
+    BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
+    bulletBodyUserData.setNeedDispose(true);
+    fb.setUserData(bulletBodyUserData);
   }
 
   private void attackPlayer(Fixture fa, Fixture fb) {
@@ -92,7 +105,7 @@ public class MyContactListener implements ContactListener {
   }
 
   private void createExplosion(FloatPair floatPair, float damage) {
-    Explosions.getInstance().createExplosion(floatPair, damage);
+    Explosions.getInstance().createFireExplosion(floatPair, damage);
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {

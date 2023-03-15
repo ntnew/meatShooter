@@ -1,9 +1,13 @@
 package ru.meat.game.service;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -13,14 +17,19 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
+import ru.meat.game.loader.LoaderManager;
+import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.weapons.Bullet;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 import ru.meat.game.model.weapons.BulletType;
+import ru.meat.game.model.weapons.explosions.Explosions;
+import ru.meat.game.settings.Filters;
 import ru.meat.game.utils.GDXUtils;
 import ru.meat.game.settings.Constants;
 
@@ -37,12 +46,32 @@ public class BulletService {
     return instance;
   }
 
-  private List<Bullet> bullets = new ArrayList<>();
+
+  private Animation<Texture> acidBulletAnimation;
+
+  private List<Bullet> playerBullets = new ArrayList<>();
+
+  private List<Bullet> enemyBullets = new ArrayList<>();
+
 
   private final ArrayList<Integer> bulletsToRemove = new ArrayList<>();
 
   public BulletService() {
     batch = new SpriteBatch();
+
+    Texture[] l = new Texture[19];
+
+    for (int i = 0; i < 19; i++) {
+      l[i] = LoaderManager.getInstance().get("ani/widowAttack/fly/" + i + ".png");
+    }
+    acidBulletAnimation = new Animation<>(0.025f, l);
+  }
+
+
+  public static void initResources() {
+    for (int i = 0; i < 19; i++) {
+      LoaderManager.getInstance().load("ani/widowAttack/fly/" + i + ".png", Texture.class, TEXTURE_PARAMETERS);
+    }
   }
 
   /**
@@ -64,7 +93,7 @@ public class BulletService {
     Bullet bullet = new Bullet();
     //создать данные для бокс2д
     Body bulletBody = createCircleForBullet(fromX, fromY, damage, bulletRadius, bulletType);
-    bulletBody.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
+    bulletBody.getFixtureList().get(0).setFilterData(Filters.getPlayerBulletFilter());
     bulletBody.setBullet(true);
     bulletBody.setLinearVelocity((screenX - fromX) * bulletSpeed * MAIN_ZOOM,
         (screenY - fromY) * bulletSpeed * MAIN_ZOOM);
@@ -77,7 +106,7 @@ public class BulletService {
     sprite.rotate(bulletBody.getLinearVelocity().angleDeg());
     bullet.setSprite(sprite);
 
-    bullets.add(bullet);
+    playerBullets.add(bullet);
   }
 
   private Body createCircleForBullet(float x, float y, int damage, float bulletRadius, BulletType bulletType) {
@@ -104,9 +133,48 @@ public class BulletService {
     return box;
   }
 
+
+  public void createEnemyBullet(float fromX, float fromY, float toX, float toY,
+      float bulletSpeed, int damage, float bulletRadius,
+      BulletType bulletType, float bulletScale) {
+    Bullet bullet = new Bullet();
+    //создать данные для бокс2д
+    Body bulletBody = createCircleForBullet(fromX, fromY, damage, bulletRadius, bulletType);
+    bulletBody.getFixtureList().get(0).setFilterData(Filters.getFilterForEnemiesBullets());
+    bulletBody.setBullet(true);
+    //найти  новую точку на экране с новоой гипотенузой для одинаковости выстрелов
+    float catetPrilezjaschiy = (toX - fromX);
+    float newGip = 20;
+    float catetProtivo = (toY - fromY);
+    float gip = GDXUtils.calcGipotenuza(catetPrilezjaschiy, catetProtivo);
+    float sin = catetProtivo / gip;
+    float cos = catetPrilezjaschiy / gip;
+    float newCatetForY = sin * newGip;
+    float newCatetForX = cos * newGip;
+
+    toX = fromX + newCatetForX;
+    toY = fromY + newCatetForY;
+
+    bulletBody.setLinearVelocity((toX - fromX) * bulletSpeed * MAIN_ZOOM,
+        (toY - fromY) * bulletSpeed * MAIN_ZOOM);
+    bullet.setBody(bulletBody);
+
+    bullet.setStateTime(0);
+    bullet.setBornDate(TimeUtils.millis());
+    //создать спрайт текстуры
+    Sprite sprite = new Sprite(acidBulletAnimation.getKeyFrame(0));
+    sprite.setScale(bulletScale);
+
+    sprite.setOrigin(sprite.getWidth() / 2f, sprite.getHeight() / 2.4f);
+    sprite.rotate(bulletBody.getLinearVelocity().angleDeg() + 90);
+    bullet.setSprite(sprite);
+
+    enemyBullets.add(bullet);
+  }
+
   public void updateBullets() {
-    for (int i = 0; i < bullets.size(); i++) {
-      Bullet bullet = bullets.get(i);
+    for (int i = 0; i < playerBullets.size(); i++) {
+      Bullet bullet = playerBullets.get(i);
       Array<Fixture> fixtureList = bullet.getBody().getFixtureList();
       if (!fixtureList.isEmpty()) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
@@ -115,13 +183,33 @@ public class BulletService {
         }
       }
     }
-    bullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
+    playerBullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
+
+    for (int i = 0; i < enemyBullets.size(); i++) {
+      Bullet bullet = enemyBullets.get(i);
+      Array<Fixture> fixtureList = bullet.getBody().getFixtureList();
+      if (!fixtureList.isEmpty()) {
+        BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
+        if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(bullet.getBornDate()) > 6000) {
+          try {
+            Explosions.getInstance().createAcidExplosion(
+                new FloatPair(enemyBullets.get(i).getBody().getPosition().x * WORLD_TO_VIEW,
+                    enemyBullets.get(i).getBody().getPosition().y * WORLD_TO_VIEW));
+            enemyBullets.get(i).getBody().setActive(false);
+            Box2dWorld.getInstance().getWorld().destroyBody(enemyBullets.get(i).getBody());
+          } catch (Exception e) {
+
+          }
+        }
+      }
+    }
+    enemyBullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
   }
 
   private void deleteBulletBody(int i) {
     try {
-      bullets.get(i).getBody().setActive(false);
-      Box2dWorld.getInstance().getWorld().destroyBody(bullets.get(i).getBody());
+      playerBullets.get(i).getBody().setActive(false);
+      Box2dWorld.getInstance().getWorld().destroyBody(playerBullets.get(i).getBody());
     } catch (Exception e) {
 
     }
@@ -130,7 +218,7 @@ public class BulletService {
   public void drawBullets(OrthographicCamera camera) {
     batch.setProjectionMatrix(camera.combined);
     batch.begin();
-    bullets.forEach(b -> {
+    playerBullets.forEach(b -> {
           try {
             Array<Fixture> fixtureList = b.getBody().getFixtureList();
             if (!fixtureList.isEmpty()) {
@@ -139,6 +227,24 @@ public class BulletService {
               b.getSprite().setPosition(
                   position.x * Constants.WORLD_TO_VIEW - b.getSprite().getWidth() + b.getSprite().getWidth() / 12,
                   position.y * Constants.WORLD_TO_VIEW - b.getSprite().getHeight() / 2);
+
+              b.getSprite().draw(batch);
+            }
+          } catch (NullPointerException e) {
+
+          }
+        }
+    );
+    enemyBullets.forEach(b -> {
+          try {
+            Array<Fixture> fixtureList = b.getBody().getFixtureList();
+            if (!fixtureList.isEmpty()) {
+              Vector2 position = fixtureList.get(0).getBody().getPosition();
+              b.setStateTime(b.getStateTime() + Gdx.graphics.getDeltaTime());
+              b.getSprite().setTexture(acidBulletAnimation.getKeyFrame(b.getStateTime(), true));
+              b.getSprite().setPosition(
+                  position.x * Constants.WORLD_TO_VIEW - b.getSprite().getWidth() / 2f,
+                  position.y * Constants.WORLD_TO_VIEW - b.getSprite().getHeight() / 2.4f);
 
               b.getSprite().draw(batch);
             }

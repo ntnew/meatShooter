@@ -110,12 +110,6 @@ public class GDXUtils {
 
   }
 
-  public static Filter getFilter() {
-    Filter f = new Filter();
-    f.groupIndex = -1;
-    return f;
-  }
-
 
   public static float calcAngleBetweenTwoPoints(float x1, float y1, float x2, float y2) {
     return MathUtils.radiansToDegrees * MathUtils.atan2(y2 - y1, x2 - x1);

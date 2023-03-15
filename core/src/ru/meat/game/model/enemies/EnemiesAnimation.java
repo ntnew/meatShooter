@@ -17,6 +17,8 @@ public class EnemiesAnimation {
 
   private SkeletonData spiderSkeletonData;
 
+  private SkeletonData blackWidowSkeletonData;
+
   private static EnemiesAnimation instance;
 
   public static EnemiesAnimation getInstance() {
@@ -35,5 +37,9 @@ public class EnemiesAnimation {
     SkeletonJson spiderJson = new SkeletonJson((TextureAtlas) LoaderManager.getInstance().get("ani/spider/spider.atlas"));
     spiderJson.setScale(2f/MAIN_ZOOM);
     spiderSkeletonData = spiderJson.readSkeletonData(Gdx.files.internal("ani/spider/spider.json"));
+
+    SkeletonJson blackWidowJson = new SkeletonJson((TextureAtlas) LoaderManager.getInstance().get("ani/blackWidow/spider_mini_boss.atlas"));
+    blackWidowJson.setScale(3f/MAIN_ZOOM);
+    blackWidowSkeletonData = blackWidowJson.readSkeletonData(Gdx.files.internal("ani/blackWidow/spider_mini_boss.json"));
   }
 }

@@ -13,4 +13,8 @@ public class Bullet {
   private float speedMultiply;
 
   private Sprite sprite;
+
+  private Long bornDate;
+
+  private float stateTime;
 }

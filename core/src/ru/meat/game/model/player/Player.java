@@ -1,21 +1,23 @@
 package ru.meat.game.model.player;
 
-import static ru.meat.game.utils.FilesUtils.initAnimationFrames;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.esotericsoftware.spine.AnimationState;
+import com.esotericsoftware.spine.AnimationStateData;
+import com.esotericsoftware.spine.Skeleton;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.meat.game.model.bodyData.BodyUserData;
+import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
 import ru.meat.game.service.RpgStatsService;
 import ru.meat.game.model.weapons.WeaponFactory;
+import ru.meat.game.settings.Filters;
 import ru.meat.game.utils.GDXUtils;
 
 @EqualsAndHashCode(callSuper = true)
@@ -26,6 +28,17 @@ public class Player extends Actor {
    * Тело игрока в box2d
    */
   private Body body;
+
+
+  private AnimationState topState;
+
+  private Skeleton topSkeleton;
+
+
+
+  private AnimationState feetState;
+
+  private Skeleton feetSkeleton;
 
   /**
    * Текущие жизни игрока
@@ -47,14 +60,6 @@ public class Player extends Actor {
    */
   private boolean isDead = false;
 
-  private Animation<Texture> walkAnimation;
-  private Animation<Texture> idle;
-  private Animation<Texture> runAnimation;
-  private Animation<Texture> strafeLeftAnimation;
-  private Animation<Texture> strafeRightAnimation;
-
-  private Animation<Texture> diedAnimation;
-
   private WeaponEnum currentWeapon;
 
   private List<Weapon> weapons = new ArrayList<>();
@@ -65,29 +70,50 @@ public class Player extends Actor {
   public Player(float x, float y) {
     try {
       currentWeapon = WeaponEnum.SHOTGUN;
-      topStatus = CharacterTopStatus.IDLE;
+      topStatus = CharacterTopStatus.MOVE;
       feetStatus = CharacterFeetStatus.IDLE;
 
       this.hp = RpgStatsService.getInstance().getStats().getHp();
 
-      this.walkAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/walk/", zoomMultiplier, frameDuration);
-      this.idle = initAnimationFrames("./assets/Top_Down_survivor/feet/idle/", zoomMultiplier, frameDuration);
-      this.runAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/run/", zoomMultiplier, frameDuration);
-      this.strafeLeftAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_left/", zoomMultiplier, frameDuration);
-      this.strafeRightAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
-      this.diedAnimation = initAnimationFrames("./assets/Top_Down_survivor/feet/strafe_right/", zoomMultiplier,frameDuration);
 
-      weapons.add(WeaponFactory.shotgunWeapon(zoomMultiplier, frameDuration));
-      weapons.add(WeaponFactory.rifleWeapon(zoomMultiplier, frameDuration));
-      weapons.add(WeaponFactory.doubleBarrelShotgunWeapon(zoomMultiplier, frameDuration));
-      weapons.add(WeaponFactory.machineGun(zoomMultiplier, frameDuration));
-      weapons.add(WeaponFactory.m79(zoomMultiplier, frameDuration));
-      weapons.add(WeaponFactory.m32(zoomMultiplier, frameDuration));
-      weapons.add(WeaponFactory.aa12(zoomMultiplier, frameDuration));
+      topSkeleton = new Skeleton(PlayerAnimationFactory.getInstance().getPlayerTopSkeletonData());
+      topSkeleton.setPosition(x, y);
+//      float random = MathUtils.random(0.8f, 1.2f);
+//      skeleton.setScale(random, random);
+
+      AnimationStateData stateData = new AnimationStateData(PlayerAnimationFactory.getInstance().getPlayerTopSkeletonData());
+//      stateData.setMix("walk", "attack", 0.2f);
+//      stateData.setMix("attack", "walk", 0.2f);
+      this.topState = new AnimationState(stateData);
+      this.topState.setTimeScale(0.8f);
+
+      feetSkeleton = new Skeleton(PlayerAnimationFactory.getInstance().getPlayerFeetSkeletonData());
+      feetSkeleton.setPosition(x, y);
+//      float random = MathUtils.random(0.8f, 1.2f);
+//      skeleton.setScale(random, random);
+
+      AnimationStateData feetStateData = new AnimationStateData(PlayerAnimationFactory.getInstance().getPlayerFeetSkeletonData());
+//      stateData.setMix("walk", "attack", 0.2f);
+//      stateData.setMix("attack", "walk", 0.2f);
+      this.feetState = new AnimationState(feetStateData);
+      this.feetState.setTimeScale(1.5f);
+
+      topState.setAnimation(0, "move_" + getCurrentWeapon().getAniTag(), true);
+
+      this.feetState.setAnimation(0, "run", true);
 
 
-      body = GDXUtils.createCircleForModel(90/WORLD_TO_VIEW, 100, new BodyUserData("player",0), x,y,true);
-      body.getFixtureList().get(0).setFilterData(GDXUtils.getFilter());
+
+      weapons.add(WeaponFactory.shotgunWeapon());
+      weapons.add(WeaponFactory.rifleWeapon());
+      weapons.add(WeaponFactory.doubleBarrelShotgunWeapon());
+      weapons.add(WeaponFactory.machineGun());
+      weapons.add(WeaponFactory.m79());
+      weapons.add(WeaponFactory.m32());
+      weapons.add(WeaponFactory.aa12());
+
+      body = GDXUtils.createCircleForModel(90 / WORLD_TO_VIEW, 100, new BodyUserData("player", 0), x, y, true);
+      body.getFixtureList().get(0).setFilterData(Filters.getPlayerFilter());
 
     } catch (Exception e) {
       e.printStackTrace();

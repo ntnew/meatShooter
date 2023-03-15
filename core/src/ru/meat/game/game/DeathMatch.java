@@ -28,22 +28,6 @@ public class DeathMatch extends GameZone {
   protected void renderSpec(float delta) {
     createMoreEnemies();
 
-    enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY());
-
-    //рисовать текстуры
-    spriteBatch.setProjectionMatrix(camera.combined);
-    polyBatch.setProjectionMatrix(camera.combined);
-
-    polyBatch.begin();
-    BloodService.getInstance().drawBloodSpots(camera);
-    BulletService.getInstance().drawBullets(camera);
-
-    spriteBatch.begin();
-
-    playerService.drawPlayer(spriteBatch);
-    enemyService.drawEnemies(polyBatch, renderer);
-    spriteBatch.end();
-    polyBatch.end();
   }
 
   private void createMoreEnemies() {
@@ -80,14 +64,20 @@ public class DeathMatch extends GameZone {
         yBound2 = yBound2 - deltaByY / 2 - 80;
       }
 //      Создание врага
-      if (MathUtils.random(0, 100) > 30) {
+      int random1 = MathUtils.random(0, 100);
+      if (random1 > 30) {
         enemyService.getEnemies().add(
             EnemyFactory.createLittleBug(
                 MathUtils.random(xBound1, xBound2),
                 MathUtils.random(yBound1, yBound2)));
-      } else {
+      } else  if (random1 > 15 && random1 <30){
         enemyService.getEnemies().add(
             EnemyFactory.createSpider(
+                MathUtils.random(xBound1, xBound2),
+                MathUtils.random(yBound1, yBound2)));
+      } else {
+        enemyService.getEnemies().add(
+            EnemyFactory.createBlackWidow(
                 MathUtils.random(xBound1, xBound2),
                 MathUtils.random(yBound1, yBound2)));
       }

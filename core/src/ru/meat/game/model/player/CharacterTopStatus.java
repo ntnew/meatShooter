@@ -4,6 +4,5 @@ public enum CharacterTopStatus {
   IDLE,
   MOVE,
   RELOAD,
-  SHOOT,
-  MELEE_ATTACK
+  SHOOT;
 }

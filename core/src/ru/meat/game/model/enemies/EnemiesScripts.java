@@ -2,7 +2,9 @@ package ru.meat.game.model.enemies;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.TimeUtils;
+import lombok.SneakyThrows;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.weapons.BulletType;
 import ru.meat.game.service.BulletService;
@@ -20,19 +22,13 @@ public class EnemiesScripts {
       enemy.setActionCounter(TimeUtils.millis());
       enemy.setStatus(EnemyStatus.ATTACK);
       enemy.getState().setAnimation(0, "attack", false);
-      BulletService.getInstance().createEnemyBullet(
-          enemy.getBody().getPosition().x, enemy.getBody().getPosition().y,
-          x,y, 0.2f, 40, 40/MAIN_ZOOM, BulletType.ENEMY_COMMON,0.3f
-          );
+      new ThreadForDelayFoeBullet(enemy, x, y).start();
     } else if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 1000 && enemy.getStatus()
         .equals(EnemyStatus.ATTACK)) {
       enemy.setActionCounter(TimeUtils.millis());
       enemy.setStatus(EnemyStatus.MOVE);
       enemy.getState().setAnimation(0, "walk", true);
     }
-
-    EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
-
 
     EnemyService.rotateModel(x - enemy.getBody().getPosition().x, y - enemy.getBody().getPosition().y, enemy);
     if (!enemy.getStatus().equals(EnemyStatus.ATTACK)) {
@@ -47,6 +43,7 @@ public class EnemiesScripts {
           enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
     }
   }
+
 
   /**
    * Метод действия врага простой идти на врага, при касании атаковать
@@ -85,5 +82,33 @@ public class EnemiesScripts {
     enemy.setSpeedX(cos * enemy.getSpeed());
     enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
         enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
+  }
+
+
+  static class ThreadForDelayFoeBullet extends Thread {
+
+    private final Enemy enemy;
+    private final float x;
+    private final float y;
+
+    public ThreadForDelayFoeBullet(Enemy enemy, float x, float y) {
+      this.enemy = enemy;
+      this.x = x;
+      this.y = y;
+    }
+
+    @SneakyThrows
+    @Override
+    public void run() {
+      Thread.sleep(300);
+      Gdx.app.postRunnable(() -> {
+        if (enemy.getBody() != null) {
+          BulletService.getInstance().createEnemyBullet(
+              enemy.getBody().getPosition().x, enemy.getBody().getPosition().y,
+              x, y, 0.2f, 40, 40 / MAIN_ZOOM, BulletType.ENEMY_COMMON, 0.25f
+          );
+        }
+      });
+    }
   }
 }

@@ -56,6 +56,9 @@ public class MyContactListener implements ContactListener {
     BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
     bulletBodyUserData.setNeedDispose(true);
     fb.setUserData(bulletBodyUserData);
+
+    BodyUserData playerUserData = (BodyUserData) fa.getUserData();
+    playerUserData.setDamage(playerUserData.getDamage() + bulletBodyUserData.getDamage());
   }
 
   private void attackPlayer(Fixture fa, Fixture fb) {

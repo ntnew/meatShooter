@@ -46,7 +46,7 @@ public class Explosions {
   private static final int FRAME_COLS = 8, FRAME_ROWS = 6;
 
   private static Explosions instance;
-  private final static long  explosionLifeTime = 6000;
+  private final static long  explosionLifeTime = 600;
 
   public static Explosions getInstance() {
     if (instance == null) {

@@ -18,7 +18,7 @@ public class EnemiesScripts {
       enemy.setActionCounter(TimeUtils.millis());
     }
 
-    if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 3000 && !enemy.getStatus().equals(EnemyStatus.ATTACK)) {
+    if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 4000 && !enemy.getStatus().equals(EnemyStatus.ATTACK)) {
       enemy.setActionCounter(TimeUtils.millis());
       enemy.setStatus(EnemyStatus.ATTACK);
       enemy.getState().setAnimation(0, "attack", false);
@@ -82,6 +82,59 @@ public class EnemiesScripts {
     enemy.setSpeedX(cos * enemy.getSpeed());
     enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
         enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
+  }
+
+  /**
+   * Метод действия врага простой идти на врага, при касании атаковать
+   * <p>
+   * для пауков
+   *
+   * @param x     x координата игрока
+   * @param y     у координата игрока
+   * @param enemy враг
+   */
+  public static void spiderActions(float x, float y, Enemy enemy) {
+    if (enemy.getActionCounter() == null) {
+      enemy.setActionCounter(TimeUtils.millis());
+    }
+
+    EnemyBodyUserData userData = (EnemyBodyUserData) enemy.getBody().getFixtureList().get(0).getUserData();
+
+    if (userData.isNeedAttack()) {
+      if (!enemy.getStatus().equals(EnemyStatus.ATTACK)) {
+        enemy.setStatus(EnemyStatus.ATTACK);
+        enemy.getState().setAnimation(0, "attack", false);
+        enemy.getState().addAnimation(0, "walk", true, 0);
+      }
+      userData.setNeedAttack(false);
+    }
+
+    EnemyService.rotateModel(x - enemy.getBody().getPosition().x, y - enemy.getBody().getPosition().y, enemy);
+
+    if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 2000 && enemy.getStatus().equals(EnemyStatus.IDLE)
+        && !userData.isNeedAttack()) {
+      enemy.setActionCounter(TimeUtils.millis());
+      enemy.setStatus(EnemyStatus.MOVE);
+      if (!enemy.getStatus().equals(EnemyStatus.MOVE) && enemy.getState().getTracks().isEmpty()) {
+        enemy.getState().setAnimation(0, "walk", true);
+      }
+    } else if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 2000 && !enemy.getStatus()
+        .equals(EnemyStatus.IDLE)) {
+      enemy.setActionCounter(TimeUtils.millis());
+      enemy.setStatus(EnemyStatus.IDLE);
+    }
+
+    if (enemy.getStatus().equals(EnemyStatus.MOVE)) {
+      float catetPrilezjaschiy = x - enemy.getBody().getPosition().x;
+      float catetProtivo = y - enemy.getBody().getPosition().y;
+      float gip = GDXUtils.calcGipotenuza(catetPrilezjaschiy, catetProtivo);
+      float sin = catetProtivo / gip;
+      float cos = catetPrilezjaschiy / gip;
+      enemy.setSpeedY(sin * enemy.getSpeed());
+      enemy.setSpeedX(cos * enemy.getSpeed());
+      enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
+          enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
+    }
   }
 
 

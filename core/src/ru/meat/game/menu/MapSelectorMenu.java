@@ -60,22 +60,20 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load("GBullet.png", Texture.class, TEXTURE_PARAMETERS);
     Explosions.initResources();
     BulletService.initResources();
+
     LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
-    LoaderManager.getInstance().load("ani/littleBug/bug.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
 
     LoaderManager.getInstance().load("ani/spider/spider.atlas", TextureAtlas.class);
-    LoaderManager.getInstance().load("ani/spider/spider.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
 
     LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.atlas", TextureAtlas.class);
-//    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.json", TextureAtlas.class);
     LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.png", Texture.class);
 
 
     PlayerAnimationFactory.loadAni();
-    GUI.loadHpBarTextures();
-    BloodService.getInstance();
+    GUI.loadResources();
+    BloodService.loadResources();
   }
 
   @Override

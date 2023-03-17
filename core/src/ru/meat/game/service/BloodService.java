@@ -24,17 +24,17 @@ import ru.meat.game.model.enemies.BloodSpot;
 @Data
 public class BloodService {
 
-  private List<String> littleBloodPngName = Arrays.asList(
+  private static List<String> littleBloodPngName = Arrays.asList(
       "blood/spot/1.png",
       "blood/spot/2.png",
       "blood/spot/3.png");
-  private List<String> bigBloodPngName = Arrays.asList(
+  private static List<String> bigBloodPngName = Arrays.asList(
       "blood/spot/4.png",
       "blood/spot/5.png",
       "blood/spot/6.png",
       "blood/spot/7.png");
 
-  private final String bleedAniPath = "blood/ani1/b";
+  private static final String bleedAniPath = "blood/ani1/b";
 
   private SpriteBatch batch;
 
@@ -55,14 +55,18 @@ public class BloodService {
   }
 
   public BloodService() {
+
+
+    batch = new SpriteBatch();
+  }
+
+  public static void loadResources() {
     littleBloodPngName.forEach(x -> LoaderManager.getInstance().load(x, Texture.class, TEXTURE_PARAMETERS));
     bigBloodPngName.forEach(x -> LoaderManager.getInstance().load(x, Texture.class, TEXTURE_PARAMETERS));
 
     for (int i = 0; i < 8; i++) {
       LoaderManager.getInstance().load(bleedAniPath + i + ".png", Texture.class, TEXTURE_PARAMETERS);
     }
-
-    batch = new SpriteBatch();
   }
 
   public void createBleeding(float x, float y) {

@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.utils.TimeUtils;
 import lombok.AllArgsConstructor;
+import ru.meat.game.gui.GUI;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.enemies.EnemyBodyUserData;
@@ -59,6 +60,8 @@ public class MyContactListener implements ContactListener {
 
     BodyUserData playerUserData = (BodyUserData) fa.getUserData();
     playerUserData.setDamage(playerUserData.getDamage() + bulletBodyUserData.getDamage());
+
+    GUI.getInstance().handleHit();
   }
 
   private void attackPlayer(Fixture fa, Fixture fb) {
@@ -71,6 +74,7 @@ public class MyContactListener implements ContactListener {
       playerUserData.setDamage(playerUserData.getDamage() + enemyData.getAttack());
       enemyData.setPreviousAttackTime(TimeUtils.millis());
     }
+    GUI.getInstance().handleHit();
   }
 
   @Override

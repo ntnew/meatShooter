@@ -69,8 +69,6 @@ public class PlayerService {
       player.getFeetState().update(Gdx.graphics.getDeltaTime());
     }
 
-    player.getBody().setActive(!player.isDead());
-
     player.getFeetState().apply(player.getFeetSkeleton());
     player.getFeetSkeleton().updateWorldTransform();
 

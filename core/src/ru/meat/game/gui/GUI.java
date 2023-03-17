@@ -12,15 +12,26 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.TimeUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
+import ru.meat.game.model.enemies.EnemiesAnimation;
 
 @Data
 public class GUI {
+
+  private static GUI instance;
+
+  public static GUI getInstance() {
+    if (instance == null) {
+      instance = new GUI();
+    }
+    return instance;
+  }
 
   private SpriteBatch batch;
 
@@ -37,18 +48,21 @@ public class GUI {
 
   private Cursor cursor;
 
+  private Sprite damageScreen;
+
+  private Float damageScreenAlpha;
+  private Long damageScreenTransparentCounter;
+
   /**
    * Значение максимального хп, для подсчёта оставшегося процента хп
    */
   private double fullHp;
 
-  public GUI(double fullHp) {
+  public GUI() {
     for (int i = 0; i < 51; i++) {
       hpTextures.add(LoaderManager.getInstance().get("gui/hpBar/" + i + ".png"));
     }
     hpTextures.forEach(t -> t.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear));
-
-    this.fullHp = fullHp;
 
     //init camera
     camera = new OrthographicCamera();
@@ -60,18 +74,49 @@ public class GUI {
     batch.setProjectionMatrix(camera.combined);
 
     //init hp sprite
-    hpSprite = new Sprite(getActualTexture(fullHp));
+    hpSprite = new Sprite(getActualTexture(null));
     hpSprite.setPosition(camera.viewportWidth / 2 * MAIN_ZOOM * GUI_ZOOM - hpSprite.getWidth() / 2,
         camera.viewportHeight * MAIN_ZOOM * GUI_ZOOM - hpSprite.getHeight());
     hpSprite.flip(false, true);
+
+    //init damage red screen sprite
+    damageScreen = new Sprite((Texture) LoaderManager.getInstance().get("gui/damageScreen.png"));
+    damageScreen.setScale(Gdx.graphics.getWidth()/damageScreen.getWidth() * MAIN_ZOOM * GUI_ZOOM ,Gdx.graphics.getHeight()/damageScreen.getHeight() *MAIN_ZOOM * GUI_ZOOM);
+    damageScreen.setPosition(camera.viewportWidth / 2 * MAIN_ZOOM * GUI_ZOOM - damageScreen.getWidth() / 2,
+        camera.viewportHeight/2 * MAIN_ZOOM * GUI_ZOOM - damageScreen.getHeight()/2);
+    damageScreenAlpha = 0f;
+    damageScreen.setAlpha(damageScreenAlpha);
+    if (damageScreenTransparentCounter == null){
+      damageScreenTransparentCounter = TimeUtils.millis();
+    }
   }
 
 
+  /**
+   * Рисовать интерфейс, вызывается в рендере
+   * @param hp
+   */
   public void draw(double hp) {
+    handleDamageScreenTransparency();
+
     batch.begin();
     hpSprite.setTexture(getActualTexture(hp));
     hpSprite.draw(batch);
+    damageScreen.draw(batch);
     batch.end();
+  }
+
+  /**
+   * Обработать прозрачность красного экрана
+   */
+  private void handleDamageScreenTransparency() {
+    if (damageScreenAlpha != 0 && TimeUtils.timeSinceMillis(damageScreenTransparentCounter) > 100){
+      damageScreenAlpha = damageScreenAlpha - 0.005f;
+    }
+    if (damageScreenAlpha < 0){
+      damageScreenAlpha = 0f;
+    }
+    damageScreen.setAlpha(damageScreenAlpha);
   }
 
   /**
@@ -79,7 +124,10 @@ public class GUI {
    *
    * @param hp оставшиеся хп
    */
-  private Texture getActualTexture(double hp) {
+  private Texture getActualTexture(Double hp) {
+    if (hp == null) {
+      return hpTextures.get(0);
+    }
     int i = Integer.parseInt(
         BigDecimal.valueOf((100 - hp / (fullHp / 100)) / 2).setScale(0, RoundingMode.HALF_DOWN).toString());
     if (i < hpTextures.size()) {
@@ -116,9 +164,25 @@ public class GUI {
     pm.dispose();
   }
 
-  public static void loadHpBarTextures() {
+  public static void loadResources() {
     for (int i = 0; i < 51; i++) {
       LoaderManager.getInstance().load("gui/hpBar/" + i + ".png", Texture.class, TEXTURE_PARAMETERS);
+    }
+
+    LoaderManager.getInstance().load("gui/damageScreen.png", Texture.class, TEXTURE_PARAMETERS);
+  }
+
+  public void initFullHp(Double hp) {
+    this.fullHp = hp;
+  }
+
+  /**
+   * Обработать удар по игроку, сделать красным экран
+   */
+  public void handleHit(){
+    damageScreenAlpha = damageScreenAlpha + 0.5f;
+    if (damageScreenAlpha > 1){
+      damageScreenAlpha = 1f;
     }
   }
 }

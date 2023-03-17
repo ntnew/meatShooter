@@ -42,10 +42,6 @@ public abstract class GameZone implements Screen, InputProcessor {
   protected MapService mapService;
 
   protected final MyGame game;
-  /**
-   * Интерфейс пользователя
-   */
-  protected GUI gui;
 
   protected PlayerService playerService;
 
@@ -56,7 +52,6 @@ public abstract class GameZone implements Screen, InputProcessor {
    * Основная камера с текстурами
    */
   protected final OrthographicCamera camera;
-
 
   protected LocalDateTime beginDate;
 
@@ -89,8 +84,8 @@ public abstract class GameZone implements Screen, InputProcessor {
     //создание игрока и интерфейса
     playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM,
         Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
-    gui = new GUI(playerService.getPlayer().getHp());
-    gui.setAimCursor();
+    GUI.getInstance().initFullHp(playerService.getPlayer().getHp());
+    GUI.getInstance().setAimCursor();
 
     beginDate = LocalDateTime.now();
 
@@ -121,7 +116,6 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     camera.update();
     Box2dWorld.getInstance().update();
-//    System.out.println(playerService.getModelFrontAngle());
     playerService.updateState();
     BulletService.getInstance().updateBullets();
 
@@ -169,7 +163,7 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     Box2dWorld.getInstance().render();
 
-    gui.draw(playerService.getPlayer().getHp());
+    GUI.getInstance().draw(playerService.getPlayer().getHp());
 
     //Нарисовать осветление экрана при старте
     if (!started) {
@@ -308,7 +302,7 @@ public abstract class GameZone implements Screen, InputProcessor {
 
 
   public void resumeGame() {
-    gui.setAimCursor();
+    GUI.getInstance().setAimCursor();
     Gdx.input.setInputProcessor(this);
   }
 

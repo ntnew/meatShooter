@@ -58,7 +58,9 @@ public class EnemyService {
    */
   public void actionEnemies(float posX, float posY) {
     enemies.forEach(enemy -> {
-      enemy.getState().update(Gdx.graphics.getDeltaTime());
+      if (!enemy.getStatus().equals(EnemyStatus.IDLE)) {
+        enemy.getState().update(Gdx.graphics.getDeltaTime());
+      }
       enemy.getState().apply(enemy.getSkeleton());
       enemy.getSkeleton().updateWorldTransform();
 

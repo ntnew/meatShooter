@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
+import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.settings.Filters;
 import ru.meat.game.utils.GDXUtils;
 
@@ -56,7 +57,7 @@ public class EnemyFactory {
     Enemy enemy = new Enemy(x, y, 1f, 500, speed, 300, null) {
       @Override
       public void doSomething(float posX, float posY) {
-        EnemiesScripts.simpleActions(posX, posY, this);
+        EnemiesScripts.spiderActions(posX, posY, this);
       }
     };
 
@@ -117,22 +118,7 @@ public class EnemyFactory {
 
     enemy.setRewardPoint(30);
     enemy.getState().setAnimation(0, "walk", true);
-
-    return enemy;
-  }
-
-
-  public static Enemy createZombie(float x, float y) {
-    float zombieSpeedLowRange = 1f;
-    float zombieSpeedTopRange = 2f;
-    float speed = MathUtils.random(zombieSpeedLowRange, zombieSpeedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
-    Enemy enemy = new Enemy(x, y, 1f, 100, speed, 300, null);
-    enemy.setRadius(80);
-    enemy.setAttack(10);
-    enemy.setAttackSpeed(1.5);
-    enemy.setBody(GDXUtils.createCircleForModel(enemy.getRadius() / WORLD_TO_VIEW, 80,
-        new EnemyBodyUserData("zombie", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y, true));
-    enemy.setRewardPoint(45);
+    enemy.setStatus(EnemyStatus.MOVE);
     return enemy;
   }
 }

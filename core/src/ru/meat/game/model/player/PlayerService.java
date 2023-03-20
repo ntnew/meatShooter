@@ -15,6 +15,8 @@ import com.esotericsoftware.spine.SkeletonRenderer;
 import java.util.Objects;
 import lombok.Data;
 import lombok.SneakyThrows;
+import ru.meat.game.Box2dWorld;
+import ru.meat.game.gui.GUI;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
@@ -38,7 +40,6 @@ public class PlayerService {
 
   public PlayerService(float x, float y) {
     player = new Player(x, y);
-    new ThreadForFeetAngle().start();
   }
 
   public void updateState() {
@@ -93,13 +94,11 @@ public class PlayerService {
 
   /**
    * Повернуть подельку за мышью
-   *
-   * @param camera отрисовывающая камера
    */
-  public void rotateModel(OrthographicCamera camera) {
+  public void rotateModel() {
     Vector3 tmpVec3 = new Vector3();
     tmpVec3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-    tmpVec3 = camera.unproject(tmpVec3);
+    tmpVec3 = Box2dWorld.getInstance().getCameraBox2D().unproject(tmpVec3);
 
     modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - getBodyPosY(),
         tmpVec3.x - getBodyPosX());
@@ -135,10 +134,8 @@ public class PlayerService {
 
   /**
    * Стрелять
-   *
-   * @param cameraBox2D камера box2d
    */
-  public void shoot(OrthographicCamera cameraBox2D) {
+  public void shoot() {
     Weapon weapon = getActualWeapon();
     if (weapon.getCurrentLockCounter() == 0
         || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()
@@ -147,7 +144,7 @@ public class PlayerService {
 
       Vector3 point = new Vector3();
       point.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-      cameraBox2D.unproject(point);
+      Box2dWorld.getInstance().getCameraBox2D().unproject(point);
 
       weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y,
           !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
@@ -207,21 +204,83 @@ public class PlayerService {
 
       player.getBody().setTransform(getBodyPosX() + x / WORLD_TO_VIEW, getBodyPosY() + y / WORLD_TO_VIEW, 0);
 
-      //Держит камеру примерно по центру игрока
-      if ((getBodyPosX() > cameraBox2D.position.x && x < 0) || (getBodyPosX() < cameraBox2D.position.x && x > 0)) {
-        x = 0;
-      }
-
-      if ((getBodyPosY() > cameraBox2D.position.y && y < 0) || (getBodyPosY() < cameraBox2D.position.y && y > 0)) {
-        y = 0;
-      }
-
-      camera.translate(x, y);
-      cameraBox2D.translate(x / WORLD_TO_VIEW, y / WORLD_TO_VIEW);
-
-      camera.update();
-      cameraBox2D.update();
+      handleCameraTransform(camera, x, y);
     }
+  }
+
+  /**
+   * обработать нажатие на клавиши ходьбы
+   *
+   * @param camera камера отрисовки текстур
+   */
+  public void handleMobileTouch(OrthographicCamera camera) {
+    if (!player.isDead()) {
+      for (int i = 0; i < 10; i++) {
+        if (Gdx.input.isTouched(i) && GUI.getInstance().isOnLeftJoystick(i)) {
+          changeFeetStatus(CharacterFeetStatus.MOVE);
+
+          Float dirAngle = GUI.getInstance().handleLeftJoystickTouch(Gdx.input.getX(i), Gdx.input.getY(i));
+
+          feetRotationAngle = dirAngle + 180;
+          float gipotenuzaSpeed = getSpeed();
+
+          float x = MathUtils.sinDeg((dirAngle * -1) - 90) * gipotenuzaSpeed;
+          float y = MathUtils.cosDeg((dirAngle * -1) - 90) * gipotenuzaSpeed;
+
+          player.getBody().setTransform(getBodyPosX() + x / WORLD_TO_VIEW, getBodyPosY() + y / WORLD_TO_VIEW, 0);
+
+          handleCameraTransform(camera, x, y);
+        } else {
+          changeFeetStatus(CharacterFeetStatus.IDLE);
+        }
+
+        if (Gdx.input.isTouched(i) && GUI.getInstance().isOnRightJoystick(i)) {
+          Weapon weapon = getActualWeapon();
+          Float dirAngle = GUI.getInstance().handleRightJoystickTouch(Gdx.input.getX(i), Gdx.input.getY(i));
+          modelFrontAngle = dirAngle + 180;
+
+          if (weapon.getCurrentLockCounter() == 0
+              || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()
+              * RpgStatsService.getInstance().getStats().getFireSpeed()) {
+            weapon.setCurrentLockCounter(TimeUtils.millis());
+
+            float gip = 20;
+
+            float x = MathUtils.sinDeg((dirAngle * -1) - 90) * gip;
+            float y = MathUtils.cosDeg((dirAngle * -1) - 90) * gip;
+
+            Vector3 point = new Vector3();
+            point.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            Box2dWorld.getInstance().getCameraBox2D().unproject(point);
+
+            weapon.shootMobile(getBodyPosX(), getBodyPosY(),getBodyPosX() + x , getBodyPosY() + y ,
+                !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
+            if (!weapon.isReloading()) {
+              player.getTopState()
+                  .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private void handleCameraTransform(OrthographicCamera camera, float x, float y) {
+    //Держит камеру примерно по центру игрока
+    OrthographicCamera cameraBox2D = Box2dWorld.getInstance().getCameraBox2D();
+    if ((getBodyPosX() > cameraBox2D.position.x && x < 0) || (getBodyPosX() < cameraBox2D.position.x && x > 0)) {
+      x = 0;
+    }
+
+    if ((getBodyPosY() > cameraBox2D.position.y && y < 0) || (getBodyPosY() < cameraBox2D.position.y && y > 0)) {
+      y = 0;
+    }
+
+    camera.translate(x, y);
+    cameraBox2D.translate(x / WORLD_TO_VIEW, y / WORLD_TO_VIEW);
+
+    camera.update();
+    cameraBox2D.update();
   }
 
 
@@ -263,25 +322,5 @@ public class PlayerService {
    */
   public float getBodyPosY() {
     return player.getBody().getPosition().y;
-  }
-
-  class ThreadForFeetAngle extends Thread {
-
-    float currentAngle;
-
-    @SneakyThrows
-    @Override
-    public void run() {
-      feetRotationAngle = 0;
-      currentAngle = feetRotationAngle;
-      while (!player.isDead()) {
-        Thread.sleep(150);
-        float v = GDXUtils.calcAngleBetweenTwoPoints(getBodyPosX(), getBodyPosY(), getBodyPosX() + transformX,
-            getBodyPosY() + transformY);
-//        if (v )
-        feetRotationAngle = v;
-//        System.out.println(v);
-      }
-    }
   }
 }

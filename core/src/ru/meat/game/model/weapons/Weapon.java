@@ -145,6 +145,36 @@ public class Weapon {
   }
 
   /**
+   * Сделать выстрел для мобилки
+   *
+   * @param fromX         из координаты Х
+   * @param fromY         из координаты У
+   * @param screenX       в точку на экране Х
+   * @param screenY       в точку на экране У
+   * @param playerRunning флаг двигается ли игрок
+   */
+  public void shootMobile(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
+    if (!reloading && fireCount < clipSize) {
+      fireCount += 1;
+      AudioService.getInstance().playShootSound(shootSound);
+
+      float deflection = bulletDeflection * (playerRunning ? 2 : 1);
+      for (int i = 0; i < shotInOneBullet; i++) {
+        BulletService.getInstance()
+            .createBullet(fromX, fromY,
+                MathUtils.random(screenX - deflection, screenX + deflection),
+                MathUtils.random(screenY - deflection, screenY + deflection),
+                speed, damage, bulletTexture,
+                box2dRadius, bulletType, textureScale);
+      }
+
+    } else if (!reloading) {
+      reloading = true;
+      implementReload();
+    }
+  }
+
+  /**
    * произвести перезарядку оружия
    */
   private void implementReload() {

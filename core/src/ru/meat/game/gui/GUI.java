@@ -2,6 +2,7 @@ package ru.meat.game.gui;
 
 import static ru.meat.game.settings.Constants.GUI_ZOOM;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.MOBILE;
 import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
 
 import com.badlogic.gdx.Gdx;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.model.enemies.EnemiesAnimation;
+import ru.meat.game.utils.GDXUtils;
 
 @Data
 public class GUI {
@@ -47,11 +49,11 @@ public class GUI {
   private final List<Texture> hpTextures = new ArrayList<>();
 
   private Cursor cursor;
-
   private Sprite damageScreen;
-
   private Float damageScreenAlpha;
   private Long damageScreenTransparentCounter;
+
+  private Joystick joystick;
 
   /**
    * Значение максимального хп, для подсчёта оставшегося процента хп
@@ -81,19 +83,33 @@ public class GUI {
 
     //init damage red screen sprite
     damageScreen = new Sprite((Texture) LoaderManager.getInstance().get("gui/damageScreen.png"));
-    damageScreen.setScale(Gdx.graphics.getWidth()/damageScreen.getWidth() * MAIN_ZOOM * GUI_ZOOM ,Gdx.graphics.getHeight()/damageScreen.getHeight() *MAIN_ZOOM * GUI_ZOOM);
+    damageScreen.setScale(Gdx.graphics.getWidth() / damageScreen.getWidth() * MAIN_ZOOM * GUI_ZOOM,
+        Gdx.graphics.getHeight() / damageScreen.getHeight() * MAIN_ZOOM * GUI_ZOOM);
     damageScreen.setPosition(camera.viewportWidth / 2 * MAIN_ZOOM * GUI_ZOOM - damageScreen.getWidth() / 2,
-        camera.viewportHeight/2 * MAIN_ZOOM * GUI_ZOOM - damageScreen.getHeight()/2);
+        camera.viewportHeight / 2 * MAIN_ZOOM * GUI_ZOOM - damageScreen.getHeight() / 2);
     damageScreenAlpha = 0f;
     damageScreen.setAlpha(damageScreenAlpha);
-    if (damageScreenTransparentCounter == null){
+    if (damageScreenTransparentCounter == null) {
       damageScreenTransparentCounter = TimeUtils.millis();
     }
+
+    //init левый джойстик
+    if (MOBILE) {
+      createJoysticks();
+    }
+  }
+
+  /**
+   * Создать левый и правый контроллеры джойстика
+   */
+  private void createJoysticks() {
+    this.joystick = new Joystick(camera.viewportWidth * MAIN_ZOOM * GUI_ZOOM);
   }
 
 
   /**
    * Рисовать интерфейс, вызывается в рендере
+   *
    * @param hp
    */
   public void draw(double hp) {
@@ -103,6 +119,9 @@ public class GUI {
     hpSprite.setTexture(getActualTexture(hp));
     hpSprite.draw(batch);
     damageScreen.draw(batch);
+    if (MOBILE) {
+      joystick.draw(batch);
+    }
     batch.end();
   }
 
@@ -110,10 +129,10 @@ public class GUI {
    * Обработать прозрачность красного экрана
    */
   private void handleDamageScreenTransparency() {
-    if (damageScreenAlpha != 0 && TimeUtils.timeSinceMillis(damageScreenTransparentCounter) > 100){
+    if (damageScreenAlpha != 0 && TimeUtils.timeSinceMillis(damageScreenTransparentCounter) > 100) {
       damageScreenAlpha = damageScreenAlpha - 0.005f;
     }
-    if (damageScreenAlpha < 0){
+    if (damageScreenAlpha < 0) {
       damageScreenAlpha = 0f;
     }
     damageScreen.setAlpha(damageScreenAlpha);
@@ -151,9 +170,11 @@ public class GUI {
   private void createCursor() {
     Pixmap pm = new Pixmap(Gdx.files.internal("gui/cursorAim.png"));
 
+    float aimScale = 8;
+
     Pixmap pixmap100 = new Pixmap(
-        BigDecimal.valueOf(pm.getWidth() / 8).intValue(),
-        BigDecimal.valueOf(pm.getHeight() / 8).intValue(),
+        BigDecimal.valueOf(pm.getWidth() / aimScale).intValue(),
+        BigDecimal.valueOf(pm.getHeight() / aimScale).intValue(),
         pm.getFormat());
     pixmap100.drawPixmap(pm,
         0, 0, pm.getWidth(), pm.getHeight(),
@@ -170,6 +191,9 @@ public class GUI {
     }
 
     LoaderManager.getInstance().load("gui/damageScreen.png", Texture.class, TEXTURE_PARAMETERS);
+
+    LoaderManager.getInstance().load("gui/joystick/small.png", Texture.class, TEXTURE_PARAMETERS);
+    LoaderManager.getInstance().load("gui/joystick/big.png", Texture.class, TEXTURE_PARAMETERS);
   }
 
   public void initFullHp(Double hp) {
@@ -179,10 +203,48 @@ public class GUI {
   /**
    * Обработать удар по игроку, сделать красным экран
    */
-  public void handleHit(){
+  public void handleHit() {
     damageScreenAlpha = damageScreenAlpha + 0.5f;
-    if (damageScreenAlpha > 1){
+    if (damageScreenAlpha > 1) {
       damageScreenAlpha = 1f;
     }
+  }
+
+  public Float handleLeftJoystickTouch(int screenX, int screenY) {
+    Vector3 touchPos = new Vector3();
+    touchPos.set(screenX, screenY, 0);
+    camera.unproject(touchPos);
+
+    return GDXUtils.calcAngleBetweenTwoPoints(touchPos.x, touchPos.y,
+        joystick.getLeft().getBigCircle().getX() + joystick.getLeft().getBigCircle().getWidth() / 2,
+        joystick.getLeft().getBigCircle().getY() + joystick.getLeft().getBigCircle().getHeight() / 2);
+  }
+
+  public Float handleRightJoystickTouch(int screenX, int screenY) {
+    Vector3 touchPos = new Vector3();
+    touchPos.set(screenX, screenY, 0);
+    camera.unproject(touchPos);
+
+    return GDXUtils.calcAngleBetweenTwoPoints(touchPos.x, touchPos.y,
+        joystick.getRight().getBigCircle().getX() + joystick.getRight().getBigCircle().getWidth() / 2,
+        joystick.getRight().getBigCircle().getY() + joystick.getRight().getBigCircle().getHeight() / 2);
+  }
+
+  public boolean isOnLeftJoystick(int i) {
+    Vector3 touchPos = new Vector3();
+    touchPos.set(Gdx.input.getX(i), Gdx.input.getY(i), 0);
+    camera.unproject(touchPos);
+    float xBound = joystick.getLeft().getBigCircle().getX() + joystick.getLeft().getBigCircle().getWidth() * 4f;
+    float yBound = joystick.getLeft().getBigCircle().getY() + joystick.getLeft().getBigCircle().getHeight() * 3.5f;
+    return touchPos.x < xBound && touchPos.y < yBound;
+  }
+
+  public boolean isOnRightJoystick(int i) {
+    Vector3 touchPos = new Vector3();
+    touchPos.set(Gdx.input.getX(i), Gdx.input.getY(i), 0);
+    camera.unproject(touchPos);
+    float xBound = joystick.getRight().getBigCircle().getX() - 700;
+    float yBound = joystick.getRight().getBigCircle().getY() + joystick.getRight().getBigCircle().getHeight() * 3.5f;
+    return touchPos.x > xBound && touchPos.y < yBound;
   }
 }

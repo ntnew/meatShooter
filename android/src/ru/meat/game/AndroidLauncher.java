@@ -12,6 +12,7 @@ public class AndroidLauncher extends AndroidApplication {
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
     Constants.MOBILE = true;
+    Constants.MAIN_ZOOM = 3.5f;
 		initialize(new MyGame(), config);
 	}
 }

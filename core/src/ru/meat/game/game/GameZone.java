@@ -122,6 +122,8 @@ public abstract class GameZone implements Screen, InputProcessor {
     if (!MOBILE) {
       playerService.handleMoveKey(camera, Box2dWorld.getInstance().getCameraBox2D());
       handleMouse();
+    } else {
+      playerService.handleMobileTouch(camera);
     }
 
     handleWorldBounds();
@@ -146,7 +148,6 @@ public abstract class GameZone implements Screen, InputProcessor {
       playerService.drawPlayer(polyBatch, renderer);
     }
     enemyService.drawEnemies(polyBatch, renderer);
-//    System.out.println(playerService.getBodyPosX() + " ---- " + playerService.getBodyPosY());
     BulletService.getInstance().drawBullets(camera);
 
     //Если игрок жив, то рисуем после врагов
@@ -272,11 +273,13 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
     return false;
   }
 
   @Override
   public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
     return false;
   }
 
@@ -364,9 +367,9 @@ public abstract class GameZone implements Screen, InputProcessor {
    */
   private void handleMouse() {
     if (!playerService.getPlayer().isDead()) {
-      playerService.rotateModel(Box2dWorld.getInstance().getCameraBox2D());
+      playerService.rotateModel();
       if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-        playerService.shoot(Box2dWorld.getInstance().getCameraBox2D());
+        playerService.shoot();
       }
     }
   }

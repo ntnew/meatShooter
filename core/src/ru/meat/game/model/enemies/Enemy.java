@@ -60,16 +60,16 @@ public class Enemy {
   /**
    * размер шага по оси X, меняется постоянно
    */
-  private float speedX = 1;
+  private float speedX;
   /**
    * размер шага по оси У, меняется постоянно
    */
-  private float speedY = 1;
+  private float speedY;
   /**
    * Позиции
    */
-  private float posX = 50;
-  private float posY = 50;
+  private float posX;
+  private float posY;
 
   /**
    * Урон врага
@@ -88,7 +88,7 @@ public class Enemy {
   /**
    * Угол поворота модельки, меняется в зависимости от направления движения
    */
-  private float animationAngle = 0;
+  private float animationAngle;
 
   /**
    * Очки вознаграждения за убийство
@@ -99,6 +99,9 @@ public class Enemy {
    * Прозрачность
    */
   private float transparency;
+
+  private Boolean needCreateBullet = false;
+  private Long timestampFromAttackBegin;
 
   public Enemy(float posX, float posY, float zoom, int hp, float speed, float actionPing, FloatPair playerCoord) {
     this.actionPing = actionPing;

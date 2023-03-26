@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.model.enemies.Enemy;
@@ -23,7 +24,8 @@ import ru.meat.game.utils.GDXUtils;
 public class EnemyService {
 
   @Getter
-  private final List<Enemy> enemies = new ArrayList<>();
+  @Setter
+  private List<Enemy> enemies = new ArrayList<>();
   @Getter
   private final AtomicInteger rewardPointCount = new AtomicInteger(0);
   @Getter
@@ -34,7 +36,6 @@ public class EnemyService {
     if (userData != null && userData.getDamage() != 0) {
       enemy.setHp(enemy.getHp() - userData.getDamage());
       userData.setDamage(0);
-//      System.out.println(enemy.getHp());
     }
   }
 

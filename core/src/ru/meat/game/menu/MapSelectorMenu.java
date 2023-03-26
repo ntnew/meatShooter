@@ -71,9 +71,7 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.png", Texture.class);
 
 
-    PlayerAnimationFactory.loadAni();
-    GUI.loadResources();
-    BloodService.loadResources();
+
   }
 
   @Override

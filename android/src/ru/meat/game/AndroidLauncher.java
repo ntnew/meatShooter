@@ -11,6 +11,7 @@ public class AndroidLauncher extends AndroidApplication {
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+    config.numSamples = 2;
     Constants.MOBILE = true;
     Constants.MAIN_ZOOM = 3.5f;
 		initialize(new MyGame(), config);

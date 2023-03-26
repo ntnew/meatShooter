@@ -139,7 +139,8 @@ public class PlayerService {
     Weapon weapon = getActualWeapon();
     if (weapon.getCurrentLockCounter() == 0
         || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()
-        * RpgStatsService.getInstance().getStats().getFireSpeed()) {
+        * RpgStatsService.getInstance().getStats().getFireSpeed()
+        && !weapon.isReloading()) {
       weapon.setCurrentLockCounter(TimeUtils.millis());
 
       Vector3 point = new Vector3();
@@ -148,10 +149,8 @@ public class PlayerService {
 
       weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y,
           !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
-      if (!weapon.isReloading()) {
-        player.getTopState()
-            .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
-      }
+      player.getTopState()
+          .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
     }
   }
 
@@ -173,10 +172,9 @@ public class PlayerService {
   /**
    * обработать нажатие на клавиши ходьбы
    *
-   * @param camera      камера отрисовки текстур
-   * @param cameraBox2D камера box2d
+   * @param camera камера отрисовки текстур
    */
-  public void handleMoveKey(OrthographicCamera camera, OrthographicCamera cameraBox2D) {
+  public void handleMoveKey(OrthographicCamera camera) {
     if (!player.isDead()) {
       handleMovingStatus();
 
@@ -218,10 +216,11 @@ public class PlayerService {
       for (int i = 0; i < 10; i++) {
         if (Gdx.input.isTouched(i) && GUI.getInstance().isOnLeftJoystick(i)) {
           changeFeetStatus(CharacterFeetStatus.MOVE);
-
-          Float dirAngle = GUI.getInstance().handleLeftJoystickTouch(Gdx.input.getX(i), Gdx.input.getY(i));
+          player.getFeetState().update(Gdx.graphics.getDeltaTime());
+          Float dirAngle = GUI.getInstance().handleLeftJoystickTouch(i);
 
           feetRotationAngle = dirAngle + 180;
+
           float gipotenuzaSpeed = getSpeed();
 
           float x = MathUtils.sinDeg((dirAngle * -1) - 90) * gipotenuzaSpeed;
@@ -235,13 +234,15 @@ public class PlayerService {
         }
 
         if (Gdx.input.isTouched(i) && GUI.getInstance().isOnRightJoystick(i)) {
-          Weapon weapon = getActualWeapon();
-          Float dirAngle = GUI.getInstance().handleRightJoystickTouch(Gdx.input.getX(i), Gdx.input.getY(i));
+
+          Float dirAngle = GUI.getInstance().handleRightJoystickTouch(i);
           modelFrontAngle = dirAngle + 180;
 
+          Weapon weapon = getActualWeapon();
           if (weapon.getCurrentLockCounter() == 0
               || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()
-              * RpgStatsService.getInstance().getStats().getFireSpeed()) {
+              * RpgStatsService.getInstance().getStats().getFireSpeed()
+              && !weapon.isReloading()) {
             weapon.setCurrentLockCounter(TimeUtils.millis());
 
             float gip = 20;
@@ -249,16 +250,11 @@ public class PlayerService {
             float x = MathUtils.sinDeg((dirAngle * -1) - 90) * gip;
             float y = MathUtils.cosDeg((dirAngle * -1) - 90) * gip;
 
-            Vector3 point = new Vector3();
-            point.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-            Box2dWorld.getInstance().getCameraBox2D().unproject(point);
-
-            weapon.shootMobile(getBodyPosX(), getBodyPosY(),getBodyPosX() + x , getBodyPosY() + y ,
+            weapon.shootMobile(getBodyPosX(), getBodyPosY(), getBodyPosX() + x, getBodyPosY() + y,
                 !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
-            if (!weapon.isReloading()) {
-              player.getTopState()
-                  .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
-            }
+
+            player.getTopState()
+                .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
           }
         }
       }

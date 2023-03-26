@@ -46,15 +46,11 @@ public class BulletService {
     return instance;
   }
 
-
   private Animation<Texture> acidBulletAnimation;
 
   private List<Bullet> playerBullets = new ArrayList<>();
 
   private List<Bullet> enemyBullets = new ArrayList<>();
-
-
-  private final ArrayList<Integer> bulletsToRemove = new ArrayList<>();
 
   public BulletService() {
     batch = new SpriteBatch();
@@ -106,6 +102,8 @@ public class BulletService {
     sprite.rotate(bulletBody.getLinearVelocity().angleDeg());
     bullet.setSprite(sprite);
 
+    bullet.setBornDate(TimeUtils.millis());
+
     playerBullets.add(bullet);
   }
 
@@ -115,22 +113,24 @@ public class BulletService {
 
     def.type = BodyType.DynamicBody;
     def.position.set(x, y);
-    Body box = Box2dWorld.getInstance().getWorld().createBody(def);
+    if (Box2dWorld.getInstance() != null) {
+      Body box = Box2dWorld.getInstance().getWorld().createBody(def);
 
-    CircleShape circle = new CircleShape();
-    circle.setRadius(bulletRadius * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
+      CircleShape circle = new CircleShape();
+      circle.setRadius(bulletRadius * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
 
-    box.createFixture(circle, (float) 100);
-    box.getFixtureList().get(0)
-        .setUserData(
-            new BulletBodyUserData(UUID.randomUUID(), "bullet",
-                damage * RpgStatsService.getInstance().getStats().getDamage(),
-                false,
-                bulletType));
+      box.createFixture(circle, (float) 100);
+      box.getFixtureList().get(0)
+          .setUserData(
+              new BulletBodyUserData(UUID.randomUUID(), "bullet",
+                  damage * RpgStatsService.getInstance().getStats().getDamage(),
+                  false,
+                  bulletType));
 
-    circle.dispose();
-
-    return box;
+      circle.dispose();
+      return box;
+    }
+    return null;
   }
 
 
@@ -164,7 +164,6 @@ public class BulletService {
     //создать спрайт текстуры
     Sprite sprite = new Sprite(acidBulletAnimation.getKeyFrame(0));
     sprite.setScale(bulletScale);
-
     sprite.setOrigin(sprite.getWidth() / 2f, sprite.getHeight() / 2.4f);
     sprite.rotate(bulletBody.getLinearVelocity().angleDeg() + 90);
     bullet.setSprite(sprite);
@@ -173,46 +172,46 @@ public class BulletService {
   }
 
   public void updateBullets() {
-    for (int i = 0; i < playerBullets.size(); i++) {
-      Bullet bullet = playerBullets.get(i);
+    playerBullets.parallelStream().forEach(bullet -> {
       Array<Fixture> fixtureList = bullet.getBody().getFixtureList();
       if (!fixtureList.isEmpty()) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
-        if (userData.isNeedDispose()) {
-          deleteBulletBody(i);
+        if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(bullet.getBornDate()) > 10000) {
+          try {
+            deleteBulletBody(bullet);
+          } catch (Exception e) {
+
+          }
         }
       }
-    }
+    });
     playerBullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
 
-    for (int i = 0; i < enemyBullets.size(); i++) {
-      Bullet bullet = enemyBullets.get(i);
+    enemyBullets.parallelStream().forEach(bullet -> {
       Array<Fixture> fixtureList = bullet.getBody().getFixtureList();
       if (!fixtureList.isEmpty()) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
         if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(bullet.getBornDate()) > 6000) {
           try {
             Explosions.getInstance().createAcidExplosion(
-                new FloatPair(enemyBullets.get(i).getBody().getPosition().x * WORLD_TO_VIEW,
-                    enemyBullets.get(i).getBody().getPosition().y * WORLD_TO_VIEW));
-            enemyBullets.get(i).getBody().setActive(false);
-            Box2dWorld.getInstance().getWorld().destroyBody(enemyBullets.get(i).getBody());
+                new FloatPair(bullet.getBody().getPosition().x * WORLD_TO_VIEW,
+                    bullet.getBody().getPosition().y * WORLD_TO_VIEW));
+            deleteBulletBody(bullet);
           } catch (Exception e) {
 
           }
         }
       }
-    }
+    });
+
     enemyBullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
   }
 
-  private void deleteBulletBody(int i) {
-    try {
-      playerBullets.get(i).getBody().setActive(false);
-      Box2dWorld.getInstance().getWorld().destroyBody(playerBullets.get(i).getBody());
-    } catch (Exception e) {
-
-    }
+  private void deleteBulletBody(Bullet bullet) {
+    Gdx.app.postRunnable(() -> {
+      bullet.getBody().setActive(false);
+      Box2dWorld.getInstance().getWorld().destroyBody(bullet.getBody());
+    });
   }
 
   public void drawBullets(OrthographicCamera camera) {

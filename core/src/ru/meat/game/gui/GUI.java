@@ -210,41 +210,42 @@ public class GUI {
     }
   }
 
-  public Float handleLeftJoystickTouch(int screenX, int screenY) {
-    Vector3 touchPos = new Vector3();
-    touchPos.set(screenX, screenY, 0);
-    camera.unproject(touchPos);
-
-    return GDXUtils.calcAngleBetweenTwoPoints(touchPos.x, touchPos.y,
-        joystick.getLeft().getBigCircle().getX() + joystick.getLeft().getBigCircle().getWidth() / 2,
-        joystick.getLeft().getBigCircle().getY() + joystick.getLeft().getBigCircle().getHeight() / 2);
+  public Float handleLeftJoystickTouch(int i) {
+    return joystick.getAngleForLeftController(unprojectTouchPos(i));
   }
 
-  public Float handleRightJoystickTouch(int screenX, int screenY) {
-    Vector3 touchPos = new Vector3();
-    touchPos.set(screenX, screenY, 0);
-    camera.unproject(touchPos);
-
-    return GDXUtils.calcAngleBetweenTwoPoints(touchPos.x, touchPos.y,
-        joystick.getRight().getBigCircle().getX() + joystick.getRight().getBigCircle().getWidth() / 2,
-        joystick.getRight().getBigCircle().getY() + joystick.getRight().getBigCircle().getHeight() / 2);
+  public Float handleRightJoystickTouch(int i) {
+    return joystick.getAngleForRightController(unprojectTouchPos(i));
   }
 
+  /**
+   * Является ли касание пальца на левом контроллере
+   * @param i индекс касания
+   * @return
+   */
   public boolean isOnLeftJoystick(int i) {
-    Vector3 touchPos = new Vector3();
-    touchPos.set(Gdx.input.getX(i), Gdx.input.getY(i), 0);
-    camera.unproject(touchPos);
-    float xBound = joystick.getLeft().getBigCircle().getX() + joystick.getLeft().getBigCircle().getWidth() * 4f;
-    float yBound = joystick.getLeft().getBigCircle().getY() + joystick.getLeft().getBigCircle().getHeight() * 3.5f;
-    return touchPos.x < xBound && touchPos.y < yBound;
+    Vector3 touchPos = unprojectTouchPos(i);
+    return joystick.isLeftControllerTouched(touchPos);
   }
 
+  /**
+   * Является ли касание пальца на правом контроллере
+   * @param i индекс касания
+   * @return
+   */
   public boolean isOnRightJoystick(int i) {
+    return joystick.isRightControllerTouched(unprojectTouchPos(i));
+  }
+
+  /**
+   * Перевести координаты касания в координаты камеры гуи
+    * @param i
+   * @return
+   */
+  private Vector3 unprojectTouchPos(int i) {
     Vector3 touchPos = new Vector3();
     touchPos.set(Gdx.input.getX(i), Gdx.input.getY(i), 0);
     camera.unproject(touchPos);
-    float xBound = joystick.getRight().getBigCircle().getX() - 700;
-    float yBound = joystick.getRight().getBigCircle().getY() + joystick.getRight().getBigCircle().getHeight() * 3.5f;
-    return touchPos.x > xBound && touchPos.y < yBound;
+    return touchPos;
   }
 }

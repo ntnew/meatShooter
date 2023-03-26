@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
+import java.util.function.BiFunction;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.settings.Filters;
 import ru.meat.game.utils.GDXUtils;
@@ -94,6 +95,7 @@ public class EnemyFactory {
     Enemy enemy = new Enemy(x, y, 1f, 500, speed, 300, null) {
       @Override
       public void doSomething(float posX, float posY) {
+
         EnemiesScripts.blackWidowActions(this, posX, posY);
       }
     };

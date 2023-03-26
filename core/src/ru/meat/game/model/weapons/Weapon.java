@@ -2,6 +2,7 @@ package ru.meat.game.model.weapons;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
@@ -70,8 +71,6 @@ public class Weapon {
    */
   private float reloadDuration;
 
-  private long reloadCounter;
-
   /**
    * разброс пули +- от точки куда выстрелил
    */
@@ -128,19 +127,24 @@ public class Weapon {
       screenX = fromX + newCatetForX;
       screenY = fromY + newCatetForY;
 
-      float deflection = bulletDeflection * (playerRunning ? 2 : 1);
-      for (int i = 0; i < shotInOneBullet; i++) {
+      createBullet(fromX, fromY, screenX, screenY, playerRunning);
+    } else if (!reloading) {
+      reloading = true;
+      new ThreadForReload().start();
+    }
+  }
+
+  private void createBullet(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
+    float deflection = bulletDeflection * (playerRunning ? 2 : 1);
+    for (int i = 0; i < shotInOneBullet; i++) {
+      Gdx.app.postRunnable(() -> {
         BulletService.getInstance()
             .createBullet(fromX, fromY,
                 MathUtils.random(screenX - deflection, screenX + deflection),
                 MathUtils.random(screenY - deflection, screenY + deflection),
                 speed, damage, bulletTexture,
                 box2dRadius, bulletType, textureScale);
-      }
-
-    } else if (!reloading) {
-      reloading = true;
-      implementReload();
+      });
     }
   }
 
@@ -158,27 +162,11 @@ public class Weapon {
       fireCount += 1;
       AudioService.getInstance().playShootSound(shootSound);
 
-      float deflection = bulletDeflection * (playerRunning ? 2 : 1);
-      for (int i = 0; i < shotInOneBullet; i++) {
-        BulletService.getInstance()
-            .createBullet(fromX, fromY,
-                MathUtils.random(screenX - deflection, screenX + deflection),
-                MathUtils.random(screenY - deflection, screenY + deflection),
-                speed, damage, bulletTexture,
-                box2dRadius, bulletType, textureScale);
-      }
+      createBullet(fromX, fromY, screenX, screenY, playerRunning);
 
     } else if (!reloading) {
+      //произвести перезарядку оружия
       reloading = true;
-      implementReload();
-    }
-  }
-
-  /**
-   * произвести перезарядку оружия
-   */
-  private void implementReload() {
-    if (reloadCounter == 0) {
       new ThreadForReload().start();
     }
   }
@@ -192,23 +180,21 @@ public class Weapon {
         AudioService.getInstance().playReloadSound(preReloadSound);
         Thread.sleep(preReloadDuration);
       }
+
+      int sleepDur = (int) Math.ceil(
+          reloadDuration * 1000L / RpgStatsService.getInstance().getStats().getReloadSpeed());
+
       while (fireCount > 0) {
         AudioService.getInstance().playReloadSound(reloadSound);
-        reloadCounter = TimeUtils.millis();
-        while (true) {
-          if (TimeUtils.timeSinceMillis(reloadCounter) > reloadDuration * 1000L
-              / RpgStatsService.getInstance().getStats().getReloadSpeed()) {
-            fireCount -= reloadBulletPerTick;
-            reloadCounter = 0;
-            break;
-          }
-        }
+        Thread.sleep(sleepDur);
+        fireCount -= reloadBulletPerTick;
       }
-      reloading = false;
+
       fireCount = Math.max(fireCount, 0);
       if (postReloadSound != null) {
         AudioService.getInstance().playReloadSound(postReloadSound);
       }
+      reloading = false;
     }
   }
 }

@@ -18,24 +18,18 @@ public class MapService {
 
   private Map currentMap;
 
-  private SpriteBatch batch;
-
   private Maps mapInfo;
 
   public void initMap(int mapPos) {
     mapInfo = Maps.getNameByPos(mapPos);
     currentMap = new Map(FloatPair.create(0f, 0f), LoaderManager.getInstance().get(mapInfo.getName()));
     currentMap.getMainTexture().setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
-    batch = new SpriteBatch();
 
 //    currentMap = new Map(FloatPair.create(0f,0f), GDXUtils.resizeTexture((Texture) LoaderManager.getInstance().get(map.getName()), map.getScale()));
 // изменение размера медленно работает TODO переделать масштабирование
   }
 
-  public void draw(OrthographicCamera camera) {
-    batch.begin();
-    batch.setProjectionMatrix(camera.combined);
+  public void draw(SpriteBatch batch) {
     batch.draw(currentMap.getMainTexture(), currentMap.getPos().getX(), currentMap.getPos().getY());
-    batch.end();
   }
 }

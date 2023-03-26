@@ -20,8 +20,6 @@ public class DeathMatch extends GameZone {
 
   public DeathMatch(int map, MyGame game) {
     super(game, map);
-
-    enemyService.getEnemies().add(EnemyFactory.createLittleBug(100, 100));
   }
 
   @Override
@@ -31,7 +29,7 @@ public class DeathMatch extends GameZone {
   }
 
   private void createMoreEnemies() {
-    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 40) {
+    if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 30) {
       // Инициализация начальной позиции
       float xBound1 = playerService.getBodyPosX() * WORLD_TO_VIEW;
       float xBound2 = playerService.getBodyPosX() * WORLD_TO_VIEW;

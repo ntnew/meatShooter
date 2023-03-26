@@ -18,8 +18,10 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import lombok.Data;
 import ru.meat.game.game.GameZone;
+import ru.meat.game.gui.GUI;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.menu.MainMenu;
+import ru.meat.game.model.player.PlayerAnimationFactory;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
 import ru.meat.game.settings.Settings;
@@ -58,7 +60,9 @@ public class MyGame extends Game {
     labelStyle.fontColor = Color.WHITE;
 
     AudioService.getInstance();
-    BloodService.getInstance();
+    BloodService.loadResources();
+    PlayerAnimationFactory.loadAni();
+    GUI.loadResources();
     LoaderManager.getInstance().load("blackTexture.png", Texture.class);
   }
 

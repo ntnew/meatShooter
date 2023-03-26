@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.async.AsyncExecutor;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import lombok.Data;
@@ -57,6 +58,8 @@ public class AudioService {
 
 
   private List<String> gameMusic = Arrays.asList("sound/track1.mp3", "sound/track2.mp3");
+
+  private HashMap<String, Sound> sounds = new HashMap<>();
   private int currentMusicPos = 0;
 
   private boolean stepSoundLock = false;
@@ -87,7 +90,11 @@ public class AudioService {
   }
 
   public void playSound(String soundPath) {
-    Sound sound = LoaderManager.getInstance().get(soundPath);
+    Sound sound = sounds.get(soundPath);
+    if (sound == null) {
+      sound = LoaderManager.getInstance().get(soundPath);
+      sounds.put(soundPath, sound);
+    }
     sound.play(Settings.getInstance().EFFECT_VOLUME);
   }
 
@@ -96,19 +103,33 @@ public class AudioService {
   }
 
   public void playShootSound(String soundPath) {
-    Sound sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + soundPath);
+    Sound sound = sounds.get(PATH_WEAPON_SOUND + soundPath);
+    if (sound == null) {
+      sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + soundPath);
+      sounds.put(PATH_WEAPON_SOUND + soundPath, sound);
+    }
     sound.play(Settings.getInstance().EFFECT_VOLUME * SHOOT_SOUND_MULTIPLY);
   }
 
   public void playExplosionSound() {
     int random = MathUtils.random(0, explosionsSounds.size() - 1);
-    Sound sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + explosionsSounds.get(random));
+
+    Sound sound = sounds.get(PATH_WEAPON_SOUND + explosionsSounds.get(random));
+    if (sound == null) {
+      sound = LoaderManager.getInstance().get(PATH_WEAPON_SOUND + explosionsSounds.get(random));
+      sounds.put(PATH_WEAPON_SOUND + explosionsSounds.get(random), sound);
+    }
     sound.play(Settings.getInstance().EFFECT_VOLUME * EXPLODE_SOUND_MULTIPLY);
   }
 
   public void playEnemyDie() {
     int random = MathUtils.random(0, enemyBugDies.size() - 1);
-    Sound sound = LoaderManager.getInstance().get(enemyBugDies.get(random));
+
+    Sound sound = sounds.get(enemyBugDies.get(random));
+    if (sound == null) {
+      sound = LoaderManager.getInstance().get(enemyBugDies.get(random));
+      sounds.put(enemyBugDies.get(random), sound);
+    }
     sound.play(Settings.getInstance().EFFECT_VOLUME);
   }
 

@@ -1,6 +1,7 @@
 package ru.meat.game.service;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
+import static ru.meat.game.settings.Constants.MOBILE;
 import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
@@ -12,8 +13,11 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.TimeUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
 import lombok.Data;
@@ -28,6 +32,8 @@ public class BloodService {
       "blood/spot/1.png",
       "blood/spot/2.png",
       "blood/spot/3.png");
+
+  private List<Texture> bloodSpotTextures = new ArrayList<>();
   private static List<String> bigBloodPngName = Arrays.asList(
       "blood/spot/4.png",
       "blood/spot/5.png",
@@ -35,8 +41,6 @@ public class BloodService {
       "blood/spot/7.png");
 
   private static final String bleedAniPath = "blood/ani1/b";
-
-  private SpriteBatch batch;
 
   public List<Sprite> spots = new ArrayList<>();
   public List<BloodSpot> bleeds = new ArrayList<>();
@@ -55,9 +59,16 @@ public class BloodService {
   }
 
   public BloodService() {
+    littleBloodPngName.forEach(s -> {
+      Texture texture = LoaderManager.getInstance().get(s);
+      if (MOBILE) {
+        texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
+      } else {
+        texture.setFilter(TextureFilter.MipMapNearestNearest, TextureFilter.MipMapNearestNearest);
+      }
 
-
-    batch = new SpriteBatch();
+      bloodSpotTextures.add(texture);
+    });
   }
 
   public static void loadResources() {
@@ -71,14 +82,7 @@ public class BloodService {
 
   public void createBleeding(float x, float y) {
     if (bleedAnimation == null) {
-      Texture[] bleedTextures = new Texture[8];
-      for (int i = 0; i < 8; i++) {
-        bleedTextures[i] = LoaderManager.getInstance().get(bleedAniPath + i + ".png");
-      }
-      for (Texture bleedTexture : bleedTextures) {
-        bleedTexture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
-      }
-      bleedAnimation = new Animation<>(0.07f, bleedTextures);
+      initializeBleedingAnimation();
     }
     float z = Gdx.graphics.getDeltaTime();
 
@@ -88,28 +92,37 @@ public class BloodService {
     bleeds.add(new BloodSpot(sprite, z));
   }
 
-  public void drawBleeds(OrthographicCamera camera) {
-    batch.setProjectionMatrix(camera.combined);
-    batch.begin();
+  /**
+   * Загрузить анимацию кровотечения от попадания пули
+   */
+  private void initializeBleedingAnimation() {
+    Texture[] bleedTextures = new Texture[8];
+    for (int i = 0; i < 8; i++) {
+      bleedTextures[i] = LoaderManager.getInstance().get(bleedAniPath + i + ".png");
+    }
+    for (Texture bleedTexture : bleedTextures) {
+      bleedTexture.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.MipMapLinearNearest);
+    }
+    bleedAnimation = new Animation<>(0.07f, bleedTextures);
+  }
+
+  public void drawBleeds(SpriteBatch batch) {
+    bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
+        bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
+
     bleeds.forEach(x -> {
       x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
       x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
       x.getSprite().draw(batch);
     });
-    batch.end();
-
-    bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(), bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length-1]));
   }
 
   public void createBloodSpot(FloatPair coord) {
 
   }
 
-  public void drawBloodSpots(OrthographicCamera camera) {
-    batch.setProjectionMatrix(camera.combined);
-    batch.begin();
+  public void drawBloodSpots(SpriteBatch batch) {
     spots.forEach(x -> x.draw(batch));
-    batch.end();
   }
 
   /**
@@ -118,11 +131,7 @@ public class BloodService {
    * @param coord координаты где создать в мире текстур
    */
   public void createLittleBloodSpot(FloatPair coord) {
-    int random = MathUtils.random(0, littleBloodPngName.size() - 1);
-
-    Texture texture = LoaderManager.getInstance().get(littleBloodPngName.get(random));
-    texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
-    Sprite sprite = new Sprite(texture);
+    Sprite sprite = new Sprite(bloodSpotTextures.get(MathUtils.random(0, bloodSpotTextures.size() - 1)));
 
     sprite.setPosition(coord.getX() - sprite.getWidth() / 2 + MathUtils.random(-bloodDiffusion, +bloodDiffusion),
         coord.getY() - sprite.getHeight() / 2 - MathUtils.random(-bloodDiffusion, +bloodDiffusion));
@@ -130,6 +139,7 @@ public class BloodService {
     sprite.rotate(MathUtils.random(0, 359));
 
     spots.add(sprite);
+    System.out.println(spots.size());
   }
 
   public void dispose() {

@@ -15,7 +15,7 @@ import ru.meat.game.service.MyContactListener;
 @Data
 public class Box2dWorld {
 
-  private static Box2dWorld instance;
+  private static volatile Box2dWorld instance;
   private Box2DDebugRenderer renderer;
   private final World world;
   public OrthographicCamera cameraBox2D;

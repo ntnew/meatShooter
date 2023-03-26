@@ -5,6 +5,7 @@ import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.TimeUtils;
 import lombok.SneakyThrows;
+import ru.meat.game.Box2dWorld;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.weapons.BulletType;
 import ru.meat.game.service.BulletService;
@@ -22,12 +23,22 @@ public class EnemiesScripts {
       enemy.setActionCounter(TimeUtils.millis());
       enemy.setStatus(EnemyStatus.ATTACK);
       enemy.getState().setAnimation(0, "attack", false);
-      new ThreadForDelayFoeBullet(enemy, x, y).start();
+      enemy.setNeedCreateBullet(true);
+      enemy.setTimestampFromAttackBegin(TimeUtils.millis());
     } else if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 1000 && enemy.getStatus()
         .equals(EnemyStatus.ATTACK)) {
       enemy.setActionCounter(TimeUtils.millis());
       enemy.setStatus(EnemyStatus.MOVE);
       enemy.getState().setAnimation(0, "walk", true);
+    }
+    if (enemy.getNeedCreateBullet() && TimeUtils.timeSinceMillis(enemy.getTimestampFromAttackBegin()) > 300) {
+      enemy.setNeedCreateBullet(false);
+      if (enemy.getBody() != null && Box2dWorld.getInstance() != null) {
+        BulletService.getInstance().createEnemyBullet(
+            enemy.getBody().getPosition().x, enemy.getBody().getPosition().y,
+            x, y, 0.2f, 40, 40 / MAIN_ZOOM, BulletType.ENEMY_COMMON, 0.25f
+        );
+      }
     }
 
     EnemyService.rotateModel(x - enemy.getBody().getPosition().x, y - enemy.getBody().getPosition().y, enemy);
@@ -134,34 +145,6 @@ public class EnemiesScripts {
       enemy.setSpeedX(cos * enemy.getSpeed());
       enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
           enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
-    }
-  }
-
-
-  static class ThreadForDelayFoeBullet extends Thread {
-
-    private final Enemy enemy;
-    private final float x;
-    private final float y;
-
-    public ThreadForDelayFoeBullet(Enemy enemy, float x, float y) {
-      this.enemy = enemy;
-      this.x = x;
-      this.y = y;
-    }
-
-    @SneakyThrows
-    @Override
-    public void run() {
-      Thread.sleep(300);
-      Gdx.app.postRunnable(() -> {
-        if (enemy.getBody() != null) {
-          BulletService.getInstance().createEnemyBullet(
-              enemy.getBody().getPosition().x, enemy.getBody().getPosition().y,
-              x, y, 0.2f, 40, 40 / MAIN_ZOOM, BulletType.ENEMY_COMMON, 0.25f
-          );
-        }
-      });
     }
   }
 }

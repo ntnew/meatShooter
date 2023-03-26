@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.SneakyThrows;
 import ru.meat.game.Box2dWorld;
@@ -119,16 +120,16 @@ public abstract class GameZone implements Screen, InputProcessor {
     playerService.updateState();
     BulletService.getInstance().updateBullets();
 
-    if (!MOBILE) {
-      playerService.handleMoveKey(camera, Box2dWorld.getInstance().getCameraBox2D());
-      handleMouse();
-    } else {
+    if (MOBILE) {
       playerService.handleMobileTouch(camera);
+    } else {
+      playerService.handleMoveKey(camera);
+      handleMouse();
     }
 
     handleWorldBounds();
 
-    mapService.draw(camera);
+
 
     renderSpec(delta);
 
@@ -137,28 +138,25 @@ public abstract class GameZone implements Screen, InputProcessor {
     //рисовать текстуры
     spriteBatch.setProjectionMatrix(camera.combined);
     polyBatch.setProjectionMatrix(camera.combined);
+    spriteBatch.begin();
+    mapService.draw(spriteBatch);
+    BloodService.getInstance().drawBloodSpots(spriteBatch);
+
+    BloodService.getInstance().drawBleeds(spriteBatch);
+    spriteBatch.end();
 
     polyBatch.begin();
-    BloodService.getInstance().drawBloodSpots(camera);
-
-    spriteBatch.begin();
-
     //Если игрок умер, то рисуем раньше врагов
-    if (playerService.getPlayer().isDead()){
+    if (playerService.getPlayer().isDead()) {
       playerService.drawPlayer(polyBatch, renderer);
     }
     enemyService.drawEnemies(polyBatch, renderer);
     BulletService.getInstance().drawBullets(camera);
-
     //Если игрок жив, то рисуем после врагов
-    if (!playerService.getPlayer().isDead()){
+    if (!playerService.getPlayer().isDead()) {
       playerService.drawPlayer(polyBatch, renderer);
     }
-
-    spriteBatch.end();
     polyBatch.end();
-
-    BloodService.getInstance().drawBleeds(camera);
 
     Explosions.getInstance().drawExplosions(camera);
 
@@ -174,6 +172,7 @@ public abstract class GameZone implements Screen, InputProcessor {
     if (playerService.getPlayer().isDead()) {
       if (threadForZoom == null) {
         threadForZoom = new ThreadForZoom();
+        threadForZoom.setDaemon(true);
         threadForZoom.start();
       }
       //нарисовать затемнение экрана при смерти
@@ -188,7 +187,7 @@ public abstract class GameZone implements Screen, InputProcessor {
    */
   private void sortEnemies() {
     comparatorTime = TimeUtils.millis();
-    enemyService.getEnemies().sort((x, y) -> {
+    enemyService.setEnemies(enemyService.getEnemies().parallelStream().sorted((x, y) -> {
       if (x.getStatus().equals(EnemyStatus.DIED) && !y.getStatus().equals(EnemyStatus.DIED)) {
         return -1;
       } else if ((x.getStatus().equals(EnemyStatus.DIED) && y.getStatus().equals(EnemyStatus.DIED))
@@ -197,7 +196,7 @@ public abstract class GameZone implements Screen, InputProcessor {
       } else {
         return 1;
       }
-    });
+    }).collect(Collectors.toList()));
   }
 
   /**
@@ -313,7 +312,8 @@ public abstract class GameZone implements Screen, InputProcessor {
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-    RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get());
+    new Thread(() -> RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get())).start();
+
     playerService.getPlayer().setDead(true);
     this.game.setScreen(
         new EndGameMenu(game, enemyService.getRewardPointCount().get(), mapService.getMapInfo().getPosition(),
@@ -340,7 +340,7 @@ public abstract class GameZone implements Screen, InputProcessor {
         mapService.getCurrentMap().getMainTexture().getHeight());
     camMax.sub(camMin); //bring to center
 
-//keep camera within borders
+    //keep camera within borders
     camX = Math.min(camMax.x, Math.max(camX, camMin.x));
     camY = Math.min(camMax.y, Math.max(camY, camMin.y));
 
@@ -375,16 +375,13 @@ public abstract class GameZone implements Screen, InputProcessor {
   }
 
   class ThreadForZoom extends Thread {
-    private long timeStamp = 0;
 
     @SneakyThrows
     @Override
     public void run() {
       while (true) {
-        if (timeStamp == 0 || TimeUtils.timeSinceMillis(timeStamp) > 10) {
-          camera.zoom = camera.zoom - 0.02f;
-          timeStamp = TimeUtils.millis();
-        }
+        Thread.sleep(100);
+        camera.zoom = camera.zoom - 0.02f;
         if (camera.zoom < 1) {
           break;
         }

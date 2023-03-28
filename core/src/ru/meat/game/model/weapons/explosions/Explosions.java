@@ -130,6 +130,7 @@ public class Explosions {
     }
     expBodies.removeIf(body -> !body.isActive());
 
+    batch.setProjectionMatrix(camera.combined);
     batch.begin();
     for (Explosion x : explosions) {
       try {

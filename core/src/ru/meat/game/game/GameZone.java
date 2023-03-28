@@ -380,8 +380,8 @@ public abstract class GameZone implements Screen, InputProcessor {
     @Override
     public void run() {
       while (true) {
-        Thread.sleep(100);
-        camera.zoom = camera.zoom - 0.02f;
+        Thread.sleep(50);
+        camera.zoom = camera.zoom - 0.12f;
         if (camera.zoom < 1) {
           break;
         }

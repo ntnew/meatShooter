@@ -44,9 +44,6 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   protected final MyGame game;
 
-  protected PlayerService playerService;
-
-
   protected EnemyService enemyService;
 
   /**
@@ -82,10 +79,8 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     this.mapService = new MapService();
     mapService.initMap(map);
-    //создание игрока и интерфейса
-    playerService = new PlayerService(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM,
-        Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
-    GUI.getInstance().initFullHp(playerService.getPlayer().getHp());
+
+    GUI.getInstance().initFullHp();
     GUI.getInstance().setAimCursor();
 
     beginDate = LocalDateTime.now();
@@ -107,33 +102,32 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   @Override
   public void render(float delta) {
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     AudioService.getInstance().playGameMusic();
     if (TimeUtils.timeSinceMillis(comparatorTime) > 4000) {
       sortEnemies();
     }
-    Gdx.gl.glClearColor(0, 0, 0, 1);
-    Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
 
     camera.update();
     Box2dWorld.getInstance().update();
-    playerService.updateState();
+
+    BloodService.getInstance().update();
+    PlayerService.getInstance().updateState();
     BulletService.getInstance().updateBullets();
 
     if (MOBILE) {
-      playerService.handleMobileTouch(camera);
+      PlayerService.getInstance().handleMobileTouch(camera);
     } else {
-      playerService.handleMoveKey(camera);
+      PlayerService.getInstance().handleMoveKey(camera);
       handleMouse();
     }
 
     handleWorldBounds();
 
-
-
     renderSpec(delta);
 
-    enemyService.actionEnemies(playerService.getBodyPosX(), playerService.getBodyPosY());
+    enemyService.actionEnemies(PlayerService.getInstance().getBodyPosX(), PlayerService.getInstance().getBodyPosY());
 
     //рисовать текстуры
     spriteBatch.setProjectionMatrix(camera.combined);
@@ -147,14 +141,15 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     polyBatch.begin();
     //Если игрок умер, то рисуем раньше врагов
-    if (playerService.getPlayer().isDead()) {
-      playerService.drawPlayer(polyBatch, renderer);
+    if (PlayerService.getInstance().getPlayer().isDead()) {
+      PlayerService.getInstance().drawPlayer(polyBatch, renderer);
     }
+    BulletService.getInstance().drawPlayerBullets(camera);
     enemyService.drawEnemies(polyBatch, renderer);
-    BulletService.getInstance().drawBullets(camera);
+    BulletService.getInstance().drawEnemyBullets(camera);
     //Если игрок жив, то рисуем после врагов
-    if (!playerService.getPlayer().isDead()) {
-      playerService.drawPlayer(polyBatch, renderer);
+    if (!PlayerService.getInstance().getPlayer().isDead()) {
+      PlayerService.getInstance().drawPlayer(polyBatch, renderer);
     }
     polyBatch.end();
 
@@ -162,14 +157,14 @@ public abstract class GameZone implements Screen, InputProcessor {
 
     Box2dWorld.getInstance().render();
 
-    GUI.getInstance().draw(playerService.getPlayer().getHp());
+    GUI.getInstance().draw();
 
     //Нарисовать осветление экрана при старте
     if (!started) {
       started = FaderService.getInstance().drawFadeIn();
     }
 
-    if (playerService.getPlayer().isDead()) {
+    if (PlayerService.getInstance().getPlayer().isDead()) {
       if (threadForZoom == null) {
         threadForZoom = new ThreadForZoom();
         threadForZoom.setDaemon(true);
@@ -229,30 +224,33 @@ public abstract class GameZone implements Screen, InputProcessor {
   @Override
   public boolean keyDown(int keycode) {
     if (keycode == Keys.NUM_1) {
-      playerService.changeWeapon(1);
+      PlayerService.getInstance().changeWeapon(1);
     }
     if (keycode == Keys.NUM_2) {
-      playerService.changeWeapon(2);
+      PlayerService.getInstance().changeWeapon(2);
     }
     if (keycode == Keys.NUM_3) {
-      playerService.changeWeapon(3);
+      PlayerService.getInstance().changeWeapon(3);
     }
     if (keycode == Keys.NUM_4) {
-      playerService.changeWeapon(4);
+      PlayerService.getInstance().changeWeapon(4);
     }
     if (keycode == Keys.NUM_5) {
-      playerService.changeWeapon(5);
+      PlayerService.getInstance().changeWeapon(5);
     }
     if (keycode == Keys.NUM_6) {
-      playerService.changeWeapon(6);
+      PlayerService.getInstance().changeWeapon(6);
     }
     if (keycode == Keys.NUM_7) {
-      playerService.changeWeapon(7);
+      PlayerService.getInstance().changeWeapon(7);
     }
     if (keycode == Keys.NUM_8) {
-      playerService.changeWeapon(8);
+      PlayerService.getInstance().changeWeapon(8);
     }
 
+    if (keycode == Keys.TAB) {
+      PlayerService.getInstance().changeToNextWeapon();
+    }
     if (keycode == Keys.ESCAPE) {
       Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
       game.setScreen(new PauseMenu(game, this));
@@ -314,12 +312,14 @@ public abstract class GameZone implements Screen, InputProcessor {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     new Thread(() -> RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get())).start();
 
-    playerService.getPlayer().setDead(true);
+    PlayerService.endGameSession();
+    AudioService.getInstance().smoothStopMusic();
+
     this.game.setScreen(
         new EndGameMenu(game, enemyService.getRewardPointCount().get(), mapService.getMapInfo().getPosition(),
             beginDate, enemyService.getKillCount().get()));
     Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
-    AudioService.getInstance().smoothStopMusic();
+
     Box2dWorld.dispose();
     BulletService.dispose();
     BloodService.getInstance().dispose();
@@ -366,10 +366,10 @@ public abstract class GameZone implements Screen, InputProcessor {
    * Обработать нажатия мыши, если персонаж ещё жив
    */
   private void handleMouse() {
-    if (!playerService.getPlayer().isDead()) {
-      playerService.rotateModel();
+    if (!PlayerService.getInstance().getPlayer().isDead()) {
+      PlayerService.getInstance().rotateModel();
       if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-        playerService.shoot();
+        PlayerService.getInstance().shoot();
       }
     }
   }

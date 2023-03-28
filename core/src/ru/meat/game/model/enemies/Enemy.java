@@ -5,6 +5,7 @@ import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.Skeleton;
+import java.util.function.BiFunction;
 import lombok.Data;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
@@ -42,10 +43,6 @@ public class Enemy {
    */
   private FloatPair turnSpeed = new FloatPair(1f * MAIN_ZOOM, 1f * MAIN_ZOOM);
 
-  /**
-   * делитель размера модельки
-   */
-  private float zoom;
 
   /**
    * Здоровье
@@ -103,9 +100,10 @@ public class Enemy {
   private Boolean needCreateBullet = false;
   private Long timestampFromAttackBegin;
 
-  public Enemy(float posX, float posY, float zoom, int hp, float speed, float actionPing, FloatPair playerCoord) {
+  private BiFunction<Enemy, FloatPair, Boolean> actions;
+
+  public Enemy(float posX, float posY, int hp, float speed, float actionPing, FloatPair playerCoord) {
     this.actionPing = actionPing;
-    this.zoom = zoom;
     this.hp = hp;
     this.speed = speed;
     this.speedX = 0;
@@ -127,5 +125,6 @@ public class Enemy {
   }
 
   public void doSomething(float posX, float posY) {
+    actions.apply(this, new FloatPair(posX, posY));
   }
 }

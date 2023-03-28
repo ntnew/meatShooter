@@ -13,8 +13,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.Data;
-import lombok.SneakyThrows;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.model.bodyData.BodyUserData;
@@ -22,10 +22,18 @@ import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.RpgStatsService;
-import ru.meat.game.utils.GDXUtils;
 
 @Data
 public class PlayerService {
+
+  private static PlayerService instance;
+
+  public static PlayerService getInstance() {
+    if (instance == null) {
+      instance = new PlayerService();
+    }
+    return instance;
+  }
 
   private Player player;
 
@@ -36,10 +44,11 @@ public class PlayerService {
   private float transformX = 0;
 
   private float transformY;
+  private Long weaponChangeLock = 0L;
 
-
-  public PlayerService(float x, float y) {
-    player = new Player(x, y);
+  public PlayerService() {
+    player = new Player(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM,
+        Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
   }
 
   public void updateState() {
@@ -169,6 +178,24 @@ public class PlayerService {
         .setAnimation(0, "move_" + player.getCurrentWeapon().getAniTag(), true);
   }
 
+  public void changeToNextWeapon() {
+    AudioService.getInstance().playClick();
+
+    int pos = 0;
+    Optional<Weapon> first = player.getWeapons().stream().filter(x -> x.getName().equals(player.getCurrentWeapon()))
+        .findFirst();
+    if (first.isPresent()) {
+      pos = player.getWeapons().indexOf(first.get()) + 1;
+      if (pos > player.getWeapons().size() - 1) {
+        pos = 0;
+      }
+    }
+
+    player.setCurrentWeapon(player.getWeapons().get(pos).getName());
+    player.getTopState()
+        .setAnimation(0, "move_" + player.getCurrentWeapon().getAniTag(), true);
+  }
+
   /**
    * обработать нажатие на клавиши ходьбы
    *
@@ -257,6 +284,12 @@ public class PlayerService {
                 .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
           }
         }
+
+        if (Gdx.input.isTouched(i) && GUI.getInstance().isOnChangeWeaponButton(i)
+            && TimeUtils.timeSinceMillis(weaponChangeLock) > 400) {
+          weaponChangeLock = TimeUtils.millis();
+          changeToNextWeapon();
+        }
       }
     }
   }
@@ -274,9 +307,6 @@ public class PlayerService {
 
     camera.translate(x, y);
     cameraBox2D.translate(x / WORLD_TO_VIEW, y / WORLD_TO_VIEW);
-
-    camera.update();
-    cameraBox2D.update();
   }
 
 
@@ -318,5 +348,10 @@ public class PlayerService {
    */
   public float getBodyPosY() {
     return player.getBody().getPosition().y;
+  }
+
+  public static void endGameSession() {
+    instance.getPlayer().setDead(true);
+    instance = null;
   }
 }

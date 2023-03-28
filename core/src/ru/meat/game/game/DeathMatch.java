@@ -4,17 +4,11 @@ import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.esotericsoftware.spine.SkeletonRenderer;
-import com.esotericsoftware.spine.SkeletonRendererDebug;
 import ru.meat.game.MyGame;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.enemies.EnemyFactory;
-import ru.meat.game.service.BloodService;
-import ru.meat.game.service.BulletService;
-import ru.meat.game.service.EnemyService;
+import ru.meat.game.model.player.PlayerService;
 
 public class DeathMatch extends GameZone {
 
@@ -31,10 +25,10 @@ public class DeathMatch extends GameZone {
   private void createMoreEnemies() {
     if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 30) {
       // Инициализация начальной позиции
-      float xBound1 = playerService.getBodyPosX() * WORLD_TO_VIEW;
-      float xBound2 = playerService.getBodyPosX() * WORLD_TO_VIEW;
-      float yBound1 = playerService.getBodyPosY() * WORLD_TO_VIEW;
-      float yBound2 = playerService.getBodyPosY() * WORLD_TO_VIEW;
+      float xBound1 = PlayerService.getInstance().getBodyPosX() * WORLD_TO_VIEW;
+      float xBound2 = PlayerService.getInstance().getBodyPosX() * WORLD_TO_VIEW;
+      float yBound1 = PlayerService.getInstance().getBodyPosY() * WORLD_TO_VIEW;
+      float yBound2 = PlayerService.getInstance().getBodyPosY() * WORLD_TO_VIEW;
       float deltaByY = Gdx.graphics.getHeight() * MAIN_ZOOM;
       float deltaByX = Gdx.graphics.getWidth() * MAIN_ZOOM;
 
@@ -63,6 +57,11 @@ public class DeathMatch extends GameZone {
       }
 //      Создание врага
       int random1 = MathUtils.random(0, 100);
+
+//      enemyService.getEnemies().add(
+//            EnemyFactory.createScorpionBoss(
+//                500,
+//               500));
       if (random1 > 30) {
         enemyService.getEnemies().add(
             EnemyFactory.createLittleBug(

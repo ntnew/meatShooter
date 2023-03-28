@@ -6,18 +6,14 @@ import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.TimeUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Objects;
 import lombok.Data;
@@ -62,9 +58,9 @@ public class BloodService {
     littleBloodPngName.forEach(s -> {
       Texture texture = LoaderManager.getInstance().get(s);
       if (MOBILE) {
-        texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
-      } else {
         texture.setFilter(TextureFilter.MipMapNearestNearest, TextureFilter.MipMapNearestNearest);
+      } else {
+        texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
       }
 
       bloodSpotTextures.add(texture);
@@ -106,22 +102,16 @@ public class BloodService {
     bleedAnimation = new Animation<>(0.07f, bleedTextures);
   }
 
-  public void drawBleeds(SpriteBatch batch) {
-    bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
-        bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
-
-    bleeds.forEach(x -> {
-      x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
-      x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
-      x.getSprite().draw(batch);
-    });
+  public void drawBleeds(Batch batch) {
+    bleeds.forEach(x -> x.getSprite().draw(batch));
   }
 
   public void createBloodSpot(FloatPair coord) {
 
   }
 
-  public void drawBloodSpots(SpriteBatch batch) {
+  public void drawBloodSpots(Batch batch) {
+    //TODO лагает
     spots.forEach(x -> x.draw(batch));
   }
 
@@ -139,11 +129,19 @@ public class BloodService {
     sprite.rotate(MathUtils.random(0, 359));
 
     spots.add(sprite);
-    System.out.println(spots.size());
   }
 
   public void dispose() {
     spots.clear();
     bleeds.clear();
+  }
+
+  public void update() {
+    bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
+        bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
+    bleeds.parallelStream().forEach(x -> {
+      x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
+      x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
+    });
   }
 }

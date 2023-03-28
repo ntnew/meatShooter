@@ -8,6 +8,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -163,6 +164,7 @@ public class BulletService {
     bullet.setBornDate(TimeUtils.millis());
     //создать спрайт текстуры
     Sprite sprite = new Sprite(acidBulletAnimation.getKeyFrame(0));
+    sprite.setPosition(-500, - 500);
     sprite.setScale(bulletScale);
     sprite.setOrigin(sprite.getWidth() / 2f, sprite.getHeight() / 2.4f);
     sprite.rotate(bulletBody.getLinearVelocity().angleDeg() + 90);
@@ -172,39 +174,73 @@ public class BulletService {
   }
 
   public void updateBullets() {
-    playerBullets.parallelStream().forEach(bullet -> {
-      Array<Fixture> fixtureList = bullet.getBody().getFixtureList();
+    playerBullets.parallelStream().forEach(b -> {
+      Array<Fixture> fixtureList = b.getBody().getFixtureList();
       if (!fixtureList.isEmpty()) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
-        if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(bullet.getBornDate()) > 10000) {
+        if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(b.getBornDate()) > 8000) {
           try {
-            deleteBulletBody(bullet);
+            deleteBulletBody(b);
           } catch (Exception e) {
 
           }
+        } else {
+          //Переместить пулю
+          Vector2 position = fixtureList.get(0).getBody().getPosition();
+          b.getSprite().setPosition(
+              position.x * Constants.WORLD_TO_VIEW - b.getSprite().getWidth() + b.getSprite().getWidth() / 12,
+              position.y * Constants.WORLD_TO_VIEW - b.getSprite().getHeight() / 2);
         }
       }
     });
     playerBullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
 
-    enemyBullets.parallelStream().forEach(bullet -> {
-      Array<Fixture> fixtureList = bullet.getBody().getFixtureList();
+    enemyBullets.parallelStream().forEach(b -> {
+      Array<Fixture> fixtureList = b.getBody().getFixtureList();
       if (!fixtureList.isEmpty()) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
-        if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(bullet.getBornDate()) > 6000) {
-          try {
-            Explosions.getInstance().createAcidExplosion(
-                new FloatPair(bullet.getBody().getPosition().x * WORLD_TO_VIEW,
-                    bullet.getBody().getPosition().y * WORLD_TO_VIEW));
-            deleteBulletBody(bullet);
-          } catch (Exception e) {
-
-          }
+        if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(b.getBornDate()) > 6000) {
+          createExplosionAndDeleteBody(b);
+        } else {
+          setAnimationFrame(b);
+          setPosition(b, fixtureList);
         }
       }
     });
 
     enemyBullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
+  }
+
+  /**
+   * Установить кадр для пули вражеской
+   */
+  private void setAnimationFrame(Bullet b) {
+    b.setStateTime(b.getStateTime() + Gdx.graphics.getDeltaTime());
+    b.getSprite().setTexture(acidBulletAnimation.getKeyFrame(b.getStateTime(), true));
+  }
+
+  /**
+   * Установить позицию
+   */
+  private void setPosition(Bullet b, Array<Fixture> fixtureList) {
+    Vector2 position = fixtureList.get(0).getBody().getPosition();
+    b.getSprite().setPosition(
+        position.x * Constants.WORLD_TO_VIEW - b.getSprite().getWidth() / 2f,
+        position.y * Constants.WORLD_TO_VIEW - b.getSprite().getHeight() / 2.4f);
+  }
+
+  /**
+   * Создать взрыв кислоты и удалить тело пули
+   */
+  private void createExplosionAndDeleteBody(Bullet b) {
+    try {
+      Explosions.getInstance().createAcidExplosion(
+          new FloatPair(b.getBody().getPosition().x * WORLD_TO_VIEW,
+              b.getBody().getPosition().y * WORLD_TO_VIEW));
+      deleteBulletBody(b);
+    } catch (Exception e) {
+
+    }
   }
 
   private void deleteBulletBody(Bullet bullet) {
@@ -214,44 +250,17 @@ public class BulletService {
     });
   }
 
-  public void drawBullets(OrthographicCamera camera) {
+  public void drawPlayerBullets(OrthographicCamera camera){
     batch.setProjectionMatrix(camera.combined);
     batch.begin();
-    playerBullets.forEach(b -> {
-          try {
-            Array<Fixture> fixtureList = b.getBody().getFixtureList();
-            if (!fixtureList.isEmpty()) {
-              Vector2 position = fixtureList.get(0).getBody().getPosition();
-
-              b.getSprite().setPosition(
-                  position.x * Constants.WORLD_TO_VIEW - b.getSprite().getWidth() + b.getSprite().getWidth() / 12,
-                  position.y * Constants.WORLD_TO_VIEW - b.getSprite().getHeight() / 2);
-
-              b.getSprite().draw(batch);
-            }
-          } catch (NullPointerException e) {
-
-          }
-        }
-    );
-    enemyBullets.forEach(b -> {
-          try {
-            Array<Fixture> fixtureList = b.getBody().getFixtureList();
-            if (!fixtureList.isEmpty()) {
-              Vector2 position = fixtureList.get(0).getBody().getPosition();
-              b.setStateTime(b.getStateTime() + Gdx.graphics.getDeltaTime());
-              b.getSprite().setTexture(acidBulletAnimation.getKeyFrame(b.getStateTime(), true));
-              b.getSprite().setPosition(
-                  position.x * Constants.WORLD_TO_VIEW - b.getSprite().getWidth() / 2f,
-                  position.y * Constants.WORLD_TO_VIEW - b.getSprite().getHeight() / 2.4f);
-
-              b.getSprite().draw(batch);
-            }
-          } catch (NullPointerException e) {
-
-          }
-        }
-    );
+    for (Bullet b : playerBullets) {
+      b.getSprite().draw(batch);
+    }
+  }
+  public void drawEnemyBullets(OrthographicCamera camera) {
+    for (Bullet b : enemyBullets) {
+      b.getSprite().draw(batch);
+    }
     batch.end();
   }
 

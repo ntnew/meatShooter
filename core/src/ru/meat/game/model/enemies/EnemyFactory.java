@@ -7,8 +7,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
-import java.util.function.BiFunction;
 import ru.meat.game.model.EnemyStatus;
+import ru.meat.game.model.enemies.scripts.BlackWidowScripts;
+import ru.meat.game.model.enemies.scripts.LittleBugScripts;
+import ru.meat.game.model.enemies.scripts.ScorpionBossScript;
+import ru.meat.game.model.enemies.scripts.SpiderScripts;
 import ru.meat.game.settings.Filters;
 import ru.meat.game.utils.GDXUtils;
 
@@ -18,15 +21,11 @@ public class EnemyFactory {
     float speedLowRange = 1.5f;
     float speedTopRange = 2.5f;
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
-    Enemy enemy = new Enemy(x, y, 1f, 100, speed, 300, null) {
-      @Override
-      public void doSomething(float posX, float posY) {
-        EnemiesScripts.simpleActions(posX, posY, this);
-      }
-    };
+    Enemy enemy = new Enemy(x, y, 100, speed, 300, null);
+
+    enemy.setActions(LittleBugScripts.littleBugActions());
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getLittleBugSkeletonData());
-    skeleton.setPosition(50, 50);
     float random = MathUtils.random(0.8f, 1.2f);
     skeleton.setScale(random, random);
     enemy.setSkeleton(skeleton);
@@ -55,12 +54,9 @@ public class EnemyFactory {
     float speedLowRange = 1.1f;
     float speedTopRange = 1.8f;
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
-    Enemy enemy = new Enemy(x, y, 1f, 500, speed, 300, null) {
-      @Override
-      public void doSomething(float posX, float posY) {
-        EnemiesScripts.spiderActions(posX, posY, this);
-      }
-    };
+    Enemy enemy = new Enemy(x, y, 500, speed, 300, null);
+
+    enemy.setActions(SpiderScripts.spiderActions());
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getSpiderSkeletonData());
     skeleton.setPosition(50, 50);
@@ -92,13 +88,9 @@ public class EnemyFactory {
     float speedLowRange = 1.1f;
     float speedTopRange = 1.8f;
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
-    Enemy enemy = new Enemy(x, y, 1f, 500, speed, 300, null) {
-      @Override
-      public void doSomething(float posX, float posY) {
+    Enemy enemy = new Enemy(x, y, 500, speed, 300, null);
 
-        EnemiesScripts.blackWidowActions(this, posX, posY);
-      }
-    };
+    enemy.setActions(BlackWidowScripts.blackWidow());
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getBlackWidowSkeletonData());
     skeleton.setPosition(50, 50);
@@ -115,6 +107,38 @@ public class EnemyFactory {
     enemy.setAttackSpeed(1.0);
     enemy.setBody(GDXUtils.createCircleForModel(enemy.getRadius() / WORLD_TO_VIEW, 80,
         new EnemyBodyUserData("blackWidow", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y, true));
+
+    enemy.getBody().getFixtureList().get(0).setFilterData(Filters.getEnemyFilter());
+
+    enemy.setRewardPoint(30);
+    enemy.getState().setAnimation(0, "walk", true);
+    enemy.setStatus(EnemyStatus.MOVE);
+    return enemy;
+  }
+
+  public static Enemy createScorpionBoss(float x, float y) {
+    float speedLowRange = 0.8f;
+    float speedTopRange = 1f;
+    float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
+    Enemy enemy = new Enemy(x, y, 10000, speed, 300, null);
+
+    enemy.setActions(ScorpionBossScript.scorpionBoss());
+
+    Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getScorpionSkeletonData());
+    skeleton.setPosition(500, 500);
+    float random = MathUtils.random(0.8f, 1.2f);
+    skeleton.setScale(random, random);
+    enemy.setSkeleton(skeleton);
+
+    AnimationStateData stateData = new AnimationStateData(EnemiesAnimation.getInstance().getScorpionSkeletonData());
+    enemy.setState(new AnimationState(stateData));
+    enemy.getState().setTimeScale(1.5f);
+
+    enemy.setRadius(630 / MAIN_ZOOM);
+    enemy.setAttack(25);
+    enemy.setAttackSpeed(1.0);
+    enemy.setBody(GDXUtils.createCircleForModel(enemy.getRadius() / WORLD_TO_VIEW, 80,
+        new EnemyBodyUserData("scorpion", 0, false, enemy.getAttack(), enemy.getAttackSpeed()), x, y, true));
 
     enemy.getBody().getFixtureList().get(0).setFilterData(Filters.getEnemyFilter());
 

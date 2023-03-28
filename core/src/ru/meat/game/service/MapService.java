@@ -29,7 +29,7 @@ public class MapService {
 // изменение размера медленно работает TODO переделать масштабирование
   }
 
-  public void draw(SpriteBatch batch) {
+  public void draw(Batch batch) {
     batch.draw(currentMap.getMainTexture(), currentMap.getPos().getX(), currentMap.getPos().getY());
   }
 }

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.utils.GDXUtils;
+import ru.meat.game.model.player.PlayerService;
 
 @Data
 public class GUI {
@@ -54,6 +54,8 @@ public class GUI {
   private Long damageScreenTransparentCounter;
 
   private Joystick joystick;
+
+  private Sprite button;
 
   /**
    * Значение максимального хп, для подсчёта оставшегося процента хп
@@ -95,8 +97,18 @@ public class GUI {
 
     //init левый джойстик
     if (MOBILE) {
+      createChangeWeaponButton();
       createJoysticks();
     }
+  }
+
+  private void createChangeWeaponButton() {
+    Texture texture = LoaderManager.getInstance().get("gui/changeWeaponButton.png");
+    texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
+    button = new Sprite(texture);
+    button.setPosition(camera.viewportWidth * MAIN_ZOOM * GUI_ZOOM - button.getWidth() - 50,
+        camera.viewportHeight * MAIN_ZOOM * GUI_ZOOM - button.getHeight() - 50);
+    button.setScale(1.5f);
   }
 
   /**
@@ -109,18 +121,17 @@ public class GUI {
 
   /**
    * Рисовать интерфейс, вызывается в рендере
-   *
-   * @param hp
    */
-  public void draw(double hp) {
+  public void draw() {
     handleDamageScreenTransparency();
 
     batch.begin();
-    hpSprite.setTexture(getActualTexture(hp));
+    hpSprite.setTexture(getActualTexture(PlayerService.getInstance().getPlayer().getHp()));
     hpSprite.draw(batch);
     damageScreen.draw(batch);
     if (MOBILE) {
       joystick.draw(batch);
+      button.draw(batch);
     }
     batch.end();
   }
@@ -194,10 +205,12 @@ public class GUI {
 
     LoaderManager.getInstance().load("gui/joystick/small.png", Texture.class, TEXTURE_PARAMETERS);
     LoaderManager.getInstance().load("gui/joystick/big.png", Texture.class, TEXTURE_PARAMETERS);
+
+    LoaderManager.getInstance().load("gui/changeWeaponButton.png", Texture.class, TEXTURE_PARAMETERS);
   }
 
-  public void initFullHp(Double hp) {
-    this.fullHp = hp;
+  public void initFullHp() {
+    this.fullHp = PlayerService.getInstance().getPlayer().getHp();
   }
 
   /**
@@ -220,6 +233,7 @@ public class GUI {
 
   /**
    * Является ли касание пальца на левом контроллере
+   *
    * @param i индекс касания
    * @return
    */
@@ -228,8 +242,16 @@ public class GUI {
     return joystick.isLeftControllerTouched(touchPos);
   }
 
+  public boolean isOnChangeWeaponButton(int i) {
+    Vector3 point = unprojectTouchPos(i);
+    float xBound = camera.viewportWidth * MAIN_ZOOM * GUI_ZOOM / 5 * 4;
+    float yBound = camera.viewportHeight * MAIN_ZOOM * GUI_ZOOM / 5 * 4;
+    return point.x > xBound && point.y > yBound;
+  }
+
   /**
    * Является ли касание пальца на правом контроллере
+   *
    * @param i индекс касания
    * @return
    */
@@ -239,7 +261,8 @@ public class GUI {
 
   /**
    * Перевести координаты касания в координаты камеры гуи
-    * @param i
+   *
+   * @param i
    * @return
    */
   private Vector3 unprojectTouchPos(int i) {

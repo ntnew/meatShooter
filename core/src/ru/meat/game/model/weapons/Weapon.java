@@ -137,14 +137,12 @@ public class Weapon {
   private void createBullet(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
     float deflection = bulletDeflection * (playerRunning ? 2 : 1);
     for (int i = 0; i < shotInOneBullet; i++) {
-      Gdx.app.postRunnable(() -> {
-        BulletService.getInstance()
-            .createBullet(fromX, fromY,
-                MathUtils.random(screenX - deflection, screenX + deflection),
-                MathUtils.random(screenY - deflection, screenY + deflection),
-                speed, damage, bulletTexture,
-                box2dRadius, bulletType, textureScale);
-      });
+      BulletService.getInstance()
+          .createBullet(fromX, fromY,
+              MathUtils.random(screenX - deflection, screenX + deflection),
+              MathUtils.random(screenY - deflection, screenY + deflection),
+              speed, damage, bulletTexture,
+              box2dRadius, bulletType, textureScale);
     }
   }
 
@@ -161,9 +159,7 @@ public class Weapon {
     if (!reloading && fireCount < clipSize) {
       fireCount += 1;
       AudioService.getInstance().playShootSound(shootSound);
-
       createBullet(fromX, fromY, screenX, screenY, playerRunning);
-
     } else if (!reloading) {
       //произвести перезарядку оружия
       reloading = true;

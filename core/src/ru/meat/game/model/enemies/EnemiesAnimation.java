@@ -3,6 +3,7 @@ package ru.meat.game.model.enemies;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.esotericsoftware.spine.SkeletonData;
@@ -18,6 +19,8 @@ public class EnemiesAnimation {
   private SkeletonData spiderSkeletonData;
 
   private SkeletonData blackWidowSkeletonData;
+
+  private SkeletonData scorpionSkeletonData;
 
   private static EnemiesAnimation instance;
 
@@ -41,5 +44,24 @@ public class EnemiesAnimation {
     SkeletonJson blackWidowJson = new SkeletonJson((TextureAtlas) LoaderManager.getInstance().get("ani/blackWidow/spider_mini_boss.atlas"));
     blackWidowJson.setScale(3f/MAIN_ZOOM);
     blackWidowSkeletonData = blackWidowJson.readSkeletonData(Gdx.files.internal("ani/blackWidow/spider_mini_boss.json"));
+
+    SkeletonJson scorpJson = new SkeletonJson((TextureAtlas) LoaderManager.getInstance().get("ani/scorpion/boss.atlas"));
+    scorpJson.setScale(5f/MAIN_ZOOM);
+    scorpionSkeletonData = scorpJson.readSkeletonData(Gdx.files.internal("ani/scorpion/boss.json"));
+  }
+
+
+  public static void loadResources() {
+    LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
+
+    LoaderManager.getInstance().load("ani/spider/spider.atlas", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
+
+    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.atlas", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.png", Texture.class);
+
+    LoaderManager.getInstance().load("ani/scorpion/boss.atlas", TextureAtlas.class);
+    LoaderManager.getInstance().load("ani/scorpion/boss.png", Texture.class);
   }
 }

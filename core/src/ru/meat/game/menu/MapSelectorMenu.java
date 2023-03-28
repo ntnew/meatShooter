@@ -19,6 +19,7 @@ import ru.meat.game.game.DeathMatch;
 import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.loader.LoaderManager;
+import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.maps.Maps;
 import ru.meat.game.model.player.PlayerAnimationFactory;
 import ru.meat.game.model.weapons.explosions.Explosions;
@@ -60,18 +61,7 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load("GBullet.png", Texture.class, TEXTURE_PARAMETERS);
     Explosions.initResources();
     BulletService.initResources();
-
-    LoaderManager.getInstance().load("ani/littleBug/bug.atlas", TextureAtlas.class);
-    LoaderManager.getInstance().load("ani/littleBug/bug.png", Texture.class);
-
-    LoaderManager.getInstance().load("ani/spider/spider.atlas", TextureAtlas.class);
-    LoaderManager.getInstance().load("ani/spider/spider.png", Texture.class);
-
-    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.atlas", TextureAtlas.class);
-    LoaderManager.getInstance().load("ani/blackWidow/spider_mini_boss.png", Texture.class);
-
-
-
+    EnemiesAnimation.loadResources();
   }
 
   @Override

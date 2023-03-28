@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -46,7 +47,7 @@ public class Explosions {
   private static final int FRAME_COLS = 8, FRAME_ROWS = 6;
 
   private static Explosions instance;
-  private final static long  explosionLifeTime = 600;
+  private final static long explosionLifeTime = 600;
 
   public static Explosions getInstance() {
     if (instance == null) {
@@ -75,8 +76,8 @@ public class Explosions {
 
     Texture[] l = new Texture[10];
 
-    for (int i = 0; i < 10 ; i++) {
-      l[i] = LoaderManager.getInstance().get("ani/widowAttack/explosion/" + i +".png");
+    for (int i = 0; i < 10; i++) {
+      l[i] = LoaderManager.getInstance().get("ani/widowAttack/explosion/" + i + ".png");
       l[i].setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
     }
 
@@ -86,31 +87,34 @@ public class Explosions {
   public static void initResources() {
     LoaderManager.getInstance().load("ani/explosion.png", Texture.class, TEXTURE_PARAMETERS);
 
-    for (int i = 0; i < 10 ; i++) {
-      LoaderManager.getInstance().load("ani/widowAttack/explosion/" + i +".png", Texture.class, TEXTURE_PARAMETERS);
+    for (int i = 0; i < 10; i++) {
+      LoaderManager.getInstance().load("ani/widowAttack/explosion/" + i + ".png", Texture.class, TEXTURE_PARAMETERS);
     }
   }
 
   public void createFireExplosion(FloatPair pos, float damage) {
     AudioService.getInstance().playExplosionSound();
-    explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359), ExplosionType.FIRE, TimeUtils.millis(), 12));
+
     ExplosionBodyUserData explosionBodyUserData = new ExplosionBodyUserData(UUID.randomUUID(), TimeUtils.millis());
     explosionBodyUserData.setDamage(damage);
     explosionBodyUserData.setName("explosion");
 
     Gdx.app.postRunnable(() -> {
-      Body body = GDXUtils.createCircleForModel(12/MAIN_ZOOM, 100, explosionBodyUserData, pos.getX(), pos.getY(), true);
+      explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359), ExplosionType.FIRE, TimeUtils.millis(), 12));
+      Body body = GDXUtils.createCircleForModel(12 / MAIN_ZOOM, 100, explosionBodyUserData, pos.getX(), pos.getY(),
+          true);
       body.getFixtureList().get(0).setFilterData(Filters.getPlayerBulletFilter());
       expBodies.add(body);
     });
   }
 
   public void createAcidExplosion(FloatPair pos) {
-    explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359), ExplosionType.ACID, TimeUtils.millis(),1.5f));
+    Gdx.app.postRunnable(() ->
+        explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359), ExplosionType.ACID, TimeUtils.millis(), 1.5f)));
   }
 
   public void drawExplosions(OrthographicCamera camera) {
-    expBodies.forEach(b -> {
+    for (Body b : expBodies) {
       Array<Fixture> fixtureList = b.getFixtureList();
       if (!fixtureList.isEmpty() && fixtureList.get(0).getUserData() instanceof ExplosionBodyUserData) {
         ExplosionBodyUserData userData = (ExplosionBodyUserData) fixtureList.get(0).getUserData();
@@ -123,30 +127,33 @@ public class Explosions {
           }
         }
       }
-    });
+    }
     expBodies.removeIf(body -> !body.isActive());
 
-    batch.setProjectionMatrix(camera.combined);
     batch.begin();
-    explosions.forEach(x -> {
-      x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
-      Sprite sprite = new Sprite();
-      if (x.getType().equals(ExplosionType.ACID)) {
-        sprite =new Sprite(acidExplosionAnimation.getKeyFrame(x.getStateTime()));
-      } else if (x.getType().equals(ExplosionType.FIRE)) {
-        sprite =new Sprite(fireExplosionAnimation.getKeyFrame(x.getStateTime()));
+    for (Explosion x : explosions) {
+      try {
+        x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
+        Sprite sprite = new Sprite();
+        if (x.getType().equals(ExplosionType.ACID)) {
+          sprite = new Sprite(acidExplosionAnimation.getKeyFrame(x.getStateTime()));
+        } else if (x.getType().equals(ExplosionType.FIRE)) {
+          sprite = new Sprite(fireExplosionAnimation.getKeyFrame(x.getStateTime()));
+        }
+        sprite.setOrigin(sprite.getWidth() - sprite.getWidth() / 2, sprite.getHeight() / 2);
+        sprite.setPosition(x.getPos().getX() - sprite.getWidth() / 2,
+            x.getPos().getY() - sprite.getHeight() / 2);
+        sprite.rotate(x.getAngle());
+        sprite.setScale(x.getScale() / MAIN_ZOOM);
+        sprite.draw(batch);
+      } catch (NullPointerException n) {
+        System.out.println(n);
       }
-      sprite.setOrigin(sprite.getWidth() - sprite.getWidth() / 2, sprite.getHeight() / 2);
-      sprite.setPosition(x.getPos().getX() - sprite.getWidth() / 2,
-          x.getPos().getY() - sprite.getHeight() / 2);
-      sprite.rotate(x.getAngle());
-      sprite.setScale(x.getScale()/MAIN_ZOOM);
-      sprite.draw(batch);
-    });
+    }
     batch.end();
   }
 
-  public void dispose(){
+  public void dispose() {
     explosions.clear();
     expBodies.clear();
   }

@@ -28,6 +28,8 @@ public class PlayerService {
 
   private static PlayerService instance;
 
+  private Float finalSpeed;
+
   public static PlayerService getInstance() {
     if (instance == null) {
       instance = new PlayerService();
@@ -40,16 +42,15 @@ public class PlayerService {
   private float feetRotationAngle = 0;
 
   private float modelFrontAngle = 0;
-
-  private float transformX = 0;
-
-  private float transformY;
   private Long weaponChangeLock = 0L;
 
   public PlayerService() {
     player = new Player(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM,
         Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
+
+    finalSpeed = calcSpeed();
   }
+
 
   public void updateState() {
     //Обновить верхнюю часть анимации
@@ -176,6 +177,7 @@ public class PlayerService {
     player.setCurrentWeapon(WeaponEnum.getByPos(i));
     player.getTopState()
         .setAnimation(0, "move_" + player.getCurrentWeapon().getAniTag(), true);
+    finalSpeed = calcSpeed();
   }
 
   public void changeToNextWeapon() {
@@ -194,6 +196,7 @@ public class PlayerService {
     player.setCurrentWeapon(player.getWeapons().get(pos).getName());
     player.getTopState()
         .setAnimation(0, "move_" + player.getCurrentWeapon().getAniTag(), true);
+    finalSpeed = calcSpeed();
   }
 
   /**
@@ -223,9 +226,6 @@ public class PlayerService {
       if (Gdx.input.isKeyPressed(Input.Keys.D)) {
         x = getSpeed();
       }
-
-      transformX = x;
-      transformY = y;
 
       player.getBody().setTransform(getBodyPosX() + x / WORLD_TO_VIEW, getBodyPosY() + y / WORLD_TO_VIEW, 0);
 
@@ -329,11 +329,7 @@ public class PlayerService {
    * Получить скорость движения игрока
    */
   private float getSpeed() {
-    return
-        PLAYER_MOVE_SPEED
-            * MAIN_ZOOM
-            * RpgStatsService.getInstance().getStats().getMoveSpeed()
-            * getActualWeapon().getMoveSpeedMultiplier();
+    return finalSpeed;
   }
 
   /**
@@ -353,5 +349,13 @@ public class PlayerService {
   public static void endGameSession() {
     instance.getPlayer().setDead(true);
     instance = null;
+  }
+
+
+  private float calcSpeed() {
+    return PLAYER_MOVE_SPEED
+        * MAIN_ZOOM
+        * RpgStatsService.getInstance().getStats().getMoveSpeed()
+        * getActualWeapon().getMoveSpeedMultiplier();
   }
 }

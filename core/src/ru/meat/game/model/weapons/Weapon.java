@@ -1,12 +1,7 @@
 package ru.meat.game.model.weapons;
 
-import static ru.meat.game.settings.Constants.MAIN_ZOOM;
-
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.TimeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -111,6 +106,7 @@ public class Weapon {
    */
   public void shoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
     if (!reloading && fireCount < clipSize) {
+
       fireCount += 1;
       AudioService.getInstance().playShootSound(shootSound);
 
@@ -124,17 +120,14 @@ public class Weapon {
       float newCatetForY = sin * newGip;
       float newCatetForX = cos * newGip;
 
-      screenX = fromX + newCatetForX;
-      screenY = fromY + newCatetForY;
-
-      createBullet(fromX, fromY, screenX, screenY, playerRunning);
+      createShoot(fromX, fromY, fromX + newCatetForX, fromY + newCatetForY, playerRunning);
     } else if (!reloading) {
       reloading = true;
       new ThreadForReload().start();
     }
   }
 
-  private void createBullet(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
+  private void createShoot(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
     float deflection = bulletDeflection * (playerRunning ? 2 : 1);
     for (int i = 0; i < shotInOneBullet; i++) {
       BulletService.getInstance()
@@ -159,7 +152,7 @@ public class Weapon {
     if (!reloading && fireCount < clipSize) {
       fireCount += 1;
       AudioService.getInstance().playShootSound(shootSound);
-      createBullet(fromX, fromY, screenX, screenY, playerRunning);
+      createShoot(fromX, fromY, screenX, screenY, playerRunning);
     } else if (!reloading) {
       //произвести перезарядку оружия
       reloading = true;

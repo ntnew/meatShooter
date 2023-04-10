@@ -58,12 +58,14 @@ public class EnemyService {
    * @param posY y координата игрока
    */
   public void actionEnemies(float posX, float posY) {
-    enemies.forEach(enemy -> {
+    for (Enemy enemy : enemies) {
+      enemy.getState().apply(enemy.getSkeleton());
+      enemy.getSkeleton().updateWorldTransform();
+
       if (!enemy.getStatus().equals(EnemyStatus.IDLE)) {
         enemy.getState().update(Gdx.graphics.getDeltaTime());
       }
-      enemy.getState().apply(enemy.getSkeleton());
-      enemy.getSkeleton().updateWorldTransform();
+
 
       if (enemy.getHp() <= 0 && !enemy.getStatus().equals(EnemyStatus.DIED)) {
         enemy.setStatus(EnemyStatus.DIED);
@@ -83,7 +85,7 @@ public class EnemyService {
         rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
         killCount.set(killCount.get() + 1);
       }
-    });
+    }
   }
 
   private void updateEnemyPos(Enemy enemy) {

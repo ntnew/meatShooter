@@ -93,6 +93,8 @@ public abstract class GameZone implements Screen, InputProcessor {
     renderer.setPremultipliedAlpha(true);
 
     polyBatch = new PolygonSpriteBatch();
+
+    new PlayerControlHandlerThread().start();
   }
 
   @Override
@@ -119,8 +121,8 @@ public abstract class GameZone implements Screen, InputProcessor {
     if (MOBILE) {
       PlayerService.getInstance().handleMobileTouch(camera);
     } else {
-      PlayerService.getInstance().handleMoveKey(camera);
-      handleMouse();
+      PlayerService.getInstance().transformPlayerBody();
+      PlayerService.getInstance().handleCameraTransform(camera);
     }
 
     handleWorldBounds();
@@ -360,18 +362,6 @@ public abstract class GameZone implements Screen, InputProcessor {
     camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
 
     Box2dWorld.getInstance().getCameraBox2D().position.set(camX2, camY2, 0);
-  }
-
-  /**
-   * Обработать нажатия мыши, если персонаж ещё жив
-   */
-  private void handleMouse() {
-    if (!PlayerService.getInstance().getPlayer().isDead()) {
-      PlayerService.getInstance().rotateModel();
-      if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-        PlayerService.getInstance().shoot();
-      }
-    }
   }
 
   class ThreadForZoom extends Thread {

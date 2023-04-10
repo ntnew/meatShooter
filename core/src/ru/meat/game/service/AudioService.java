@@ -45,7 +45,7 @@ public class AudioService {
       "shotgun.mp3", "shotgunReload.mp3",
       "2barrelShot.mp3", "2barrelReload.mp3",
       "m249.mp3", "m249reload.mp3",
-      "m79reload.mp3","m79open.mp3", "m79shoot.mp3",
+      "m79reload.mp3", "m79open.mp3", "m79shoot.mp3",
       "m32open.mp3", "m32reload.mp3", "m32close.mp3",
       "aa12shoot.mp3", "aa12open.mp3", "aa12reload.mp3", "aa12close.mp3"
   );
@@ -139,20 +139,22 @@ public class AudioService {
   }
 
   public void playStep() {
-    if (!firstStepPlaying && !stepSoundLock) {
-      step1.setVolume(Settings.getInstance().EFFECT_VOLUME);
-      step1.setOnCompletionListener(music -> stepSoundLock = false);
-      step1.play();
-      stepSoundLock = true;
-      firstStepPlaying = true;
-    }
-    if (!stepSoundLock) {
-      step2.setVolume(Settings.getInstance().EFFECT_VOLUME);
-      step2.setOnCompletionListener(x -> stepSoundLock = false);
-      step2.play();
-      stepSoundLock = true;
-      firstStepPlaying = false;
-    }
+    Gdx.app.postRunnable(() -> {
+      if (!firstStepPlaying && !stepSoundLock) {
+        step1.setVolume(Settings.getInstance().EFFECT_VOLUME);
+        step1.setOnCompletionListener(music -> stepSoundLock = false);
+        step1.play();
+        stepSoundLock = true;
+        firstStepPlaying = true;
+      }
+      if (!stepSoundLock) {
+        step2.setVolume(Settings.getInstance().EFFECT_VOLUME);
+        step2.setOnCompletionListener(x -> stepSoundLock = false);
+        step2.play();
+        stepSoundLock = true;
+        firstStepPlaying = false;
+      }
+    });
   }
 
   public void playHit() {

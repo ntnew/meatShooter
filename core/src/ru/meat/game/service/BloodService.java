@@ -38,7 +38,7 @@ public class BloodService {
 
   private static final String bleedAniPath = "blood/ani1/b";
 
-  public List<Sprite> spots = new ArrayList<>();
+  public final List<Sprite> spots = new ArrayList<>();
   public List<BloodSpot> bleeds = new ArrayList<>();
 
 
@@ -112,7 +112,11 @@ public class BloodService {
 
   public void drawBloodSpots(Batch batch) {
     //TODO лагает
-    spots.forEach(x -> x.draw(batch));
+    synchronized (spots) {
+      for (Sprite x : spots) {
+        x.draw(batch);
+      }
+    }
   }
 
   /**
@@ -121,25 +125,32 @@ public class BloodService {
    * @param coord координаты где создать в мире текстур
    */
   public void createLittleBloodSpot(FloatPair coord) {
-    Sprite sprite = new Sprite(bloodSpotTextures.get(MathUtils.random(0, bloodSpotTextures.size() - 1)));
+    new Thread(() -> {
+      synchronized (spots) {
+        Sprite sprite = new Sprite(bloodSpotTextures.get(MathUtils.random(0, bloodSpotTextures.size() - 1)));
 
-    sprite.setPosition(coord.getX() - sprite.getWidth() / 2 + MathUtils.random(-bloodDiffusion, +bloodDiffusion),
-        coord.getY() - sprite.getHeight() / 2 - MathUtils.random(-bloodDiffusion, +bloodDiffusion));
+        sprite.setPosition(coord.getX() - sprite.getWidth() / 2 + MathUtils.random(-bloodDiffusion, +bloodDiffusion),
+            coord.getY() - sprite.getHeight() / 2 - MathUtils.random(-bloodDiffusion, +bloodDiffusion));
 
-    sprite.rotate(MathUtils.random(0, 359));
+        sprite.rotate(MathUtils.random(0, 359));
 
-    spots.add(sprite);
+        sprite.setAlpha(MathUtils.random(0.6f, 1));
+        spots.add(sprite);
+      }
+    }).start();
   }
 
   public void dispose() {
-    spots.clear();
+    synchronized (spots) {
+      spots.clear();
+    }
     bleeds.clear();
   }
 
   public void update() {
     bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
         bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
-    bleeds.parallelStream().forEach(x -> {
+    bleeds.forEach(x -> {
       x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
       x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
     });

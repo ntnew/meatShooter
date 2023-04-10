@@ -1,4 +1,4 @@
-package ru.meat.game.model.enemies;
+package ru.meat.game.model;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;

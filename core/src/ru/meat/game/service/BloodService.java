@@ -19,7 +19,7 @@ import java.util.Objects;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.FloatPair;
-import ru.meat.game.model.enemies.BloodSpot;
+import ru.meat.game.model.BloodSpot;
 
 @Data
 public class BloodService {

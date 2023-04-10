@@ -28,8 +28,6 @@ import ru.meat.game.settings.Settings;
 
 @Data
 public class MyGame extends Game {
-
-  private SpriteBatch batch;
   private BitmapFont font;
   private LabelStyle labelStyle;
   private TextButtonStyle textButtonStyle;
@@ -47,7 +45,7 @@ public class MyGame extends Game {
 
 //   Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
-    batch = new SpriteBatch();
+
     font = new BitmapFont();
     initCam();
 
@@ -76,7 +74,6 @@ public class MyGame extends Game {
   }
 
   public void dispose() {
-    batch.dispose();
     font.dispose();
   }
 
@@ -89,7 +86,6 @@ public class MyGame extends Game {
 
   private void updateCamera() {
     menuCamera.update();
-    batch.setProjectionMatrix(menuCamera.combined);
   }
 
   public void initStage() {
@@ -99,9 +95,7 @@ public class MyGame extends Game {
 
   public void drawStage() {
     updateCamera();
-    batch.begin();
     stage.act();
     stage.draw();
-    batch.end();
   }
 }

@@ -39,7 +39,7 @@ public class BloodService {
   private static final String bleedAniPath = "blood/ani1/b";
 
   public final List<Sprite> spots = new ArrayList<>();
-  public List<BloodSpot> bleeds = new ArrayList<>();
+  public final List<BloodSpot> bleeds = new ArrayList<>();
 
 
   private Animation<Texture> bleedAnimation;
@@ -62,7 +62,7 @@ public class BloodService {
       } else {
         texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
       }
-
+      initializeBleedingAnimation();
       bloodSpotTextures.add(texture);
     });
   }
@@ -77,15 +77,16 @@ public class BloodService {
   }
 
   public void createBleeding(float x, float y) {
-    if (bleedAnimation == null) {
-      initializeBleedingAnimation();
-    }
-    float z = Gdx.graphics.getDeltaTime();
+    new Thread(() -> {
+      float z = Gdx.graphics.getDeltaTime();
 
-    Sprite sprite = new Sprite(bleedAnimation.getKeyFrame(z));
-    sprite.setPosition(x * WORLD_TO_VIEW - sprite.getWidth() / 2, y * WORLD_TO_VIEW - sprite.getHeight() / 2);
-    sprite.setScale(1.5f);
-    bleeds.add(new BloodSpot(sprite, z));
+      Sprite sprite = new Sprite(bleedAnimation.getKeyFrame(z));
+      sprite.setPosition(x * WORLD_TO_VIEW - sprite.getWidth() / 2, y * WORLD_TO_VIEW - sprite.getHeight() / 2);
+      sprite.setScale(1.5f);
+      synchronized (bleeds) {
+        bleeds.add(new BloodSpot(sprite, z));
+      }
+    }).start();
   }
 
   /**
@@ -103,7 +104,13 @@ public class BloodService {
   }
 
   public void drawBleeds(Batch batch) {
-    bleeds.forEach(x -> x.getSprite().draw(batch));
+    synchronized (bleeds) {
+      for (BloodSpot x : bleeds) {
+        x.getSprite().draw(batch);
+      }
+      bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
+          bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
+    }
   }
 
   public void createBloodSpot(FloatPair coord) {
@@ -144,15 +151,17 @@ public class BloodService {
     synchronized (spots) {
       spots.clear();
     }
-    bleeds.clear();
+    synchronized (bleeds) {
+      bleeds.clear();
+    }
   }
 
   public void update() {
-    bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
-        bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
-    bleeds.forEach(x -> {
-      x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
-      x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
-    });
+    synchronized (bleeds) {
+      for (BloodSpot x : bleeds) {
+        x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
+        x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
+      }
+    }
   }
 }

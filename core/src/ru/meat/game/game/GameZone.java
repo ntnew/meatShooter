@@ -5,9 +5,6 @@ import static ru.meat.game.settings.Constants.MOBILE;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Cursor.SystemCursor;
 import com.badlogic.gdx.graphics.GL20;
@@ -38,7 +35,7 @@ import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.service.RpgStatsService;
 
 @Data
-public abstract class GameZone implements Screen, InputProcessor {
+public abstract class GameZone implements Screen {
 
   protected MapService mapService;
 
@@ -68,7 +65,7 @@ public abstract class GameZone implements Screen, InputProcessor {
   public GameZone(MyGame game, int map) {
     this.game = game;
 
-    Gdx.input.setInputProcessor(this);
+    Gdx.input.setInputProcessor(new MyInputProcessor(this.game, this));
 
     //создание камеры
     camera = new OrthographicCamera();
@@ -222,81 +219,6 @@ public abstract class GameZone implements Screen, InputProcessor {
   public void hide() {
 
   }
-
-  @Override
-  public boolean keyDown(int keycode) {
-    if (keycode == Keys.NUM_1) {
-      PlayerService.getInstance().changeWeapon(1);
-    }
-    if (keycode == Keys.NUM_2) {
-      PlayerService.getInstance().changeWeapon(2);
-    }
-    if (keycode == Keys.NUM_3) {
-      PlayerService.getInstance().changeWeapon(3);
-    }
-    if (keycode == Keys.NUM_4) {
-      PlayerService.getInstance().changeWeapon(4);
-    }
-    if (keycode == Keys.NUM_5) {
-      PlayerService.getInstance().changeWeapon(5);
-    }
-    if (keycode == Keys.NUM_6) {
-      PlayerService.getInstance().changeWeapon(6);
-    }
-    if (keycode == Keys.NUM_7) {
-      PlayerService.getInstance().changeWeapon(7);
-    }
-    if (keycode == Keys.NUM_8) {
-      PlayerService.getInstance().changeWeapon(8);
-    }
-
-    if (keycode == Keys.TAB) {
-      PlayerService.getInstance().changeToNextWeapon();
-    }
-    if (keycode == Keys.ESCAPE) {
-      Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
-      game.setScreen(new PauseMenu(game, this));
-    }
-    return false;
-  }
-
-  @Override
-  public boolean keyUp(int keycode) {
-    return false;
-  }
-
-  @Override
-  public boolean keyTyped(char character) {
-    return false;
-  }
-
-  @Override
-  public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-
-    return false;
-  }
-
-  @Override
-  public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-
-    return false;
-  }
-
-  @Override
-  public boolean touchDragged(int screenX, int screenY, int pointer) {
-    return false;
-  }
-
-  @Override
-  public boolean mouseMoved(int screenX, int screenY) {
-    return false;
-  }
-
-  @Override
-  public boolean scrolled(float amountX, float amountY) {
-    return false;
-  }
-
   @Override
   public void dispose() {
     Box2dWorld.dispose();
@@ -305,7 +227,7 @@ public abstract class GameZone implements Screen, InputProcessor {
 
   public void resumeGame() {
     GUI.getInstance().setAimCursor();
-    Gdx.input.setInputProcessor(this);
+    Gdx.input.setInputProcessor(new MyInputProcessor(this.game, this));
   }
 
   public void endGameSession() {

@@ -53,11 +53,13 @@ public class Box2dWorld {
   }
 
   public void render() {
-    renderer.render(world, cameraBox2D.combined);
+    synchronized (world) {
+      renderer.render(world, cameraBox2D.combined);
+    }
   }
 
   public void update() {
     cameraBox2D.update();
-    Box2dWorld.getInstance().getWorld().step(1 / 60f, 6, 2);
+    instance.getWorld().step(1 / 60f, 1, 1);
   }
 }

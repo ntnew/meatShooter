@@ -57,8 +57,8 @@ public abstract class GameZone implements Screen {
 
   private ThreadForZoom threadForZoom;
 
-  PerformanceCounter main = new PerformanceCounter("Main");
-  PerformanceCounter secondary = new PerformanceCounter("secondary");
+//  PerformanceCounter main = new PerformanceCounter("Main");
+//  PerformanceCounter secondary = new PerformanceCounter("secondary");
 
   private final int map;
 

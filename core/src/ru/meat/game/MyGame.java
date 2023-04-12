@@ -76,7 +76,7 @@ public class MyGame extends Game {
     super.render(); // important!
     if (!loaded && LoaderManager.getInstance().update()) {
 //      drawFadeIn(menuCamera, batch);
-      this.setScreen(new MainMenu(this));
+      this.setScreen(new MainMenu());
       loaded = true;
     }
   }
@@ -101,9 +101,19 @@ public class MyGame extends Game {
     Gdx.input.setInputProcessor(stage);
   }
 
+  public void initGameStage(Camera camera) {
+    stage = new Stage(new ScreenViewport(camera));
+  }
+
   public void drawStage() {
     updateCamera();
     stage.act();
     stage.draw();
+  }
+
+  public void addActor(Actor actor) {
+    synchronized (stage) {
+      stage.addActor(actor);
+    }
   }
 }

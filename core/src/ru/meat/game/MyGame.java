@@ -1,20 +1,18 @@
 package ru.meat.game;
 
-import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.MENU_ZOOM;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import lombok.Data;
 import ru.meat.game.game.GameZone;
@@ -28,6 +26,16 @@ import ru.meat.game.settings.Settings;
 
 @Data
 public class MyGame extends Game {
+
+  private static MyGame instance;
+
+  public static MyGame getInstance() {
+    if (instance == null) {
+      instance = new MyGame();
+    }
+    return instance;
+  }
+
   private BitmapFont font;
   private LabelStyle labelStyle;
   private TextButtonStyle textButtonStyle;

@@ -10,11 +10,9 @@ import ru.meat.game.model.player.PlayerService;
 
 public class MyInputProcessor implements InputProcessor {
 
-  private final MyGame game;
   private final GameZone gameZone;
 
-  public MyInputProcessor(MyGame game, GameZone gameZone) {
-    this.game = game;
+  public MyInputProcessor(GameZone gameZone) {
     this.gameZone = gameZone;
   }
 
@@ -50,7 +48,7 @@ public class MyInputProcessor implements InputProcessor {
     }
     if (keycode == Keys.ESCAPE) {
       Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
-      game.setScreen(new PauseMenu(game, gameZone));
+      MyGame.getInstance().setScreen(new PauseMenu(gameZone));
     }
     return false;
   }

@@ -5,15 +5,14 @@ import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
-import ru.meat.game.MyGame;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.enemies.EnemyFactory;
 import ru.meat.game.model.player.PlayerService;
 
 public class DeathMatch extends GameZone {
 
-  public DeathMatch(int map, MyGame game) {
-    super(game, map);
+  public DeathMatch(int map) {
+    super(map);
   }
 
   @Override

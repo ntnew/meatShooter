@@ -10,13 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import ru.meat.game.game.DeathMatch;
 import ru.meat.game.MyGame;
 import ru.meat.game.game.GameZone;
 
 public class PauseMenu implements Screen {
-
-  private final MyGame game;
 
   private Button toMenuButton;
 
@@ -25,14 +22,13 @@ public class PauseMenu implements Screen {
 
   private Table table;
 
-  public PauseMenu(final MyGame game, GameZone currentGameScreen) {
-    this.game = game;
-    this.game.setGameZone(currentGameScreen);
+  public PauseMenu(GameZone currentGameScreen) {
+    MyGame.getInstance().setGameZone(currentGameScreen);
 
-    game.initStage();
+    MyGame.getInstance().initStage();
     createButtons();
 
-    game.initStage();
+    MyGame.getInstance().initStage();
 
     createButtons();
 
@@ -47,7 +43,7 @@ public class PauseMenu implements Screen {
     table.add(resumeButton).width(100).height(30);
     table.row();
 
-    game.getStage().addActor(table);
+    MyGame.getInstance().addActor(table);
   }
 
 
@@ -58,29 +54,29 @@ public class PauseMenu implements Screen {
 
   private void createButtons() {
 
-    toMenuButton = createButton(game.getTextButtonStyle(), "Surrender", new ClickListener() {
+    toMenuButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Surrender", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         super.clicked(event, x, y);
-        game.getGameZone().endGameSession();
+        MyGame.getInstance().getGameZone().endGameSession();
       }
     });
 
-    settingsButton = createButton(game.getTextButtonStyle(), "Settings", new ClickListener() {
+    settingsButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Settings", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         super.clicked(event, x, y);
-        game.setScreen(new SettingsMenu(game, true));
+        MyGame.getInstance().setScreen(new SettingsMenu(true));
       }
     });
 
-    resumeButton = createButton(game.getTextButtonStyle(), "Resume", new ClickListener() {
+    resumeButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Resume", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         super.clicked(event, x, y);
-        game.setScreen(game.getGameZone());
-        game.getGameZone().resumeGame();
-        game.getStage().clear();
+        MyGame.getInstance().setScreen(MyGame.getInstance().getGameZone());
+        MyGame.getInstance().getGameZone().resumeGame();
+        MyGame.getInstance().getStage().clear();
       }
     });
   }
@@ -89,7 +85,7 @@ public class PauseMenu implements Screen {
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
 
-    game.drawStage();
+    MyGame.getInstance().drawStage();
   }
 
   @Override

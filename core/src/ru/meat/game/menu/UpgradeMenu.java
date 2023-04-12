@@ -7,16 +7,13 @@ import static ru.meat.game.utils.GDXUtils.createButton;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -25,7 +22,6 @@ import ru.meat.game.service.RpgStatsService;
 
 public class UpgradeMenu implements Screen {
 
-  final MyGame game;
   private Table table;
 
   private Label lvlLabel;
@@ -50,10 +46,8 @@ public class UpgradeMenu implements Screen {
   private long lvl;
 
 
-  public UpgradeMenu(final MyGame game) {
-    this.game = game;
-
-    game.initStage();
+  public UpgradeMenu() {
+    MyGame.getInstance().initStage();
 
     lvl = RpgStatsService.getInstance().getStats().getLvl();
 
@@ -66,38 +60,38 @@ public class UpgradeMenu implements Screen {
     table.setDebug(DEBUG);
 
     table.row();
-    Label label = new Label("LvL", game.getLabelStyle());
+    Label label = new Label("LvL", MyGame.getInstance().getLabelStyle());
     label.setAlignment(Align.center);
     table.add(label).width(100).height(30);
     table.add(lvlLabel).width(100).height(30).align(Align.center);
 
     table.row();
-    table.add(new Label("Exp", game.getLabelStyle()));
+    table.add(new Label("Exp", MyGame.getInstance().getLabelStyle()));
     table.add(experience);
     table.add(newLvlExperience);
 
     table.row();
-    table.add(new Label("HP", game.getLabelStyle())).height(30);
+    table.add(new Label("HP", MyGame.getInstance().getLabelStyle())).height(30);
     table.add(hpLabel);
     table.add(hpButton);
 
     table.row();
-    table.add(new Label("Dmg", game.getLabelStyle())).height(30);
+    table.add(new Label("Dmg", MyGame.getInstance().getLabelStyle())).height(30);
     table.add(dmgLabel);
     table.add(dmgButton);
 
     table.row();
-    table.add(new Label("Move speed", game.getLabelStyle())).height(30);
+    table.add(new Label("Move speed", MyGame.getInstance().getLabelStyle())).height(30);
     table.add(moveSpeedLabel);
     table.add(moveSpeedButton);
 
     table.row();
-    table.add(new Label("Fire speed", game.getLabelStyle())).height(30);
+    table.add(new Label("Fire speed", MyGame.getInstance().getLabelStyle())).height(30);
     table.add(fireSpeedLabel);
     table.add(fireSpeedButton);
 
     table.row();
-    table.add(new Label("Reloading", game.getLabelStyle())).height(30);
+    table.add(new Label("Reloading", MyGame.getInstance().getLabelStyle())).height(30);
     table.add(reloadSpeedLabel);
     table.add(reloadSpeedButton);
 
@@ -106,30 +100,33 @@ public class UpgradeMenu implements Screen {
     table.add();
     table.add(backButton);
 
-    game.getStage().addActor(table);
+    MyGame.getInstance().addActor(table);
   }
 
   private void createLabels() {
-    hpLabel = new Label(String.format("%.0f", RpgStatsService.getInstance().getStats().getHp()), game.getLabelStyle());
-    dmgLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getDamage()), game.getLabelStyle());
+    hpLabel = new Label(String.format("%.0f", RpgStatsService.getInstance().getStats().getHp()),
+        MyGame.getInstance().getLabelStyle());
+    dmgLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getDamage()),
+        MyGame.getInstance().getLabelStyle());
     moveSpeedLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getMoveSpeed()),
-        game.getLabelStyle());
+        MyGame.getInstance().getLabelStyle());
     fireSpeedLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getFireSpeed()),
-        game.getLabelStyle());
+        MyGame.getInstance().getLabelStyle());
     reloadSpeedLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getReloadSpeed()),
-        game.getLabelStyle());
+        MyGame.getInstance().getLabelStyle());
 
-    newLvlExperience = new Label(String.valueOf(lvl * LVL_EXP_STEP), game.getLabelStyle());
+    newLvlExperience = new Label(String.valueOf(lvl * LVL_EXP_STEP), MyGame.getInstance().getLabelStyle());
     experience = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getExperience()),
-        game.getLabelStyle());
+        MyGame.getInstance().getLabelStyle());
 
-    lvlLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getLvl()), game.getLabelStyle());
+    lvlLabel = new Label(String.valueOf(RpgStatsService.getInstance().getStats().getLvl()),
+        MyGame.getInstance().getLabelStyle());
     lvlLabel.setAlignment(Align.center);
   }
 
   private void createButtons() {
 
-    hpButton = createButton(game.getTextButtonStyle(), ">>", new ClickListener() {
+    hpButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         hpLabel.setText(String.format("%.0f", Double.parseDouble(hpLabel.getText().toString()) + 1));
@@ -137,7 +134,7 @@ public class UpgradeMenu implements Screen {
       }
     });
 
-    dmgButton = createButton(game.getTextButtonStyle(), ">>", new ClickListener() {
+    dmgButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         dmgLabel.setText(String.valueOf(new BigDecimal(
@@ -147,7 +144,7 @@ public class UpgradeMenu implements Screen {
       }
     });
 
-    moveSpeedButton = createButton(game.getTextButtonStyle(), ">>", new ClickListener() {
+    moveSpeedButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         moveSpeedLabel.setText(String.valueOf(new BigDecimal(
@@ -157,7 +154,7 @@ public class UpgradeMenu implements Screen {
       }
     });
 
-    fireSpeedButton = createButton(game.getTextButtonStyle(), ">>", new ClickListener() {
+    fireSpeedButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         fireSpeedLabel.setText(String.valueOf(new BigDecimal(
@@ -167,7 +164,7 @@ public class UpgradeMenu implements Screen {
       }
     });
 
-    reloadSpeedButton = createButton(game.getTextButtonStyle(), ">>", new ClickListener() {
+    reloadSpeedButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         reloadSpeedLabel.setText(String.valueOf(new BigDecimal(
@@ -177,7 +174,7 @@ public class UpgradeMenu implements Screen {
       }
     });
 
-    saveButton = createButton(game.getTextButtonStyle(), "Save",
+    saveButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Save",
         new ClickListener() {
           @Override
           public void clicked(InputEvent event, float x, float y) {
@@ -192,16 +189,16 @@ public class UpgradeMenu implements Screen {
             RpgStatsService.getInstance().getStats().setExperience(Long.parseLong(experience.getText().toString()));
             RpgStatsService.getInstance().getStats().setLvl(lvl);
             RpgStatsService.getInstance().saveStats();
-            game.setScreen(new MainMenu(game));
+            MyGame.getInstance().setScreen(new MainMenu());
           }
         }
     );
 
-    backButton = createButton(game.getTextButtonStyle(), "Back",
+    backButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Back",
         new ClickListener() {
           @Override
           public void clicked(InputEvent event, float x, float y) {
-            game.setScreen(new MainMenu(game));
+            MyGame.getInstance().setScreen(new MainMenu());
           }
         }
     );
@@ -229,7 +226,7 @@ public class UpgradeMenu implements Screen {
     setEnableIncreaseStats(
         Long.parseLong(experience.getText().toString()) > Long.parseLong(newLvlExperience.getText().toString()));
 
-    game.drawStage();
+    MyGame.getInstance().drawStage();
   }
 
   private void setEnableIncreaseStats(boolean b) {

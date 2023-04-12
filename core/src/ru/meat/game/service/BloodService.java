@@ -17,9 +17,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import lombok.Data;
+import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.BloodSpot;
+import ru.meat.game.model.FloatPair;
+import ru.meat.game.model.Bleeding;
 
 @Data
 public class BloodService {
@@ -29,7 +31,6 @@ public class BloodService {
       "blood/spot/2.png",
       "blood/spot/3.png");
 
-  private List<Texture> bloodSpotTextures = new ArrayList<>();
   private static List<String> bigBloodPngName = Arrays.asList(
       "blood/spot/4.png",
       "blood/spot/5.png",
@@ -37,9 +38,7 @@ public class BloodService {
       "blood/spot/7.png");
 
   private static final String bleedAniPath = "blood/ani1/b";
-
-  public final List<Sprite> spots = new ArrayList<>();
-  public final List<BloodSpot> bleeds = new ArrayList<>();
+  public final List<Bleeding> bleeds = new ArrayList<>();
 
 
   private Animation<Texture> bleedAnimation;
@@ -63,7 +62,8 @@ public class BloodService {
         texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
       }
       initializeBleedingAnimation();
-      bloodSpotTextures.add(texture);
+
+      BloodSpot.getBloodSpotTextures().add(texture);
     });
   }
 
@@ -84,7 +84,7 @@ public class BloodService {
       sprite.setPosition(x * WORLD_TO_VIEW - sprite.getWidth() / 2, y * WORLD_TO_VIEW - sprite.getHeight() / 2);
       sprite.setScale(1.5f);
       synchronized (bleeds) {
-        bleeds.add(new BloodSpot(sprite, z));
+        bleeds.add(new Bleeding(sprite, z));
       }
     }).start();
   }
@@ -105,24 +105,11 @@ public class BloodService {
 
   public void drawBleeds(Batch batch) {
     synchronized (bleeds) {
-      for (BloodSpot x : bleeds) {
+      for (Bleeding x : bleeds) {
         x.getSprite().draw(batch);
       }
       bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
           bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
-    }
-  }
-
-  public void createBloodSpot(FloatPair coord) {
-
-  }
-
-  public void drawBloodSpots(Batch batch) {
-    //TODO лагает
-    synchronized (spots) {
-      for (Sprite x : spots) {
-        x.draw(batch);
-      }
     }
   }
 
@@ -132,25 +119,10 @@ public class BloodService {
    * @param coord координаты где создать в мире текстур
    */
   public void createLittleBloodSpot(FloatPair coord) {
-    new Thread(() -> {
-      synchronized (spots) {
-        Sprite sprite = new Sprite(bloodSpotTextures.get(MathUtils.random(0, bloodSpotTextures.size() - 1)));
-
-        sprite.setPosition(coord.getX() - sprite.getWidth() / 2 + MathUtils.random(-bloodDiffusion, +bloodDiffusion),
-            coord.getY() - sprite.getHeight() / 2 - MathUtils.random(-bloodDiffusion, +bloodDiffusion));
-
-        sprite.rotate(MathUtils.random(0, 359));
-
-        sprite.setAlpha(MathUtils.random(0.6f, 1));
-        spots.add(sprite);
-      }
-    }).start();
+    new Thread(() -> MyGame.getInstance().addActor(new BloodSpot(coord))).start();
   }
 
   public void dispose() {
-    synchronized (spots) {
-      spots.clear();
-    }
     synchronized (bleeds) {
       bleeds.clear();
     }
@@ -158,7 +130,7 @@ public class BloodService {
 
   public void update() {
     synchronized (bleeds) {
-      for (BloodSpot x : bleeds) {
+      for (Bleeding x : bleeds) {
         x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
         x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
       }

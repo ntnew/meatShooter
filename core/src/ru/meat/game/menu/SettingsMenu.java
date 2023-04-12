@@ -23,8 +23,6 @@ import ru.meat.game.settings.Settings;
 
 public class SettingsMenu implements Screen {
 
-  final MyGame game;
-
   /**
    * Флаг того, что игра настройки открыты из паузы
    */
@@ -53,12 +51,11 @@ public class SettingsMenu implements Screen {
   private Button saveButton;
   private Preferences preferences;
 
-  public SettingsMenu(final MyGame game, boolean pause) {
-    this.game = game;
+  public SettingsMenu(boolean pause) {
     this.pause = pause;
     preferences = Gdx.app.getPreferences("My Preferences");
 
-    game.initStage();
+    MyGame.getInstance().initStage();
 
     createResolutionBox();
     createButtons();
@@ -75,19 +72,19 @@ public class SettingsMenu implements Screen {
     table.setSize(300, 300);
     table.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 3);
     table.setDebug(DEBUG);
-    Label resolution = new Label("resolution", game.getLabelStyle());
+    Label resolution = new Label("resolution", MyGame.getInstance().getLabelStyle());
     resolution.setAlignment(Align.center);
     table.add(resolution).width(120);
     table.add(prevButton);
     table.add(resolutionBox).width(75);
     table.add(nextButton);
     table.row();
-    table.add(new Label("effect volume", game.getLabelStyle()));
+    table.add(new Label("effect volume", MyGame.getInstance().getLabelStyle()));
     table.add(prevEffVolButton);
     table.add(effectVolumeBox);
     table.add(nextEffVolButton);
     table.row();
-    table.add(new Label("music volume", game.getLabelStyle()));
+    table.add(new Label("music volume", MyGame.getInstance().getLabelStyle()));
     table.add(decreaseMusicVolButton);
     table.add(musicVolumeBox);
     table.add(addMusicVolButton);
@@ -96,18 +93,18 @@ public class SettingsMenu implements Screen {
     table.add();
     table.add(backButton);
 
-    game.getStage().addActor(table);
+    MyGame.getInstance().getStage().addActor(table);
   }
 
   private void createResolutionBox() {
     int screen_width = preferences.getInteger("SCREEN_WIDTH");
     int screen_height = preferences.getInteger("SCREEN_HEIGHT");
-    resolutionBox = new Label(screen_width + "x" + screen_height, game.getLabelStyle());
+    resolutionBox = new Label(screen_width + "x" + screen_height, MyGame.getInstance().getLabelStyle());
     resolutionBox.setAlignment(Align.center);
   }
 
   private void createButtons() {
-    nextButton = createButton(game.getTextButtonStyle(), ">>", new ChangeListener() {
+    nextButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         String s = resolutions.stream().filter(x -> x.equals(resolutionBox.getText().toString())).findFirst()
@@ -120,7 +117,7 @@ public class SettingsMenu implements Screen {
       }
     });
 
-    prevButton = createButton(game.getTextButtonStyle(), "<<", new ChangeListener() {
+    prevButton = createButton(MyGame.getInstance().getTextButtonStyle(), "<<", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         String s = resolutions.stream().filter(x -> x.equals(resolutionBox.getText().toString())).findFirst()
@@ -134,11 +131,11 @@ public class SettingsMenu implements Screen {
     });
 
     effectVolumeBox = new Label(String.format("%.0f", preferences.getFloat("EFFECT_VOLUME") * 100),
-        game.getLabelStyle());
+        MyGame.getInstance().getLabelStyle());
   }
 
   private void createAddEffVolButton() {
-    nextEffVolButton = createButton(game.getTextButtonStyle(), ">>", new ChangeListener() {
+    nextEffVolButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(effectVolumeBox.getText().toString());
@@ -151,7 +148,7 @@ public class SettingsMenu implements Screen {
   }
 
   private void createDecreaseEffVolButton() {
-    prevEffVolButton = createButton(game.getTextButtonStyle(), "<<", new ChangeListener() {
+    prevEffVolButton = createButton(MyGame.getInstance().getTextButtonStyle(), "<<", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(effectVolumeBox.getText().toString());
@@ -165,11 +162,11 @@ public class SettingsMenu implements Screen {
 
   private void createMusicVolumeBox() {
     float effect_volume = preferences.getFloat("MUSIC_VOLUME");
-    musicVolumeBox = new Label(String.format("%.0f", effect_volume * 100), game.getLabelStyle());
+    musicVolumeBox = new Label(String.format("%.0f", effect_volume * 100), MyGame.getInstance().getLabelStyle());
   }
 
   private void createAddMusicVolButton() {
-    addMusicVolButton = createButton(game.getTextButtonStyle(), ">>", new ChangeListener() {
+    addMusicVolButton = createButton(MyGame.getInstance().getTextButtonStyle(), ">>", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(musicVolumeBox.getText().toString());
@@ -184,7 +181,7 @@ public class SettingsMenu implements Screen {
   }
 
   private void createDecreaseMusicVolButton() {
-    decreaseMusicVolButton = createButton(game.getTextButtonStyle(), "<<", new ChangeListener() {
+    decreaseMusicVolButton = createButton(MyGame.getInstance().getTextButtonStyle(), "<<", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         double v = Double.parseDouble(musicVolumeBox.getText().toString());
@@ -199,7 +196,7 @@ public class SettingsMenu implements Screen {
   }
 
   private void createSaveButton() {
-    saveButton = createButton(game.getTextButtonStyle(), "Save", new ClickListener() {
+    saveButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Save", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         String[] xes = resolutionBox.getText().toString().split("x");
@@ -222,23 +219,23 @@ public class SettingsMenu implements Screen {
         preferences.flush();
         Settings.reloadSettings();
         if (pause) {
-          game.setScreen(new PauseMenu(game, game.getGameZone()));
+          MyGame.getInstance().setScreen(new PauseMenu(MyGame.getInstance().getGameZone()));
         } else {
-          game.setScreen(new MainMenu(game));
+          MyGame.getInstance().setScreen(new MainMenu());
         }
       }
     });
 
-    backButton = createButton(game.getTextButtonStyle(), "Back", new ChangeListener() {
+    backButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Back", new ChangeListener() {
       @Override
       public void changed(ChangeEvent event, Actor actor) {
         if (AudioService.getInstance().getCurrentMusic() != null) {
           AudioService.getInstance().getCurrentMusic().setVolume(preferences.getFloat("MUSIC_VOLUME"));
         }
         if (pause) {
-          game.setScreen(new PauseMenu(game, game.getGameZone()));
+          MyGame.getInstance().setScreen(new PauseMenu(MyGame.getInstance().getGameZone()));
         } else {
-          game.setScreen(new MainMenu(game));
+          MyGame.getInstance().setScreen(new MainMenu());
         }
       }
     });
@@ -252,7 +249,7 @@ public class SettingsMenu implements Screen {
   @Override
   public void render(float delta) {
     ScreenUtils.clear(0, 0, 0, 1);
-    game.drawStage();
+    MyGame.getInstance().drawStage();
   }
 
   @Override

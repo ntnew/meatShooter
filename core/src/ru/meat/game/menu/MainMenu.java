@@ -5,21 +5,16 @@ import static ru.meat.game.utils.GDXUtils.createButton;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.Table.Debug;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.meat.game.MyGame;
 import ru.meat.game.service.AudioService;
 
 public class MainMenu implements Screen {
 
-  final MyGame game;
   private Table table;
   private Button newGameButton;
   private Button upgradeButton;
@@ -28,10 +23,9 @@ public class MainMenu implements Screen {
 
   private Button exitButton;
 
-  public MainMenu(final MyGame game) {
-    this.game = game;
+  public MainMenu() {
 
-    game.initStage();
+    MyGame.getInstance().initStage();
 
     createButtons();
 
@@ -47,32 +41,32 @@ public class MainMenu implements Screen {
     table.row();
     table.add(exitButton).width(100).height(30);
 
-    game.getStage().addActor(table);
+    MyGame.getInstance().addActor(table);
   }
 
   private void createButtons() {
-    newGameButton = createButton(game.getTextButtonStyle(), "New Game", new ClickListener() {
+    newGameButton = createButton(MyGame.getInstance().getTextButtonStyle(), "New Game", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(new MapSelectorMenu(game));
+        MyGame.getInstance().setScreen(new MapSelectorMenu());
       }
     });
 
-    upgradeButton = createButton(game.getTextButtonStyle(), "Upgrade", new ClickListener() {
+    upgradeButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Upgrade", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(new UpgradeMenu(game));
+        MyGame.getInstance().setScreen(new UpgradeMenu());
       }
     });
 
-    optionsButton = createButton(game.getTextButtonStyle(), "Options", new ClickListener() {
+    optionsButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Options", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(new SettingsMenu(game, false));
+        MyGame.getInstance().setScreen(new SettingsMenu(false));
       }
     });
 
-    exitButton = createButton(game.getTextButtonStyle(), "Exit", new ClickListener() {
+    exitButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Exit", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
         Gdx.app.exit();
@@ -90,7 +84,7 @@ public class MainMenu implements Screen {
     AudioService.getInstance().playMainMenuMusic();
     ScreenUtils.clear(0, 0, 0, 1);
 
-    game.drawStage();
+    MyGame.getInstance().drawStage();
   }
 
   @Override

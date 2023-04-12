@@ -1,16 +1,22 @@
 package ru.meat.game.model;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import ru.meat.game.model.FloatPair;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
 
-@Data
-@AllArgsConstructor
-public class BloodSpot {
+public class BloodSpot extends Image {
 
-  private Sprite sprite;
+  @Getter
+  private static List<Texture> bloodSpotTextures = new ArrayList<>();
 
-  private float stateTime;
+  public BloodSpot(FloatPair coords) {
+    super(bloodSpotTextures.get(MathUtils.random(0, bloodSpotTextures.size() - 1)));
+    this.setPosition(coords.getX(), coords.getY());
+    this.setOrigin(this.getWidth() / 2, this.getHeight() / 2);
+    this.setRotation(MathUtils.random(0, 359));
+    this.setColor(1, 1, 1, MathUtils.random(0.6f, 1));
+  }
 }

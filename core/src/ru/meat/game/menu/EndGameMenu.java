@@ -22,7 +22,6 @@ import ru.meat.game.service.AudioService;
 @Data
 public class EndGameMenu implements Screen {
 
-  final MyGame game;
   private Table table;
 
   private Button againButton;
@@ -31,9 +30,9 @@ public class EndGameMenu implements Screen {
 
   private final int selectedMap;
 
-  public EndGameMenu(MyGame game, int rewardPoints, int map, LocalDateTime fromDateTime, int kills) {
-    this.game = game;
-    game.initStage();
+  public EndGameMenu( int rewardPoints, int map, LocalDateTime fromDateTime, int kills) {
+
+    MyGame.getInstance().initStage();
 
     createButtons();
 
@@ -44,25 +43,25 @@ public class EndGameMenu implements Screen {
     table.setSize(300, 300);
     table.setPosition(Gdx.graphics.getWidth() / 3, Gdx.graphics.getHeight() / 3);
 
-    Label killsLabel = new Label("kills", game.getLabelStyle());
+    Label killsLabel = new Label("kills", MyGame.getInstance().getLabelStyle());
     killsLabel.setAlignment(Align.center);
-    Label labelCount = new Label(String.valueOf(kills), game.getLabelStyle());
+    Label labelCount = new Label(String.valueOf(kills), MyGame.getInstance().getLabelStyle());
     labelCount.setAlignment(Align.center);
     table.add(killsLabel).width(100).height(30);
     table.add(labelCount).width(100).height(30);
     table.row();
 
-    Label pointsLabel = new Label("points", game.getLabelStyle());
+    Label pointsLabel = new Label("points", MyGame.getInstance().getLabelStyle());
     pointsLabel.setAlignment(Align.center);
-    Label pointsLabel2 = new Label(String.valueOf(rewardPoints), game.getLabelStyle());
+    Label pointsLabel2 = new Label(String.valueOf(rewardPoints), MyGame.getInstance().getLabelStyle());
     pointsLabel2.setAlignment(Align.center);
     table.add(pointsLabel).width(100).height(30);
     table.add(pointsLabel2).width(100).height(30);
     table.row();
 
-    Label timeLabel = new Label("time", game.getLabelStyle());
+    Label timeLabel = new Label("time", MyGame.getInstance().getLabelStyle());
     timeLabel.setAlignment(Align.center);
-    Label timeLabel2 = new Label(getTotalGameTime(fromDateTime), game.getLabelStyle());
+    Label timeLabel2 = new Label(getTotalGameTime(fromDateTime), MyGame.getInstance().getLabelStyle());
     timeLabel2.setAlignment(Align.center);
     table.add(timeLabel).width(100).height(30);
     table.add(timeLabel2).width(100).height(30);
@@ -70,7 +69,7 @@ public class EndGameMenu implements Screen {
 
     table.add(againButton).width(100).height(30);
     table.add(toMenuButton).width(100).height(30);
-    game.getStage().addActor(table);
+    MyGame.getInstance().addActor(table);
   }
 
   private String getTotalGameTime(LocalDateTime fromDateTime) {
@@ -103,19 +102,19 @@ public class EndGameMenu implements Screen {
 
   private void createButtons() {
 
-    againButton = createButton(game.getTextButtonStyle(), "Again", new ClickListener() {
+    againButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Again", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(new DeathMatch(selectedMap, game));
+        MyGame.getInstance().setScreen(new DeathMatch(selectedMap));
         AudioService.getInstance().initSteps();
         AudioService.getInstance().smoothStopMusic();
       }
     });
 
-    toMenuButton = createButton(game.getTextButtonStyle(), "Menu", new ClickListener() {
+    toMenuButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Menu", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        game.setScreen(new MainMenu(game));
+        MyGame.getInstance().setScreen(new MainMenu());
       }
     });
   }
@@ -130,7 +129,7 @@ public class EndGameMenu implements Screen {
     AudioService.getInstance().playMainMenuMusic();
     ScreenUtils.clear(0, 0, 0, 1);
 
-    game.drawStage();
+    MyGame.getInstance().drawStage();
   }
 
   @Override

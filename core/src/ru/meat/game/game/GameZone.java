@@ -2,7 +2,6 @@ package ru.meat.game.game;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.MOBILE;
-import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -23,6 +22,7 @@ import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.EndGameMenu;
 import ru.meat.game.model.EnemyStatus;
+import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
@@ -30,15 +30,12 @@ import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.FaderService;
 import ru.meat.game.service.MapService;
-import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.service.RpgStatsService;
 
 @Data
 public abstract class GameZone implements Screen {
 
   protected MapService mapService;
-
-  protected final MyGame game;
 
   protected EnemyService enemyService;
 
@@ -60,11 +57,13 @@ public abstract class GameZone implements Screen {
 
   private ThreadForZoom threadForZoom;
 
+  PerformanceCounter main = new PerformanceCounter("Main");
+  PerformanceCounter secondary = new PerformanceCounter("secondary");
 
-  public GameZone(MyGame game, int map) {
-    this.game = game;
+  private final int map;
 
-    Gdx.input.setInputProcessor(new MyInputProcessor(this.game, this));
+  public GameZone(int map) {
+    this.map = map;
 
     //создание камеры
     camera = new OrthographicCamera();
@@ -91,6 +90,10 @@ public abstract class GameZone implements Screen {
     polyBatch = new PolygonSpriteBatch();
 
     new PlayerControlHandlerThread().start();
+
+    MyGame.getInstance().initGameStage(camera);
+    MyGame.getInstance().addActor(MapService.initMap(map));
+    Gdx.input.setInputProcessor(new MyInputProcessor(this));
   }
 
   @Override
@@ -128,12 +131,15 @@ public abstract class GameZone implements Screen {
     enemyService.actionEnemies(PlayerService.getInstance().getBodyPosX(), PlayerService.getInstance().getBodyPosY());
 
     //рисовать текстуры
-    spriteBatch.setProjectionMatrix(camera.combined);
-    polyBatch.setProjectionMatrix(camera.combined);
-    spriteBatch.begin();
-    mapService.draw(spriteBatch);
-    BloodService.getInstance().drawBloodSpots(spriteBatch);
 
+    //4 около 50%
+
+    polyBatch.setProjectionMatrix(camera.combined);
+
+    MyGame.getInstance().drawStage();
+
+    spriteBatch.setProjectionMatrix(camera.combined);
+    spriteBatch.begin();
     BloodService.getInstance().drawBleeds(spriteBatch);
     spriteBatch.end();
 
@@ -174,6 +180,10 @@ public abstract class GameZone implements Screen {
         endGameSession();
       }
     }
+    Box2dWorld.getInstance().update();
+
+//    main.stop();
+//    main.tick();
   }
 
   /**
@@ -227,7 +237,7 @@ public abstract class GameZone implements Screen {
 
   public void resumeGame() {
     GUI.getInstance().setAimCursor();
-    Gdx.input.setInputProcessor(new MyInputProcessor(this.game, this));
+    Gdx.input.setInputProcessor(new MyInputProcessor(this));
   }
 
   public void endGameSession() {
@@ -239,9 +249,12 @@ public abstract class GameZone implements Screen {
     PlayerService.endGameSession();
     AudioService.getInstance().smoothStopMusic();
 
-    this.game.setScreen(
-        new EndGameMenu(game, enemyService.getRewardPointCount().get(), mapService.getMapInfo().getPosition(),
-            beginDate, enemyService.getKillCount().get()));
+    MyGame.getInstance().setScreen(
+        new EndGameMenu(enemyService.getRewardPointCount().get(),
+            map,
+            beginDate,
+            enemyService.getKillCount().get()));
+
     Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
 
     Box2dWorld.dispose();

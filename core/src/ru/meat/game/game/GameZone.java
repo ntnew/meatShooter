@@ -72,9 +72,6 @@ public abstract class GameZone implements Screen {
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
     camera.update();
 
-    this.mapService = new MapService();
-    mapService.initMap(map);
-
     GUI.getInstance().initFullHp();
     GUI.getInstance().setAimCursor();
 

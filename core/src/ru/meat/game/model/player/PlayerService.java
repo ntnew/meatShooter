@@ -30,6 +30,10 @@ public class PlayerService {
 
   private Float finalSpeed;
 
+  private volatile Float xOffset = 0f;
+
+  private volatile Float yOffset = 0f;
+
   public static PlayerService getInstance() {
     if (instance == null) {
       instance = new PlayerService();
@@ -201,36 +205,32 @@ public class PlayerService {
 
   /**
    * обработать нажатие на клавиши ходьбы
-   *
-   * @param camera камера отрисовки текстур
    */
-  public void handleMoveKey(OrthographicCamera camera) {
-    if (!player.isDead()) {
-      handleMovingStatus();
+  public void handleMoveKey() {
+    handleMovingStatus();
 
-      float x = 0;
-      float y = 0;
-
-      if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-        x = -getSpeed();
-      }
-
-      if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-        y = getSpeed();
-      }
-
-      if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-        y = -getSpeed();
-      }
-
-      if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-        x = getSpeed();
-      }
-
-      player.getBody().setTransform(getBodyPosX() + x / WORLD_TO_VIEW, getBodyPosY() + y / WORLD_TO_VIEW, 0);
-
-      handleCameraTransform(camera, x, y);
+    if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+      xOffset = -getSpeed();
     }
+
+    if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+      yOffset = getSpeed();
+    }
+
+    if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+      yOffset = -getSpeed();
+    }
+
+    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+      xOffset = getSpeed();
+    }
+  }
+
+  /**
+   * Переместить игрока на свиг х и у
+   */
+  public void transformPlayerBody() {
+    player.getBody().setTransform(getBodyPosX() + xOffset / WORLD_TO_VIEW, getBodyPosY() + yOffset / WORLD_TO_VIEW, 0);
   }
 
   /**
@@ -294,19 +294,29 @@ public class PlayerService {
     }
   }
 
-  private void handleCameraTransform(OrthographicCamera camera, float x, float y) {
+  public void handleCameraTransform(OrthographicCamera camera) {
     //Держит камеру примерно по центру игрока
     OrthographicCamera cameraBox2D = Box2dWorld.getInstance().getCameraBox2D();
-    if ((getBodyPosX() > cameraBox2D.position.x && x < 0) || (getBodyPosX() < cameraBox2D.position.x && x > 0)) {
-      x = 0;
+    float x1;
+    float y1;
+    if ((getBodyPosX() > cameraBox2D.position.x && xOffset < 0) || (getBodyPosX() < cameraBox2D.position.x
+        && xOffset > 0)) {
+      x1 = 0;
+    } else {
+      x1 = xOffset;
     }
 
-    if ((getBodyPosY() > cameraBox2D.position.y && y < 0) || (getBodyPosY() < cameraBox2D.position.y && y > 0)) {
-      y = 0;
+    if ((getBodyPosY() > cameraBox2D.position.y && yOffset < 0) || (getBodyPosY() < cameraBox2D.position.y
+        && yOffset > 0)) {
+      y1 = 0;
+    } else {
+      y1 = yOffset;
     }
 
-    camera.translate(x, y);
-    cameraBox2D.translate(x / WORLD_TO_VIEW, y / WORLD_TO_VIEW);
+    camera.translate(x1, y1);
+    cameraBox2D.translate(x1 / WORLD_TO_VIEW, y1 / WORLD_TO_VIEW);
+    xOffset = 0f;
+    yOffset = 0f;
   }
 
 

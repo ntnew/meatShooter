@@ -2,6 +2,7 @@ package ru.meat.game.game;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.MOBILE;
+import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -22,6 +23,7 @@ import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.EndGameMenu;
 import ru.meat.game.model.EnemyStatus;
+import ru.meat.game.model.maps.Map;
 import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.service.AudioService;
@@ -34,8 +36,6 @@ import ru.meat.game.service.RpgStatsService;
 
 @Data
 public abstract class GameZone implements Screen {
-
-  protected MapService mapService;
 
   protected EnemyService enemyService;
 
@@ -60,11 +60,9 @@ public abstract class GameZone implements Screen {
 //  PerformanceCounter main = new PerformanceCounter("Main");
 //  PerformanceCounter secondary = new PerformanceCounter("secondary");
 
-  private final int map;
+  private final Map map;
 
   public GameZone(int map) {
-    this.map = map;
-
     //создание камеры
     camera = new OrthographicCamera();
     camera.zoom = MAIN_ZOOM;
@@ -89,7 +87,8 @@ public abstract class GameZone implements Screen {
     new PlayerControlHandlerThread().start();
 
     MyGame.getInstance().initGameStage(camera);
-    MyGame.getInstance().addActor(MapService.initMap(map));
+    this.map = MapService.initMap(map);
+    MyGame.getInstance().addActor(this.map);
     Gdx.input.setInputProcessor(new MyInputProcessor(this));
   }
 
@@ -108,7 +107,6 @@ public abstract class GameZone implements Screen {
 
 
     camera.update();
-    Box2dWorld.getInstance().update();
 
     BloodService.getInstance().update();
     PlayerService.getInstance().updateState();
@@ -248,7 +246,7 @@ public abstract class GameZone implements Screen {
 
     MyGame.getInstance().setScreen(
         new EndGameMenu(enemyService.getRewardPointCount().get(),
-            map,
+            this.map.getMapPos(),
             beginDate,
             enemyService.getKillCount().get()));
 
@@ -270,8 +268,7 @@ public abstract class GameZone implements Screen {
 
     Vector2 camMin = new Vector2(camera.viewportWidth / 2, camera.viewportHeight / 2);
     camMin.scl(camera.zoom); //bring to center and scale by the zoom level
-    Vector2 camMax = new Vector2(mapService.getCurrentMap().getMainTexture().getWidth(),
-        mapService.getCurrentMap().getMainTexture().getHeight());
+    Vector2 camMax = new Vector2(this.map.getWidth(), this.map.getHeight());
     camMax.sub(camMin); //bring to center
 
     //keep camera within borders

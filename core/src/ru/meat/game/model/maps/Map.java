@@ -12,6 +12,8 @@ import ru.meat.game.model.FloatPair;
 @NoArgsConstructor
 public class Map extends Image {
 
+  private int mapPos;
+
   public Map(FloatPair coords, Texture texture) {
     super(texture);
     texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);

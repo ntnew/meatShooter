@@ -115,7 +115,10 @@ public class BulletService {
     def.type = BodyType.DynamicBody;
     def.position.set(x, y);
     if (Box2dWorld.getInstance() != null) {
-      Body box = Box2dWorld.getInstance().getWorld().createBody(def);
+      Body box;
+      synchronized (Box2dWorld.getInstance().getWorld()) {
+         box = Box2dWorld.getInstance().getWorld().createBody(def);
+      }
 
       CircleShape circle = new CircleShape();
       circle.setRadius(bulletRadius * MAIN_ZOOM / Constants.WORLD_TO_VIEW);

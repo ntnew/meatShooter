@@ -200,7 +200,7 @@ public class BulletService {
 
     enemyBullets.parallelStream().forEach(b -> {
       Array<Fixture> fixtureList = b.getBody().getFixtureList();
-      if (!fixtureList.isEmpty()) {
+      if (!fixtureList.isEmpty() && fixtureList.get(0).getUserData() instanceof BulletBodyUserData) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
         if (userData.isNeedDispose() || TimeUtils.timeSinceMillis(b.getBornDate()) > 6000) {
           createExplosionAndDeleteBody(b);

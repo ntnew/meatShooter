@@ -1,5 +1,6 @@
 package ru.meat.game.model.weapons;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import lombok.AllArgsConstructor;
@@ -88,7 +89,7 @@ public class Weapon {
   /**
    * Флаг, идёт ли перезарядка
    */
-  private boolean reloading;
+  private volatile boolean reloading;
 
   /**
    * множитель скорости передвижения
@@ -151,7 +152,7 @@ public class Weapon {
   public void shootMobile(float fromX, float fromY, float screenX, float screenY, boolean playerRunning) {
     if (!reloading && fireCount < clipSize) {
       fireCount += 1;
-      AudioService.getInstance().playShootSound(shootSound);
+      Gdx.app.postRunnable(() -> AudioService.getInstance().playShootSound(shootSound));
       createShoot(fromX, fromY, screenX, screenY, playerRunning);
     } else if (!reloading) {
       //произвести перезарядку оружия
@@ -166,7 +167,7 @@ public class Weapon {
     @Override
     public void run() {
       if (preReloadSound != null) {
-        AudioService.getInstance().playReloadSound(preReloadSound);
+        Gdx.app.postRunnable(() -> AudioService.getInstance().playReloadSound(preReloadSound));
         Thread.sleep(preReloadDuration);
       }
 
@@ -174,14 +175,15 @@ public class Weapon {
           reloadDuration * 1000L / RpgStatsService.getInstance().getStats().getReloadSpeed());
 
       while (fireCount > 0) {
-        AudioService.getInstance().playReloadSound(reloadSound);
+        Gdx.app.postRunnable(() -> AudioService.getInstance().playReloadSound(reloadSound));
         Thread.sleep(sleepDur);
         fireCount -= reloadBulletPerTick;
       }
 
       fireCount = Math.max(fireCount, 0);
       if (postReloadSound != null) {
-        AudioService.getInstance().playReloadSound(postReloadSound);
+        Gdx.app.postRunnable(() -> AudioService.getInstance().playReloadSound(postReloadSound));
+        Thread.sleep(50);
       }
       reloading = false;
     }

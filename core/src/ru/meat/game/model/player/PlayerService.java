@@ -45,7 +45,7 @@ public class PlayerService {
 
   private float feetRotationAngle = 0;
 
-  private float modelFrontAngle = 0;
+  private volatile float modelFrontAngle = 0;
   private Long weaponChangeLock = 0L;
 
   public PlayerService() {
@@ -255,7 +255,7 @@ public class PlayerService {
 
           player.getBody().setTransform(getBodyPosX() + x / WORLD_TO_VIEW, getBodyPosY() + y / WORLD_TO_VIEW, 0);
 
-          handleCameraTransform(camera, x, y);
+          handleCameraTransform(camera);
         } else {
           changeFeetStatus(CharacterFeetStatus.IDLE);
         }

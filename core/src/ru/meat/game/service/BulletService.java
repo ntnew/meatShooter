@@ -29,7 +29,7 @@ import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.weapons.Bullet;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 import ru.meat.game.model.weapons.BulletType;
-import ru.meat.game.model.weapons.explosions.Explosions;
+import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.settings.Filters;
 import ru.meat.game.utils.GDXUtils;
 import ru.meat.game.settings.Constants;
@@ -237,7 +237,7 @@ public class BulletService {
    */
   private void createExplosionAndDeleteBody(Bullet b) {
     try {
-      Explosions.getInstance().createAcidExplosion(
+      ExplosionsService.getInstance().createAcidExplosion(
           new FloatPair(b.getBody().getPosition().x * WORLD_TO_VIEW,
               b.getBody().getPosition().y * WORLD_TO_VIEW));
       deleteBulletBody(b);

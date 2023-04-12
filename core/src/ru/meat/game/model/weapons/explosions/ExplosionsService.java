@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -29,7 +28,7 @@ import ru.meat.game.settings.Filters;
 import ru.meat.game.utils.GDXUtils;
 
 @Data
-public class Explosions {
+public class ExplosionsService {
 
   private final List<Explosion> explosions = new ArrayList<>();
 
@@ -46,17 +45,17 @@ public class Explosions {
 
   private static final int FRAME_COLS = 8, FRAME_ROWS = 6;
 
-  private static Explosions instance;
+  private static ExplosionsService instance;
   private final static long explosionLifeTime = 600;
 
-  public static Explosions getInstance() {
+  public static ExplosionsService getInstance() {
     if (instance == null) {
-      instance = new Explosions();
+      instance = new ExplosionsService();
     }
     return instance;
   }
 
-  public Explosions() {
+  public ExplosionsService() {
     fireAnimationSheet = LoaderManager.getInstance().get("ani/explosion.png");
     fireAnimationSheet.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
 
@@ -93,13 +92,12 @@ public class Explosions {
   }
 
   public void createFireExplosion(FloatPair pos, float damage) {
-    AudioService.getInstance().playExplosionSound();
-
     ExplosionBodyUserData explosionBodyUserData = new ExplosionBodyUserData(UUID.randomUUID(), TimeUtils.millis());
     explosionBodyUserData.setDamage(damage);
     explosionBodyUserData.setName("explosion");
 
     Gdx.app.postRunnable(() -> {
+      AudioService.getInstance().playExplosionSound();
       explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359), ExplosionType.FIRE, TimeUtils.millis(), 12));
       Body body = GDXUtils.createCircleForModel(12 / MAIN_ZOOM, 100, explosionBodyUserData, pos.getX(), pos.getY(),
           true);

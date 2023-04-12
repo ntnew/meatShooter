@@ -22,9 +22,8 @@ import ru.meat.game.Box2dWorld;
 import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.EndGameMenu;
-import ru.meat.game.menu.PauseMenu;
 import ru.meat.game.model.EnemyStatus;
-import ru.meat.game.model.weapons.explosions.Explosions;
+import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.service.BloodService;
 import ru.meat.game.service.BulletService;
@@ -152,7 +151,8 @@ public abstract class GameZone implements Screen {
     }
     polyBatch.end();
 
-    Explosions.getInstance().drawExplosions(camera);
+//5 статически, не увеличивается
+    ExplosionsService.getInstance().drawExplosions(camera);
 
     Box2dWorld.getInstance().render();
 
@@ -247,7 +247,7 @@ public abstract class GameZone implements Screen {
     Box2dWorld.dispose();
     BulletService.dispose();
     BloodService.getInstance().dispose();
-    Explosions.getInstance().dispose();
+    ExplosionsService.getInstance().dispose();
   }
 
 

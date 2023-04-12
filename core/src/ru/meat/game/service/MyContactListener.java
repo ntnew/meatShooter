@@ -16,7 +16,7 @@ import ru.meat.game.model.enemies.EnemyBodyUserData;
 import ru.meat.game.model.weapons.BulletBodyUserData;
 import ru.meat.game.model.weapons.BulletType;
 import ru.meat.game.model.weapons.explosions.ExplosionBodyUserData;
-import ru.meat.game.model.weapons.explosions.Explosions;
+import ru.meat.game.model.weapons.explosions.ExplosionsService;
 
 
 @AllArgsConstructor
@@ -52,7 +52,7 @@ public class MyContactListener implements ContactListener {
   }
 
   private void contactPlayerWithAcid(Fixture fa, Fixture fb) {
-    Explosions.getInstance().createAcidExplosion(
+    ExplosionsService.getInstance().createAcidExplosion(
         new FloatPair(fb.getBody().getPosition().x * WORLD_TO_VIEW, fb.getBody().getPosition().y * WORLD_TO_VIEW));
     BulletBodyUserData bulletBodyUserData = (BulletBodyUserData) fb.getUserData();
     bulletBodyUserData.setNeedDispose(true);
@@ -112,7 +112,7 @@ public class MyContactListener implements ContactListener {
   }
 
   private void createExplosion(FloatPair floatPair, float damage) {
-    Explosions.getInstance().createFireExplosion(floatPair, damage);
+    ExplosionsService.getInstance().createFireExplosion(floatPair, damage);
   }
 
   private void setDamageToEnemyFromBullet(Fixture fa, Fixture fb) {

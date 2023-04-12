@@ -7,7 +7,6 @@ import static ru.meat.game.utils.GDXUtils.createButton;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
@@ -17,14 +16,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import ru.meat.game.game.DeathMatch;
 import ru.meat.game.MyGame;
-import ru.meat.game.gui.GUI;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.maps.Maps;
-import ru.meat.game.model.player.PlayerAnimationFactory;
-import ru.meat.game.model.weapons.explosions.Explosions;
+import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.service.AudioService;
-import ru.meat.game.service.BloodService;
 import ru.meat.game.service.BulletService;
 
 public class MapSelectorMenu implements Screen {
@@ -59,7 +55,7 @@ public class MapSelectorMenu implements Screen {
     LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, TEXTURE_PARAMETERS);
     LoaderManager.getInstance().load("Bullet1.png", Texture.class, TEXTURE_PARAMETERS);
     LoaderManager.getInstance().load("GBullet.png", Texture.class, TEXTURE_PARAMETERS);
-    Explosions.initResources();
+    ExplosionsService.initResources();
     BulletService.initResources();
     EnemiesAnimation.loadResources();
   }

@@ -101,9 +101,8 @@ public abstract class GameZone implements Screen {
   public void render(float delta) {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     AudioService.getInstance().playGameMusic();
-    if (TimeUtils.timeSinceMillis(comparatorTime) > 4000) {
-      sortEnemies();
-    }
+
+    sortEnemies();
 
 
     camera.update();
@@ -185,17 +184,10 @@ public abstract class GameZone implements Screen {
    * Остортировать врагов, чтобы сначала рисовались трупы
    */
   private void sortEnemies() {
-    comparatorTime = TimeUtils.millis();
-    enemyService.setEnemies(enemyService.getEnemies().parallelStream().sorted((x, y) -> {
-      if (x.getStatus().equals(EnemyStatus.DIED) && !y.getStatus().equals(EnemyStatus.DIED)) {
-        return -1;
-      } else if ((x.getStatus().equals(EnemyStatus.DIED) && y.getStatus().equals(EnemyStatus.DIED))
-          || (!x.getStatus().equals(EnemyStatus.DIED) && !y.getStatus().equals(EnemyStatus.DIED))) {
-        return 0;
-      } else {
-        return 1;
-      }
-    }).collect(Collectors.toList()));
+    if (TimeUtils.timeSinceMillis(comparatorTime) > 2000) {
+      comparatorTime = TimeUtils.millis();
+      enemyService.sortEnemies();
+    }
   }
 
   /**

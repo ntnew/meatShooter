@@ -61,18 +61,19 @@ public class DeathMatch extends GameZone {
 //            EnemyFactory.createScorpionBoss(
 //                500,
 //               500));
+
       if (random1 > 30) {
-        enemyService.getEnemies().add(
+        enemyService.addEnemy(
             EnemyFactory.createLittleBug(
                 MathUtils.random(xBound1, xBound2),
                 MathUtils.random(yBound1, yBound2)));
       } else  if (random1 > 15 && random1 <30){
-        enemyService.getEnemies().add(
+        enemyService.addEnemy(
             EnemyFactory.createSpider(
                 MathUtils.random(xBound1, xBound2),
                 MathUtils.random(yBound1, yBound2)));
       } else {
-        enemyService.getEnemies().add(
+        enemyService.addEnemy(
             EnemyFactory.createBlackWidow(
                 MathUtils.random(xBound1, xBound2),
                 MathUtils.random(yBound1, yBound2)));

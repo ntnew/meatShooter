@@ -24,8 +24,7 @@ import ru.meat.game.utils.GDXUtils;
 public class EnemyService {
 
   @Getter
-  @Setter
-  private List<Enemy> enemies = new ArrayList<>();
+  private final List<Enemy> enemies = new ArrayList<>();
   @Getter
   private final AtomicInteger rewardPointCount = new AtomicInteger(0);
   @Getter
@@ -58,32 +57,33 @@ public class EnemyService {
    * @param posY y координата игрока
    */
   public void actionEnemies(float posX, float posY) {
-    for (Enemy enemy : enemies) {
-      enemy.getState().apply(enemy.getSkeleton());
-      enemy.getSkeleton().updateWorldTransform();
+    synchronized (enemies) {
+      for (Enemy enemy : enemies) {
+        enemy.getState().apply(enemy.getSkeleton());
+        enemy.getSkeleton().updateWorldTransform();
 
-      if (!enemy.getStatus().equals(EnemyStatus.IDLE)) {
-        enemy.getState().update(Gdx.graphics.getDeltaTime());
-      }
+        if (!enemy.getStatus().equals(EnemyStatus.IDLE)) {
+          enemy.getState().update(Gdx.graphics.getDeltaTime());
+        }
 
-
-      if (enemy.getHp() <= 0 && !enemy.getStatus().equals(EnemyStatus.DIED)) {
-        enemy.setStatus(EnemyStatus.DIED);
-        enemy.getBody().setActive(false);
-        enemy.getState().setAnimation(0, "dead", false);
-      }
-      if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
-        enemy.getBody().setAwake(true);
-        updateEnemyHp(enemy);
-        updateEnemyPos(enemy);
-        enemy.doSomething(posX, posY);
-      } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
-        Box2dWorld.getInstance().getWorld().destroyBody(enemy.getBody());
-        enemy.setBody(null);
-        new ThreadForTransparency(enemy).start();
-        AudioService.getInstance().playEnemyDie();
-        rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
-        killCount.set(killCount.get() + 1);
+        if (enemy.getHp() <= 0 && !enemy.getStatus().equals(EnemyStatus.DIED)) {
+          enemy.setStatus(EnemyStatus.DIED);
+          enemy.getBody().setActive(false);
+          enemy.getState().setAnimation(0, "dead", false);
+        }
+        if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
+          enemy.getBody().setAwake(true);
+          updateEnemyHp(enemy);
+          updateEnemyPos(enemy);
+          enemy.doSomething(posX, posY);
+        } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
+          Box2dWorld.getInstance().getWorld().destroyBody(enemy.getBody());
+          enemy.setBody(null);
+          new ThreadForTransparency(enemy).start();
+          AudioService.getInstance().playEnemyDie();
+          rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
+          killCount.set(killCount.get() + 1);
+        }
       }
     }
   }
@@ -94,13 +94,40 @@ public class EnemyService {
   }
 
   public void drawEnemies(Batch spriteBatch, SkeletonRenderer renderer) {
-    enemies.forEach(enemy -> drawSpineAni(spriteBatch, enemy, renderer));
+    synchronized (enemies) {
+      for (Enemy enemy : enemies) {
+        drawSpineAni(spriteBatch, enemy, renderer);
+      }
+    }
   }
 
   private void drawSpineAni(Batch batch, Enemy enemy, SkeletonRenderer renderer) {
     enemy.getSkeleton().getColor().a = enemy.getTransparency();
     enemy.getSkeleton().setPosition(enemy.getPosX() * WORLD_TO_VIEW, enemy.getPosY() * WORLD_TO_VIEW);
     renderer.draw(batch, enemy.getSkeleton());
+  }
+
+  public void sortEnemies() {
+    new Thread(() -> {
+      synchronized (enemies) {
+        enemies.sort((x, y) -> {
+          if (x.getStatus().equals(EnemyStatus.DIED) && !y.getStatus().equals(EnemyStatus.DIED)) {
+            return -1;
+          } else if ((x.getStatus().equals(EnemyStatus.DIED) && y.getStatus().equals(EnemyStatus.DIED))
+              || (!x.getStatus().equals(EnemyStatus.DIED) && !y.getStatus().equals(EnemyStatus.DIED))) {
+            return 0;
+          } else {
+            return 1;
+          }
+        });
+      }
+    }).start();
+  }
+
+  public void addEnemy(Enemy enemy) {
+    synchronized (enemies) {
+      enemies.add(enemy);
+    }
   }
 
   class ThreadForTransparency extends Thread {

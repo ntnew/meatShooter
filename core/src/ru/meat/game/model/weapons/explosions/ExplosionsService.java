@@ -119,7 +119,7 @@ public class ExplosionsService {
         if (TimeUtils.timeSinceMillis(userData.getBornDate()) > explosionLifeTime) {
           try {
             b.setActive(false);
-            Box2dWorld.getInstance().getWorld().destroyBody(b);
+            Box2dWorld.getInstance().destroyBody(b);
           } catch (Exception e) {
 
           }

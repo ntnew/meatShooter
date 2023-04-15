@@ -2,6 +2,7 @@ package ru.meat.game.model.enemies.scripts;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.TimeUtils;
 import java.util.function.BiFunction;
 import ru.meat.game.Box2dWorld;
@@ -36,10 +37,11 @@ public class BlackWidowScripts {
       if (enemy.getNeedCreateBullet() && TimeUtils.timeSinceMillis(enemy.getTimestampFromAttackBegin()) > 300) {
         enemy.setNeedCreateBullet(false);
         if (enemy.getBody() != null && Box2dWorld.getInstance() != null) {
-          BulletService.getInstance().createEnemyBullet(
-              enemy.getBody().getPosition().x, enemy.getBody().getPosition().y,
-              playerPos.getX(), playerPos.getY(), 0.2f, 40, 40 / MAIN_ZOOM, BulletType.ENEMY_COMMON, 0.25f
-          );
+          Gdx.app.postRunnable(() ->
+              BulletService.getInstance().createEnemyBullet(
+                  enemy.getBody().getPosition().x, enemy.getBody().getPosition().y,
+                  playerPos.getX(), playerPos.getY(), 0.2f, 40, 40 / MAIN_ZOOM, BulletType.ENEMY_COMMON, 0.25f
+              ));
         }
       }
 
@@ -53,8 +55,11 @@ public class BlackWidowScripts {
         float cos = catetPrilezjaschiy / gip;
         enemy.setSpeedY(sin * enemy.getSpeed());
         enemy.setSpeedX(cos * enemy.getSpeed());
-        enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
-            enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
+        synchronized (enemy.getBody()) {
+          Gdx.app.postRunnable(() ->
+              enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
+                  enemy.getSpeedY() + enemy.getBody().getPosition().y, 0));
+        }
       }
       return true;
     });

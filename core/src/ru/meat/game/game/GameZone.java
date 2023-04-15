@@ -1,5 +1,6 @@
 package ru.meat.game.game;
 
+import static ru.meat.game.settings.Constants.DEBUG;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.MOBILE;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
@@ -84,7 +85,7 @@ public abstract class GameZone implements Screen {
 
     polyBatch = new PolygonSpriteBatch();
 
-    new PlayerControlHandlerThread().start();
+    new PlayerControlHandlerThread(camera).start();
 
     MyGame.getInstance().initGameStage(camera);
     this.map = MapService.initMap(map);
@@ -236,6 +237,7 @@ public abstract class GameZone implements Screen {
     PlayerService.endGameSession();
     AudioService.getInstance().smoothStopMusic();
 
+    enemyService.clearEnemiesBodies();
     MyGame.getInstance().setScreen(
         new EndGameMenu(enemyService.getRewardPointCount().get(),
             this.map.getMapPos(),
@@ -270,19 +272,21 @@ public abstract class GameZone implements Screen {
 
       camera.position.set(camX, camY, 0);
 
-      float camX2 = Box2dWorld.getInstance().getCameraBox2D().position.x;
-      float camY2 = Box2dWorld.getInstance().getCameraBox2D().position.y;
+      if (DEBUG) {
+        float camX2 = Box2dWorld.getInstance().getCameraBox2D().position.x;
+        float camY2 = Box2dWorld.getInstance().getCameraBox2D().position.y;
 
-      Vector2 camMin2 = new Vector2(Box2dWorld.getInstance().getCameraBox2D().viewportWidth / 2,
-          Box2dWorld.getInstance().getCameraBox2D().viewportHeight / 2);
-      camMin2.scl(Box2dWorld.getInstance().getCameraBox2D().zoom); //bring to center and scale by the zoom level
-      Vector2 camMax2 = new Vector2(this.map.getWidth() / WORLD_TO_VIEW, this.map.getHeight() / WORLD_TO_VIEW);
-      camMax2.sub(camMin2); //bring to center
+        Vector2 camMin2 = new Vector2(Box2dWorld.getInstance().getCameraBox2D().viewportWidth / 2,
+            Box2dWorld.getInstance().getCameraBox2D().viewportHeight / 2);
+        camMin2.scl(Box2dWorld.getInstance().getCameraBox2D().zoom); //bring to center and scale by the zoom level
+        Vector2 camMax2 = new Vector2(this.map.getWidth() / WORLD_TO_VIEW, this.map.getHeight() / WORLD_TO_VIEW);
+        camMax2.sub(camMin2); //bring to center
 
-      camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
-      camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
+        camX2 = Math.min(camMax2.x, Math.max(camX2, camMin2.x));
+        camY2 = Math.min(camMax2.y, Math.max(camY2, camMin2.y));
 
-      Box2dWorld.getInstance().getCameraBox2D().position.set(camX2, camY2, 0);
+        Box2dWorld.getInstance().getCameraBox2D().position.set(camX2, camY2, 0);
+      }
     }).start();
   }
 

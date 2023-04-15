@@ -95,7 +95,7 @@ public class GDXUtils {
     def.type = dynamic ? BodyType.DynamicBody : BodyType.StaticBody;
     def.position.set(x / Constants.WORLD_TO_VIEW, y / Constants.WORLD_TO_VIEW);
 
-    Body box = Box2dWorld.getInstance().getWorld().createBody(def);
+    Body box = Box2dWorld.getInstance().createBody(def);
 
     CircleShape circle = new CircleShape();
     circle.setRadius(radius);

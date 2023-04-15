@@ -57,40 +57,52 @@ public class EnemyService {
    * @param posY y координата игрока
    */
   public void actionEnemies(float posX, float posY) {
-    synchronized (enemies) {
-      for (Enemy enemy : enemies) {
-        enemy.getState().apply(enemy.getSkeleton());
-        enemy.getSkeleton().updateWorldTransform();
+    new Thread(() -> {
+      synchronized (enemies) {
+        for (Enemy enemy : enemies) {
+          new Thread(() -> {
+            enemy.getState().apply(enemy.getSkeleton());
+            enemy.getSkeleton().updateWorldTransform();
 
-        if (!enemy.getStatus().equals(EnemyStatus.IDLE)) {
-          enemy.getState().update(Gdx.graphics.getDeltaTime());
-        }
+            if (!enemy.getStatus().equals(EnemyStatus.IDLE)) {
+              enemy.getState().update(Gdx.graphics.getDeltaTime());
+            }
 
-        if (enemy.getHp() <= 0 && !enemy.getStatus().equals(EnemyStatus.DIED)) {
-          enemy.setStatus(EnemyStatus.DIED);
-          enemy.getBody().setActive(false);
-          enemy.getState().setAnimation(0, "dead", false);
-        }
-        if (!enemy.getStatus().equals(EnemyStatus.DIED)) {
-          enemy.getBody().setAwake(true);
-          updateEnemyHp(enemy);
-          updateEnemyPos(enemy);
-          enemy.doSomething(posX, posY);
-        } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
-          Box2dWorld.getInstance().getWorld().destroyBody(enemy.getBody());
-          enemy.setBody(null);
-          new ThreadForTransparency(enemy).start();
-          AudioService.getInstance().playEnemyDie();
-          rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
-          killCount.set(killCount.get() + 1);
+            if (enemy.getHp() <= 0 && !enemy.getStatus().equals(EnemyStatus.DIED)) {
+              enemy.setStatus(EnemyStatus.DIED);
+              Gdx.app.postRunnable(() -> enemy.getBody().setActive(false));
+              enemy.getState().setAnimation(0, "dead", false);
+            }
+            if (!enemy.getStatus().equals(EnemyStatus.DIED) && enemy.getBody() != null) {
+              enemy.getBody().setAwake(true);
+              updateEnemyHp(enemy);
+              updateEnemyPos(enemy);
+              enemy.doSomething(posX, posY);
+            } else if (enemy.getBody() != null && !enemy.getBody().getFixtureList().isEmpty()) {
+              Gdx.app.postRunnable(() -> {
+                if (enemy != null && enemy.getBody() != null) {
+                  Box2dWorld.getInstance().destroyBody(enemy.getBody());
+                  enemy.setBody(null);
+                  AudioService.getInstance().playEnemyDie();
+                }
+              });
+              new ThreadForTransparency(enemy).start();
+              rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
+              killCount.set(killCount.get() + 1);
+            }
+          }).start();
         }
       }
-    }
+    }).start();
   }
 
   private void updateEnemyPos(Enemy enemy) {
-    enemy.setPosX(enemy.getBody().getPosition().x);
-    enemy.setPosY(enemy.getBody().getPosition().y);
+    synchronized (enemy.getPosX()) {
+      enemy.setPosX(enemy.getBody().getPosition().x);
+    }
+    synchronized (enemy.getPosY()) {
+      enemy.setPosY(enemy.getBody().getPosition().y);
+    }
   }
 
   public void drawEnemies(Batch spriteBatch, SkeletonRenderer renderer) {
@@ -103,7 +115,11 @@ public class EnemyService {
 
   private void drawSpineAni(Batch batch, Enemy enemy, SkeletonRenderer renderer) {
     enemy.getSkeleton().getColor().a = enemy.getTransparency();
-    enemy.getSkeleton().setPosition(enemy.getPosX() * WORLD_TO_VIEW, enemy.getPosY() * WORLD_TO_VIEW);
+    synchronized (enemy.getPosY()) {
+      synchronized (enemy.getPosX()) {
+        enemy.getSkeleton().setPosition(enemy.getPosX() * WORLD_TO_VIEW, enemy.getPosY() * WORLD_TO_VIEW);
+      }
+    }
     renderer.draw(batch, enemy.getSkeleton());
   }
 
@@ -127,6 +143,12 @@ public class EnemyService {
   public void addEnemy(Enemy enemy) {
     synchronized (enemies) {
       enemies.add(enemy);
+    }
+  }
+
+  public void clearEnemiesBodies() {
+    synchronized (enemies){
+      enemies.forEach(x -> x.setBody(null));
     }
   }
 

@@ -1,5 +1,6 @@
 package ru.meat.game.model.enemies.scripts;
 
+import com.badlogic.gdx.Gdx;
 import java.util.function.BiFunction;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.FloatPair;
@@ -28,7 +29,8 @@ public class LittleBugScripts {
         enemy.setStatus(EnemyStatus.MOVE);
       }
 
-      EnemyService.rotateModel(floatPair.getX() - enemy.getBody().getPosition().x, floatPair.getY() - enemy.getBody().getPosition().y, enemy);
+      EnemyService.rotateModel(floatPair.getX() - enemy.getBody().getPosition().x,
+          floatPair.getY() - enemy.getBody().getPosition().y, enemy);
 
       float catetPrilezjaschiy = floatPair.getX() - enemy.getBody().getPosition().x;
       float catetProtivo = floatPair.getY() - enemy.getBody().getPosition().y;
@@ -37,8 +39,14 @@ public class LittleBugScripts {
       float cos = catetPrilezjaschiy / gip;
       enemy.setSpeedY(sin * enemy.getSpeed());
       enemy.setSpeedX(cos * enemy.getSpeed());
-      enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
-          enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
+      Gdx.app.postRunnable(() -> {
+        if (enemy.getBody() != null) {
+          synchronized (enemy.getBody()) {
+            enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
+                enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
+          }
+        }
+      });
       return true;
     });
   }

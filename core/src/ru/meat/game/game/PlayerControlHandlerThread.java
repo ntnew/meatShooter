@@ -2,12 +2,15 @@ package ru.meat.game.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import ru.meat.game.model.player.PlayerService;
 
 public class PlayerControlHandlerThread extends Thread {
 
-  public PlayerControlHandlerThread() {
+  private final OrthographicCamera camera;
+  public PlayerControlHandlerThread(OrthographicCamera camera) {
     this.setDaemon(true);
+    this.camera = camera;
   }
 
   @Override
@@ -32,9 +35,9 @@ public class PlayerControlHandlerThread extends Thread {
    * Обработать нажатия мыши, если персонаж ещё жив
    */
   private void handleMouse() {
-    PlayerService.getInstance().rotateModel();
+    PlayerService.getInstance().rotateModel(camera);
     if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-      Gdx.app.postRunnable(() -> PlayerService.getInstance().shoot());
+      Gdx.app.postRunnable(() -> PlayerService.getInstance().shoot(camera));
     }
   }
 }

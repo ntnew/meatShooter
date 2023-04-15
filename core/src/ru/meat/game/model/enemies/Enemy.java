@@ -65,8 +65,8 @@ public class Enemy {
   /**
    * Позиции
    */
-  private float posX;
-  private float posY;
+  private volatile Float posX;
+  private volatile Float posY;
 
   /**
    * Урон врага

@@ -112,8 +112,6 @@ public class WeaponFactory {
   }
 
   public static Weapon m79() {
-    Texture texture = LoaderManager.getInstance().get("GBullet.png");
-    texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
     return Weapon.builder()
         .name(WeaponEnum.M79)
         .speed(grenadeSpeed)
@@ -127,7 +125,7 @@ public class WeaponFactory {
         .reloadBulletPerTick(1)
         .fireCount(0)
         .reloadDuration(1)
-        .bulletTexture(texture)
+        .bulletTexture(LoaderManager.getInstance().get("GBullet.png"))
         .textureScale(1f/MAIN_ZOOM)
         .box2dRadius(32/MAIN_ZOOM)
         .damage(150)

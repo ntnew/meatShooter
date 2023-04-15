@@ -1,5 +1,6 @@
 package ru.meat.game.model.player;
 
+import static ru.meat.game.settings.Constants.DEBUG;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.PLAYER_MOVE_SPEED;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
@@ -109,13 +110,13 @@ public class PlayerService {
   /**
    * Повернуть подельку за мышью
    */
-  public void rotateModel() {
+  public void rotateModel(OrthographicCamera camera) {
     Vector3 tmpVec3 = new Vector3();
     tmpVec3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-    tmpVec3 = Box2dWorld.getInstance().getCameraBox2D().unproject(tmpVec3);
+    tmpVec3 = camera.unproject(tmpVec3);
 
-    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - getBodyPosY(),
-        tmpVec3.x - getBodyPosX());
+    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - getBodyPosY() * WORLD_TO_VIEW,
+        tmpVec3.x - getBodyPosX() * WORLD_TO_VIEW);
   }
 
   public void drawPlayer(PolygonSpriteBatch polyBatch, SkeletonRenderer renderer) {
@@ -149,7 +150,7 @@ public class PlayerService {
   /**
    * Стрелять
    */
-  public void shoot() {
+  public void shoot(OrthographicCamera camera) {
     Weapon weapon = getActualWeapon();
     if (weapon.getCurrentLockCounter() == 0
         || TimeUtils.timeSinceMillis(weapon.getCurrentLockCounter()) > weapon.getFireRate()
@@ -159,9 +160,9 @@ public class PlayerService {
 
       Vector3 point = new Vector3();
       point.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-      Box2dWorld.getInstance().getCameraBox2D().unproject(point);
+      camera.unproject(point);
 
-      weapon.shoot(getBodyPosX(), getBodyPosY(), point.x, point.y,
+      weapon.shoot(getBodyPosX(), getBodyPosY(), point.x/WORLD_TO_VIEW, point.y/WORLD_TO_VIEW,
           !player.getFeetStatus().equals(CharacterFeetStatus.IDLE));
       player.getTopState()
           .setAnimation(0, "shoot_" + player.getCurrentWeapon().getAniTag(), false);
@@ -239,6 +240,7 @@ public class PlayerService {
    * @param camera камера отрисовки текстур
    */
   public void handleMobileTouch(OrthographicCamera camera) {
+    //TODO вынести в новый поток
     if (!player.isDead()) {
       for (int i = 0; i < 10; i++) {
         if (Gdx.input.isTouched(i) && GUI.getInstance().isOnLeftJoystick(i)) {
@@ -296,25 +298,26 @@ public class PlayerService {
 
   public void handleCameraTransform(OrthographicCamera camera) {
     //Держит камеру примерно по центру игрока
-    OrthographicCamera cameraBox2D = Box2dWorld.getInstance().getCameraBox2D();
     float x1;
     float y1;
-    if ((getBodyPosX() > cameraBox2D.position.x && xOffset < 0) || (getBodyPosX() < cameraBox2D.position.x
-        && xOffset > 0)) {
+    if ((getBodyPosX() * WORLD_TO_VIEW > camera.position.x && xOffset < 0)
+        || (getBodyPosX() * WORLD_TO_VIEW < camera.position.x && xOffset > 0)) {
       x1 = 0;
     } else {
       x1 = xOffset;
     }
 
-    if ((getBodyPosY() > cameraBox2D.position.y && yOffset < 0) || (getBodyPosY() < cameraBox2D.position.y
-        && yOffset > 0)) {
+    if ((getBodyPosY() * WORLD_TO_VIEW > camera.position.y && yOffset < 0)
+        || (getBodyPosY() * WORLD_TO_VIEW < camera.position.y && yOffset > 0)) {
       y1 = 0;
     } else {
       y1 = yOffset;
     }
 
     camera.translate(x1, y1);
-    cameraBox2D.translate(x1 / WORLD_TO_VIEW, y1 / WORLD_TO_VIEW);
+    if (DEBUG) {
+      Box2dWorld.getInstance().getCameraBox2D().translate(x1 / WORLD_TO_VIEW, y1 / WORLD_TO_VIEW);
+    }
     xOffset = 0f;
     yOffset = 0f;
   }

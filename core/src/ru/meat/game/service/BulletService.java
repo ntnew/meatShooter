@@ -114,10 +114,7 @@ public class BulletService {
     def.type = BodyType.DynamicBody;
     def.position.set(x, y);
     if (Box2dWorld.getInstance() != null) {
-      Body box;
-      synchronized (Box2dWorld.getInstance().getWorld()) {
-         box = Box2dWorld.getInstance().getWorld().createBody(def);
-      }
+      Body box = Box2dWorld.getInstance().createBody(def);
 
       CircleShape circle = new CircleShape();
       circle.setRadius(bulletRadius * MAIN_ZOOM / Constants.WORLD_TO_VIEW);
@@ -176,7 +173,7 @@ public class BulletService {
   }
 
   public void updateBullets() {
-    playerBullets.parallelStream().forEach(b -> {
+    playerBullets.forEach(b -> {
       Array<Fixture> fixtureList = b.getBody().getFixtureList();
       if (!fixtureList.isEmpty()) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
@@ -197,7 +194,7 @@ public class BulletService {
     });
     playerBullets.removeIf(x -> x.getBody().getFixtureList().isEmpty());
 
-    enemyBullets.parallelStream().forEach(b -> {
+    enemyBullets.forEach(b -> {
       Array<Fixture> fixtureList = b.getBody().getFixtureList();
       if (!fixtureList.isEmpty() && fixtureList.get(0).getUserData() instanceof BulletBodyUserData) {
         BulletBodyUserData userData = (BulletBodyUserData) fixtureList.get(0).getUserData();
@@ -248,7 +245,7 @@ public class BulletService {
   private void deleteBulletBody(Bullet bullet) {
     Gdx.app.postRunnable(() -> {
       bullet.getBody().setActive(false);
-      Box2dWorld.getInstance().getWorld().destroyBody(bullet.getBody());
+      Box2dWorld.getInstance().destroyBody(bullet.getBody());
     });
   }
 

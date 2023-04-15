@@ -106,11 +106,11 @@ public class EnemyService {
   }
 
   public void drawEnemies(Batch spriteBatch, SkeletonRenderer renderer) {
-    synchronized (enemies) {
+//    synchronized (enemies) {
       for (Enemy enemy : enemies) {
         drawSpineAni(spriteBatch, enemy, renderer);
       }
-    }
+//    }
   }
 
   private void drawSpineAni(Batch batch, Enemy enemy, SkeletonRenderer renderer) {

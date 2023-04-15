@@ -64,7 +64,9 @@ public class MapSelectorMenu implements Screen {
     ScreenUtils.clear(0, 0, 0, 1);
 
     if (LoaderManager.getInstance().update() && selectedMap != 0) {
-      MyGame.getInstance().setScreen(new DeathMatch(selectedMap));
+      DeathMatch deathMatch = new DeathMatch(selectedMap);
+      MyGame.getInstance().setScreen(deathMatch);
+      MyGame.getInstance().setGameZone(deathMatch);
       AudioService.getInstance().initSteps();
       AudioService.getInstance().smoothStopMusic();
     }

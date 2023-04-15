@@ -50,12 +50,12 @@ public class MyGame extends Game {
 
   public void create() {
     Gdx.graphics.setWindowedMode(Settings.getInstance().SCREEN_WIDTH, Settings.getInstance().SCREEN_HEIGHT);
+    initCam();
 
 //   Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
 
     font = new BitmapFont();
-    initCam();
 
     textButtonStyle = new TextButtonStyle();
     textButtonStyle.font = font;
@@ -99,10 +99,6 @@ public class MyGame extends Game {
   public void initStage() {
     stage = new Stage(new ScreenViewport(menuCamera));
     Gdx.input.setInputProcessor(stage);
-  }
-
-  public void initGameStage(Camera camera) {
-    stage = new Stage(new ScreenViewport(camera));
   }
 
   public void drawStage() {

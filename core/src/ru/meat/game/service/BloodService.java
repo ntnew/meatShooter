@@ -38,8 +38,6 @@ public class BloodService {
       "blood/spot/7.png");
 
   private static final String bleedAniPath = "blood/ani1/b";
-  public final List<Bleeding> bleeds = new ArrayList<>();
-
 
   private Animation<Texture> bleedAnimation;
 
@@ -77,16 +75,8 @@ public class BloodService {
   }
 
   public void createBleeding(float x, float y) {
-    new Thread(() -> {
-      float z = Gdx.graphics.getDeltaTime();
-
-      Sprite sprite = new Sprite(bleedAnimation.getKeyFrame(z));
-      sprite.setPosition(x * WORLD_TO_VIEW - sprite.getWidth() / 2, y * WORLD_TO_VIEW - sprite.getHeight() / 2);
-      sprite.setScale(1.5f);
-      synchronized (bleeds) {
-        bleeds.add(new Bleeding(sprite, z));
-      }
-    }).start();
+    new Thread(() -> MyGame.getInstance().getGameZone().getStage()
+        .addBleeding(new Bleeding(bleedAnimation, new FloatPair(x * WORLD_TO_VIEW, y * WORLD_TO_VIEW)))).start();
   }
 
   /**
@@ -100,17 +90,7 @@ public class BloodService {
     for (Texture bleedTexture : bleedTextures) {
       bleedTexture.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.MipMapLinearNearest);
     }
-    bleedAnimation = new Animation<>(0.07f, bleedTextures);
-  }
-
-  public void drawBleeds(Batch batch) {
-    synchronized (bleeds) {
-      for (Bleeding x : bleeds) {
-        x.getSprite().draw(batch);
-      }
-      bleeds.removeIf(x -> Objects.equals(x.getSprite().getTexture(),
-          bleedAnimation.getKeyFrames()[bleedAnimation.getKeyFrames().length - 1]));
-    }
+    bleedAnimation = new Animation<>(0.06f, bleedTextures);
   }
 
   /**
@@ -119,21 +99,8 @@ public class BloodService {
    * @param coord координаты где создать в мире текстур
    */
   public void createLittleBloodSpot(FloatPair coord) {
-    new Thread(() -> MyGame.getInstance().addActor(new BloodSpot(coord))).start();
-  }
-
-  public void dispose() {
-    synchronized (bleeds) {
-      bleeds.clear();
-    }
-  }
-
-  public void update() {
-    synchronized (bleeds) {
-      for (Bleeding x : bleeds) {
-        x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
-        x.getSprite().setTexture(bleedAnimation.getKeyFrame(x.getStateTime()));
-      }
-    }
+    new Thread(() -> {
+      MyGame.getInstance().getGameZone().getStage().addBlood(new BloodSpot(coord));
+    }).start();
   }
 }

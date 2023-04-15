@@ -13,22 +13,20 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.PerformanceCounter;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.SneakyThrows;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.EndGameMenu;
-import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.maps.Map;
 import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.service.AudioService;
-import ru.meat.game.service.BloodService;
 import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.FaderService;
@@ -58,8 +56,10 @@ public abstract class GameZone implements Screen {
 
   private ThreadForZoom threadForZoom;
 
-//  PerformanceCounter main = new PerformanceCounter("Main");
-//  PerformanceCounter secondary = new PerformanceCounter("secondary");
+  protected MainStage stage;
+
+  PerformanceCounter main = new PerformanceCounter("Main");
+  PerformanceCounter secondary = new PerformanceCounter("secondary");
 
   private final Map map;
 
@@ -85,11 +85,13 @@ public abstract class GameZone implements Screen {
 
     polyBatch = new PolygonSpriteBatch();
 
-    new PlayerControlHandlerThread(camera).start();
+    if (!MOBILE) {
+      new PlayerControlHandlerThread(camera).start();
+    }
 
-    MyGame.getInstance().initGameStage(camera);
+    this.stage = new MainStage(camera);
     this.map = MapService.initMap(map);
-    MyGame.getInstance().addActor(this.map);
+    stage.addMap(this.map);
     Gdx.input.setInputProcessor(new MyInputProcessor(this));
   }
 
@@ -100,17 +102,26 @@ public abstract class GameZone implements Screen {
 
   @Override
   public void render(float delta) {
+    main.start();
+
+   System.out.println("time: " + main.time.value * 1000 + " : load: " + main.load.value * 1000);
+
+    //1
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     AudioService.getInstance().playGameMusic();
 
     sortEnemies();
 
+    //0,003
 
     camera.update();
 
-    BloodService.getInstance().update();
+    stage.act();
+
+//2 занимает около  10-15%
     PlayerService.getInstance().updateState();
     BulletService.getInstance().updateBullets();
+
 
     if (MOBILE) {
       PlayerService.getInstance().handleMobileTouch(camera);
@@ -119,38 +130,45 @@ public abstract class GameZone implements Screen {
       PlayerService.getInstance().handleCameraTransform(camera);
     }
 
+
+//0,1-0,9 от 2.4
+
+//3 занимает около 35%
     handleWorldBounds();
 
     renderSpec(delta);
 
     enemyService.actionEnemies(PlayerService.getInstance().getBodyPosX(), PlayerService.getInstance().getBodyPosY());
+//1,24 от 3,5 и 0,434 от 1,2
 
     //рисовать текстуры
 
     //4 около 50%
 
+
+
+    stage.draw();
+
+
+    secondary.start();
+    System.out.println("secondary time: " + secondary.time.value * 1000 + " : load: " + secondary.load.value * 1000);
     polyBatch.setProjectionMatrix(camera.combined);
-
-    MyGame.getInstance().drawStage();
-
-    spriteBatch.setProjectionMatrix(camera.combined);
-    spriteBatch.begin();
-    BloodService.getInstance().drawBleeds(spriteBatch);
-    spriteBatch.end();
-
     polyBatch.begin();
     //Если игрок умер, то рисуем раньше врагов
     if (PlayerService.getInstance().getPlayer().isDead()) {
       PlayerService.getInstance().drawPlayer(polyBatch, renderer);
     }
-    BulletService.getInstance().drawPlayerBullets(camera);
+
     enemyService.drawEnemies(polyBatch, renderer);
-    BulletService.getInstance().drawEnemyBullets(camera);
+    BulletService.getInstance().drawBullets(camera);
     //Если игрок жив, то рисуем после врагов
     if (!PlayerService.getInstance().getPlayer().isDead()) {
       PlayerService.getInstance().drawPlayer(polyBatch, renderer);
     }
     polyBatch.end();
+    secondary.stop();
+    secondary.tick();
+//0,4 от 1.4  и 2 от 3.8
 
 //5 статически, не увеличивается
     ExplosionsService.getInstance().drawExplosions(camera);
@@ -158,7 +176,9 @@ public abstract class GameZone implements Screen {
     Box2dWorld.getInstance().render();
 
     GUI.getInstance().draw();
+//0,2 от 3 и  до 0.3 от 1.2
 
+//6 до конца 0.006, тут норм
     //Нарисовать осветление экрана при старте
     if (!started) {
       started = FaderService.getInstance().drawFadeIn();
@@ -177,8 +197,8 @@ public abstract class GameZone implements Screen {
     }
     Box2dWorld.getInstance().update();
 
-//    main.stop();
-//    main.tick();
+    main.stop();
+    main.tick();
   }
 
   /**
@@ -248,7 +268,6 @@ public abstract class GameZone implements Screen {
 
     Box2dWorld.dispose();
     BulletService.dispose();
-    BloodService.getInstance().dispose();
     ExplosionsService.getInstance().dispose();
   }
 

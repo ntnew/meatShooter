@@ -14,6 +14,6 @@ public class AndroidLauncher extends AndroidApplication {
     config.numSamples = 2;
     Constants.MOBILE = true;
     Constants.MAIN_ZOOM = 3.5f;
-		initialize(new MyGame(), config);
+		initialize(MyGame.getInstance(), config);
 	}
 }

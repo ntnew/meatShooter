@@ -249,20 +249,17 @@ public class BulletService {
     });
   }
 
-  public void drawPlayerBullets(OrthographicCamera camera){
+  public void drawBullets(OrthographicCamera camera){
     batch.setProjectionMatrix(camera.combined);
     batch.begin();
     for (Bullet b : playerBullets) {
       b.getSprite().draw(batch);
     }
-  }
-  public void drawEnemyBullets(OrthographicCamera camera) {
     for (Bullet b : enemyBullets) {
       b.getSprite().draw(batch);
     }
     batch.end();
   }
-
   public static void dispose() {
     instance = null;
   }

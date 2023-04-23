@@ -24,6 +24,7 @@ import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.EndGameMenu;
 import ru.meat.game.model.maps.Map;
+import ru.meat.game.model.player.Player;
 import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.service.AudioService;
@@ -47,8 +48,6 @@ public abstract class GameZone implements Screen {
 
   protected SpriteBatch spriteBatch;
 
-  protected PolygonSpriteBatch polyBatch;
-
   protected SkeletonRenderer renderer;
   private boolean started = false;
 
@@ -57,6 +56,10 @@ public abstract class GameZone implements Screen {
   private ThreadForZoom threadForZoom;
 
   protected MainStage stage;
+
+  protected SecondStage secondStage;
+
+  protected ThirdStage thirdStage;
 
   PerformanceCounter main = new PerformanceCounter("Main");
   PerformanceCounter secondary = new PerformanceCounter("secondary");
@@ -83,8 +86,6 @@ public abstract class GameZone implements Screen {
     renderer = new SkeletonRenderer();
     renderer.setPremultipliedAlpha(true);
 
-    polyBatch = new PolygonSpriteBatch();
-
     if (!MOBILE) {
       new PlayerControlHandlerThread(camera).start();
     }
@@ -92,6 +93,11 @@ public abstract class GameZone implements Screen {
     this.stage = new MainStage(camera);
     this.map = MapService.initMap(map);
     stage.addMap(this.map);
+
+    this.secondStage = new SecondStage(camera);
+    this.secondStage.addPlayer(PlayerService.getInstance().getPlayer());
+
+    this.thirdStage = new ThirdStage(camera);
     Gdx.input.setInputProcessor(new MyInputProcessor(this));
   }
 
@@ -117,9 +123,11 @@ public abstract class GameZone implements Screen {
     camera.update();
 
     stage.act();
+    secondStage.act();
+    thirdStage.act();
 
 //2 занимает около  10-15%
-    PlayerService.getInstance().updateState();
+//    PlayerService.getInstance().updateState();
     BulletService.getInstance().updateBullets();
 
 
@@ -138,7 +146,6 @@ public abstract class GameZone implements Screen {
 
     renderSpec(delta);
 
-    enemyService.actionEnemies(PlayerService.getInstance().getBodyPosX(), PlayerService.getInstance().getBodyPosY());
 //1,24 от 3,5 и 0,434 от 1,2
 
     //рисовать текстуры
@@ -148,30 +155,20 @@ public abstract class GameZone implements Screen {
 
 
     stage.draw();
+    secondStage.draw();
+    thirdStage.draw();
 
 
     secondary.start();
     System.out.println("secondary time: " + secondary.time.value * 1000 + " : load: " + secondary.load.value * 1000);
-    polyBatch.setProjectionMatrix(camera.combined);
-    polyBatch.begin();
-    //Если игрок умер, то рисуем раньше врагов
-    if (PlayerService.getInstance().getPlayer().isDead()) {
-      PlayerService.getInstance().drawPlayer(polyBatch, renderer);
-    }
 
-    enemyService.drawEnemies(polyBatch, renderer);
     BulletService.getInstance().drawBullets(camera);
-    //Если игрок жив, то рисуем после врагов
-    if (!PlayerService.getInstance().getPlayer().isDead()) {
-      PlayerService.getInstance().drawPlayer(polyBatch, renderer);
-    }
-    polyBatch.end();
+
     secondary.stop();
     secondary.tick();
 //0,4 от 1.4  и 2 от 3.8
 
 //5 статически, не увеличивается
-    ExplosionsService.getInstance().drawExplosions(camera);
 
     Box2dWorld.getInstance().render();
 
@@ -268,7 +265,7 @@ public abstract class GameZone implements Screen {
 
     Box2dWorld.dispose();
     BulletService.dispose();
-    ExplosionsService.getInstance().dispose();
+//    ExplosionsService.getInstance().dispose();
   }
 
 
@@ -276,6 +273,7 @@ public abstract class GameZone implements Screen {
    * обработать рамки камеры, чтобы не заходили за края
    */
   private void handleWorldBounds() {
+    //TODO сделать потокобезопасным
     new Thread(() -> {
       float camX = camera.position.x;
       float camY = camera.position.y;

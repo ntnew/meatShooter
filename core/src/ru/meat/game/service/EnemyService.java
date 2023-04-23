@@ -11,14 +11,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import ru.meat.game.Box2dWorld;
+import ru.meat.game.MyGame;
 import ru.meat.game.model.enemies.Enemy;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.bodyData.BodyUserData;
-import ru.meat.game.model.enemies.EnemyBodyUserData;
-import ru.meat.game.utils.GDXUtils;
 
 @NoArgsConstructor
 public class EnemyService {
@@ -141,9 +139,7 @@ public class EnemyService {
   }
 
   public void addEnemy(Enemy enemy) {
-    synchronized (enemies) {
-      enemies.add(enemy);
-    }
+    MyGame.getInstance().getGameZone().getSecondStage().addEnemy(enemy);
   }
 
   public void clearEnemiesBodies() {

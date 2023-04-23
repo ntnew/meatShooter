@@ -44,9 +44,6 @@ public class PlayerService {
 
   private Player player;
 
-  private float feetRotationAngle = 0;
-
-  private volatile float modelFrontAngle = 0;
   private Long weaponChangeLock = 0L;
 
   public PlayerService() {
@@ -54,57 +51,6 @@ public class PlayerService {
         Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
 
     finalSpeed = calcSpeed();
-  }
-
-
-  public void updateState() {
-    //Обновить верхнюю часть анимации
-    if (!player.isDead()
-        && getActualWeapon().isReloading()
-        && ((!player.getTopState().getTracks().isEmpty()
-        && !Objects.equals("reload_" + player.getCurrentWeapon().getAniTag(),
-        player.getTopState().getTracks().get(player.getTopState().getTracks().size - 1).getAnimation().getName()))
-        || player.getTopState().getTracks().isEmpty())) {
-      player.getTopState()
-          .setAnimation(0, "reload_" + player.getCurrentWeapon().getAniTag(), true);
-    }
-
-    if (player.isDead()
-        && ((!Objects.equals("death_" + player.getCurrentWeapon().getAniTag(),
-        player.getTopState().getTracks().get(0).getAnimation().getName()))
-        || player.getTopState().getTracks().isEmpty())) {
-      player.getTopState().setAnimation(0, "death_" + player.getCurrentWeapon().getAniTag(), false);
-    }
-
-    player.getTopState().update(Gdx.graphics.getDeltaTime());
-    player.getTopState().apply(player.getTopSkeleton());
-    player.getTopSkeleton().updateWorldTransform();
-
-    // обновить нижнюю часть анимации
-    if (!player.isDead() && CharacterFeetStatus.MOVE.equals(player.getFeetStatus())) {
-      player.getFeetState().update(Gdx.graphics.getDeltaTime());
-    }
-
-    player.getFeetState().apply(player.getFeetSkeleton());
-    player.getFeetSkeleton().updateWorldTransform();
-
-    handlePlayerHp();
-  }
-
-  /**
-   * Обработать значения хп игрока
-   */
-  private void handlePlayerHp() {
-    BodyUserData userData = (BodyUserData) player.getBody().getFixtureList().get(0).getUserData();
-    if (userData.getDamage() != 0) {
-      player.setHp(player.getHp() - userData.getDamage());
-      userData.setDamage(0);
-      AudioService.getInstance().playHit();
-    }
-
-    if (player.getHp() <= 0) {
-      player.setDead(true);
-    }
   }
 
   /**
@@ -115,27 +61,8 @@ public class PlayerService {
     tmpVec3.set(Gdx.input.getX(), Gdx.input.getY(), 0);
     tmpVec3 = camera.unproject(tmpVec3);
 
-    modelFrontAngle = MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - getBodyPosY() * WORLD_TO_VIEW,
-        tmpVec3.x - getBodyPosX() * WORLD_TO_VIEW);
-  }
-
-  public void drawPlayer(PolygonSpriteBatch polyBatch, SkeletonRenderer renderer) {
-    if (!player.isDead()) {
-      drawFeetSprite(polyBatch, renderer);
-    }
-    drawTopSprite(polyBatch, renderer);
-  }
-
-  private void drawFeetSprite(PolygonSpriteBatch polyBatch, SkeletonRenderer renderer) {
-    player.getFeetSkeleton().setPosition(getBodyPosX() * WORLD_TO_VIEW, getBodyPosY() * WORLD_TO_VIEW);
-    player.getFeetSkeleton().getRootBone().setRotation(feetRotationAngle);
-    renderer.draw(polyBatch, player.getFeetSkeleton());
-  }
-
-  private void drawTopSprite(PolygonSpriteBatch polyBatch, SkeletonRenderer renderer) {
-    player.getTopSkeleton().setPosition(getBodyPosX() * WORLD_TO_VIEW, getBodyPosY() * WORLD_TO_VIEW);
-    player.getTopSkeleton().getRootBone().setRotation(modelFrontAngle);
-    renderer.draw(polyBatch, player.getTopSkeleton());
+    player.setModelFrontAngle(MathUtils.radiansToDegrees * MathUtils.atan2(tmpVec3.y - getBodyPosY() * WORLD_TO_VIEW,
+        tmpVec3.x - getBodyPosX() * WORLD_TO_VIEW));
   }
 
   private void changeTopStatus(CharacterTopStatus status) {
@@ -248,7 +175,7 @@ public class PlayerService {
           player.getFeetState().update(Gdx.graphics.getDeltaTime());
           Float dirAngle = GUI.getInstance().handleLeftJoystickTouch(i);
 
-          feetRotationAngle = dirAngle + 180;
+          player.setFeetRotationAngle(dirAngle + 180);
 
           float gipotenuzaSpeed = getSpeed();
 
@@ -265,7 +192,7 @@ public class PlayerService {
         if (Gdx.input.isTouched(i) && GUI.getInstance().isOnRightJoystick(i)) {
 
           Float dirAngle = GUI.getInstance().handleRightJoystickTouch(i);
-          modelFrontAngle = dirAngle + 180;
+          player.setModelFrontAngle(dirAngle + 180);
 
           Weapon weapon = getActualWeapon();
           if (weapon.getCurrentLockCounter() == 0

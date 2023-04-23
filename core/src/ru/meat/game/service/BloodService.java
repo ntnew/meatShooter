@@ -75,7 +75,7 @@ public class BloodService {
   }
 
   public void createBleeding(float x, float y) {
-    new Thread(() -> MyGame.getInstance().getGameZone().getStage()
+    new Thread(() -> MyGame.getInstance().getGameZone().getThirdStage()
         .addBleeding(new Bleeding(bleedAnimation, new FloatPair(x * WORLD_TO_VIEW, y * WORLD_TO_VIEW)))).start();
   }
 
@@ -99,8 +99,6 @@ public class BloodService {
    * @param coord координаты где создать в мире текстур
    */
   public void createLittleBloodSpot(FloatPair coord) {
-    new Thread(() -> {
-      MyGame.getInstance().getGameZone().getStage().addBlood(new BloodSpot(coord));
-    }).start();
+    new Thread(() -> MyGame.getInstance().getGameZone().getStage().addBlood(new BloodSpot(coord))).start();
   }
 }

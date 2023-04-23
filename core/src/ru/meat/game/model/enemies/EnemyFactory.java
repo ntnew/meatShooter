@@ -23,7 +23,7 @@ public class EnemyFactory {
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
     Enemy enemy = new Enemy(x, y, 100, speed, 300, null);
 
-    enemy.setActions(LittleBugScripts.littleBugActions());
+    enemy.setEnemyScript(LittleBugScripts.littleBugActions());
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getLittleBugSkeletonData());
     float random = MathUtils.random(0.8f, 1.2f);
@@ -56,7 +56,7 @@ public class EnemyFactory {
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
     Enemy enemy = new Enemy(x, y, 500, speed, 300, null);
 
-    enemy.setActions(SpiderScripts.spiderActions());
+    enemy.setEnemyScript(SpiderScripts.spiderActions());
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getSpiderSkeletonData());
     skeleton.setPosition(50, 50);
@@ -90,7 +90,7 @@ public class EnemyFactory {
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
     Enemy enemy = new Enemy(x, y, 500, speed, 300, null);
 
-    enemy.setActions(BlackWidowScripts.blackWidow());
+    enemy.setEnemyScript(BlackWidowScripts.blackWidow());
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getBlackWidowSkeletonData());
     skeleton.setPosition(50, 50);
@@ -122,7 +122,7 @@ public class EnemyFactory {
     float speed = MathUtils.random(speedLowRange, speedTopRange) * MAIN_ZOOM / WORLD_TO_VIEW;
     Enemy enemy = new Enemy(x, y, 10000, speed, 300, null);
 
-    enemy.setActions(ScorpionBossScript.scorpionBoss());
+    enemy.setEnemyScript(ScorpionBossScript.scorpionBoss());
 
     Skeleton skeleton = new Skeleton(EnemiesAnimation.getInstance().getScorpionSkeletonData());
     skeleton.setPosition(500, 500);

@@ -2,19 +2,26 @@ package ru.meat.game.model.player;
 
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Skeleton;
+import com.esotericsoftware.spine.SkeletonRenderer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.meat.game.MyGame;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.enemies.EnemiesAnimation;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
+import ru.meat.game.service.AudioService;
 import ru.meat.game.service.RpgStatsService;
 import ru.meat.game.model.weapons.WeaponFactory;
 import ru.meat.game.settings.Filters;
@@ -67,6 +74,10 @@ public class Player extends Actor {
   private CharacterTopStatus topStatus;
   private CharacterFeetStatus feetStatus;
 
+  private float feetRotationAngle = 0;
+
+  private volatile float modelFrontAngle = 0;
+
   public Player(float x, float y) {
     try {
       currentWeapon = WeaponEnum.SHOTGUN;
@@ -75,26 +86,20 @@ public class Player extends Actor {
 
       this.hp = RpgStatsService.getInstance().getStats().getHp();
 
-
       topSkeleton = new Skeleton(PlayerAnimationFactory.getInstance().getPlayerTopSkeletonData());
       topSkeleton.setPosition(x, y);
-//      float random = MathUtils.random(0.8f, 1.2f);
-//      skeleton.setScale(random, random);
 
       AnimationStateData stateData = new AnimationStateData(PlayerAnimationFactory.getInstance().getPlayerTopSkeletonData());
-//      stateData.setMix("walk", "attack", 0.2f);
-//      stateData.setMix("attack", "walk", 0.2f);
+
       this.topState = new AnimationState(stateData);
       this.topState.setTimeScale(0.8f);
 
       feetSkeleton = new Skeleton(PlayerAnimationFactory.getInstance().getPlayerFeetSkeletonData());
       feetSkeleton.setPosition(x, y);
-//      float random = MathUtils.random(0.8f, 1.2f);
-//      skeleton.setScale(random, random);
+
 
       AnimationStateData feetStateData = new AnimationStateData(PlayerAnimationFactory.getInstance().getPlayerFeetSkeletonData());
-//      stateData.setMix("walk", "attack", 0.2f);
-//      stateData.setMix("attack", "walk", 0.2f);
+
       this.feetState = new AnimationState(feetStateData);
       this.feetState.setTimeScale(1.5f);
 
@@ -118,5 +123,87 @@ public class Player extends Actor {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  @Override
+  public void act(float delta) {
+    super.act(delta);
+    if (!this.isDead()
+        && getActualWeapon().isReloading()
+        && ((!this.getTopState().getTracks().isEmpty()
+        && !Objects.equals("reload_" + this.getCurrentWeapon().getAniTag(),
+        this.getTopState().getTracks().get(this.getTopState().getTracks().size - 1).getAnimation().getName()))
+        || this.getTopState().getTracks().isEmpty())) {
+      this.getTopState()
+          .setAnimation(0, "reload_" + this.getCurrentWeapon().getAniTag(), true);
+    }
+
+    if (this.isDead()
+        && ((!Objects.equals("death_" + this.getCurrentWeapon().getAniTag(),
+        this.getTopState().getTracks().get(0).getAnimation().getName()))
+        || this.getTopState().getTracks().isEmpty())) {
+      this.getTopState().setAnimation(0, "death_" + this.getCurrentWeapon().getAniTag(), false);
+    }
+
+    this.getTopState().update(Gdx.graphics.getDeltaTime());
+    this.getTopState().apply(this.getTopSkeleton());
+    this.getTopSkeleton().updateWorldTransform();
+
+    // обновить нижнюю часть анимации
+    if (!this.isDead() && CharacterFeetStatus.MOVE.equals(this.getFeetStatus())) {
+      this.getFeetState().update(Gdx.graphics.getDeltaTime());
+    }
+
+    this.getFeetState().apply(this.getFeetSkeleton());
+    this.getFeetSkeleton().updateWorldTransform();
+
+    handlePlayerHp();
+  }
+
+  /**
+   * Обработать значения хп игрока
+   */
+  private void handlePlayerHp() {
+    BodyUserData userData = (BodyUserData) body.getFixtureList().get(0).getUserData();
+    if (userData.getDamage() != 0) {
+      this. hp = hp - userData.getDamage();
+      userData.setDamage(0);
+      AudioService.getInstance().playHit();
+    }
+
+    if (this.hp <= 0) {
+      this.isDead = true;
+    }
+  }
+
+  /**
+   * Получить выбранное оружие у игрока
+   */
+  public Weapon getActualWeapon() {
+    return this.weapons.stream().filter(x -> x.getName().equals(this.currentWeapon))
+        .findFirst()
+        .orElse(this.weapons.get(0));
+  }
+
+
+
+  @Override
+  public void draw(Batch batch, float parentAlpha) {
+    if (!this.isDead) {
+      drawFeetSprite((PolygonSpriteBatch) batch);
+    }
+    drawTopSprite((PolygonSpriteBatch) batch);
+  }
+
+  private void drawFeetSprite(PolygonSpriteBatch polyBatch) {
+    this.feetSkeleton.setPosition(body.getPosition().x * WORLD_TO_VIEW, body.getPosition().y * WORLD_TO_VIEW);
+    this.feetSkeleton.getRootBone().setRotation(feetRotationAngle);
+    MyGame.getInstance().getGameZone().getRenderer().draw(polyBatch, this.feetSkeleton);
+  }
+
+  private void drawTopSprite(PolygonSpriteBatch polyBatch) {
+    this.topSkeleton.setPosition(body.getPosition().x * WORLD_TO_VIEW, body.getPosition().y * WORLD_TO_VIEW);
+    this.topSkeleton.getRootBone().setRotation(modelFrontAngle);
+    MyGame.getInstance().getGameZone().getRenderer().draw(polyBatch, this.topSkeleton);
   }
 }

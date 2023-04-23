@@ -5,7 +5,12 @@ import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.SnapshotArray;
+import java.sql.Array;
+import java.util.ArrayList;
 import ru.meat.game.model.EnemyStatus;
+import ru.meat.game.model.enemies.Enemy;
 import ru.meat.game.model.enemies.EnemyFactory;
 import ru.meat.game.model.player.PlayerService;
 
@@ -23,7 +28,11 @@ public class DeathMatch extends GameZone {
 
   private void createMoreEnemies() {
     synchronized (enemyService.getEnemies()) {
-      if (enemyService.getEnemies().stream().filter(x -> x.getStatus() != EnemyStatus.DIED).count() < 30) {
+      ArrayList<Actor> objects = new ArrayList<>();
+      SnapshotArray<Actor> children = getSecondStage().getEnemiesGroup().getChildren();
+
+      children.forEach(objects::add);
+      if (objects.stream().filter(x -> ((Enemy)x).getStatus() != EnemyStatus.DIED).count() < 30) {
         // Инициализация начальной позиции
         float xBound1 = PlayerService.getInstance().getBodyPosX() * WORLD_TO_VIEW;
         float xBound2 = PlayerService.getInstance().getBodyPosX() * WORLD_TO_VIEW;

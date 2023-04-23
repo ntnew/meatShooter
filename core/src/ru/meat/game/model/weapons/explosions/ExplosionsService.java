@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
+import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.service.AudioService;
@@ -30,23 +31,18 @@ import ru.meat.game.utils.GDXUtils;
 @Data
 public class ExplosionsService {
 
-  private final List<Explosion> explosions = new ArrayList<>();
-
-  private SpriteBatch batch = new SpriteBatch();
-
   private Texture fireAnimationSheet;
 
   private Animation<TextureRegion> fireExplosionAnimation;
 
 
-  private Animation<Texture> acidExplosionAnimation;
-
-  private List<Body> expBodies = new ArrayList<>();
+  private Animation<TextureRegion> acidExplosionAnimation;
 
   private static final int FRAME_COLS = 8, FRAME_ROWS = 6;
 
+
   private static ExplosionsService instance;
-  private final static long explosionLifeTime = 600;
+
 
   public static ExplosionsService getInstance() {
     if (instance == null) {
@@ -73,11 +69,12 @@ public class ExplosionsService {
 
     fireExplosionAnimation = new Animation<>(0.01f, frames);
 
-    Texture[] l = new Texture[10];
+    TextureRegion[] l = new TextureRegion[10];
 
     for (int i = 0; i < 10; i++) {
-      l[i] = LoaderManager.getInstance().get("ani/widowAttack/explosion/" + i + ".png");
-      l[i].setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
+      Texture o = LoaderManager.getInstance().get("ani/widowAttack/explosion/" + i + ".png");
+      o.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
+      l[i] = new TextureRegion(o);
     }
 
     acidExplosionAnimation = new Animation<>(0.03f, l);
@@ -92,68 +89,21 @@ public class ExplosionsService {
   }
 
   public void createFireExplosion(FloatPair pos, float damage) {
-    ExplosionBodyUserData explosionBodyUserData = new ExplosionBodyUserData(UUID.randomUUID(), TimeUtils.millis());
-    explosionBodyUserData.setDamage(damage);
-    explosionBodyUserData.setName("explosion");
-
     Gdx.app.postRunnable(() -> {
       AudioService.getInstance().playExplosionSound();
-      explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359), ExplosionType.FIRE, TimeUtils.millis(), 12));
+      ExplosionBodyUserData explosionBodyUserData =
+          new ExplosionBodyUserData("explosion", damage, UUID.randomUUID(), TimeUtils.millis());
       Body body = GDXUtils.createCircleForModel(12 / MAIN_ZOOM, 100, explosionBodyUserData, pos.getX(), pos.getY(),
           true);
       body.getFixtureList().get(0).setFilterData(Filters.getPlayerBulletFilter());
-      expBodies.add(body);
+      MyGame.getInstance().getGameZone().getThirdStage()
+          .addExplosion(new FireExplosion(pos, TimeUtils.millis(), 4, body));
     });
   }
 
   public void createAcidExplosion(FloatPair pos) {
-    Gdx.app.postRunnable(() ->
-        explosions.add(new Explosion(pos, 0, MathUtils.random(0, 359), ExplosionType.ACID, TimeUtils.millis(), 1.5f)));
-  }
-
-  public void drawExplosions(OrthographicCamera camera) {
-    for (Body b : expBodies) {
-      Array<Fixture> fixtureList = b.getFixtureList();
-      if (!fixtureList.isEmpty() && fixtureList.get(0).getUserData() instanceof ExplosionBodyUserData) {
-        ExplosionBodyUserData userData = (ExplosionBodyUserData) fixtureList.get(0).getUserData();
-        if (TimeUtils.timeSinceMillis(userData.getBornDate()) > explosionLifeTime) {
-          try {
-            b.setActive(false);
-            Box2dWorld.getInstance().destroyBody(b);
-          } catch (Exception e) {
-
-          }
-        }
-      }
-    }
-    expBodies.removeIf(body -> !body.isActive());
-
-    batch.setProjectionMatrix(camera.combined);
-    batch.begin();
-    for (Explosion x : explosions) {
-      try {
-        x.setStateTime(x.getStateTime() + Gdx.graphics.getDeltaTime());
-        Sprite sprite = new Sprite();
-        if (x.getType().equals(ExplosionType.ACID)) {
-          sprite = new Sprite(acidExplosionAnimation.getKeyFrame(x.getStateTime()));
-        } else if (x.getType().equals(ExplosionType.FIRE)) {
-          sprite = new Sprite(fireExplosionAnimation.getKeyFrame(x.getStateTime()));
-        }
-        sprite.setOrigin(sprite.getWidth() - sprite.getWidth() / 2, sprite.getHeight() / 2);
-        sprite.setPosition(x.getPos().getX() - sprite.getWidth() / 2,
-            x.getPos().getY() - sprite.getHeight() / 2);
-        sprite.rotate(x.getAngle());
-        sprite.setScale(x.getScale() / MAIN_ZOOM);
-        sprite.draw(batch);
-      } catch (NullPointerException n) {
-        System.out.println(n);
-      }
-    }
-    batch.end();
-  }
-
-  public void dispose() {
-    explosions.clear();
-    expBodies.clear();
+    new Thread(() ->
+        MyGame.getInstance().getGameZone().getThirdStage()
+            .addExplosion(new AcidExplosion(pos, MathUtils.random(0, 359), TimeUtils.millis(), 0.001f))).start();
   }
 }

@@ -13,8 +13,6 @@ public class WeaponFactory {
   private final static float pistolBulletSpeed = 12f;
   private final static float grenadeSpeed = 0.7f;
 
-  private final static String assetsDir = "./assets/Top_Down_survivor/";
-
   public static Weapon rifleWeapon() {
     return Weapon.builder()
         .name(WeaponEnum.RIFLE)

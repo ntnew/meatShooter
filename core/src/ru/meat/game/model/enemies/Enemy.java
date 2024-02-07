@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.Skeleton;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -21,7 +22,6 @@ import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.service.AudioService;
 
 @Data
-//@Builder
 public class Enemy extends Image {
 
   private Body body;
@@ -113,6 +113,8 @@ public class Enemy extends Image {
 
   private BiFunction<Enemy, FloatPair, Boolean> enemyScript;
 
+  private Boolean needDispose = false;
+
   public Enemy(float posX, float posY, int hp, float speed, float actionPing, FloatPair playerCoord) {
     this.actionPing = actionPing;
     this.hp = hp;
@@ -133,10 +135,6 @@ public class Enemy extends Image {
       this.destination = new FloatPair(posX, posY);
       this.floatDestination = new FloatPair(posX, posY);
     }
-  }
-
-  public void doSomething(float posX, float posY) {
-    enemyScript.apply(this, new FloatPair(posX, posY));
   }
 
   @Override
@@ -162,21 +160,27 @@ public class Enemy extends Image {
           new FloatPair(PlayerService.getInstance().getBodyPosX(), PlayerService.getInstance().getBodyPosY()));
       skeleton.setPosition(posX * WORLD_TO_VIEW, posY * WORLD_TO_VIEW);
     } else if (body != null && !body.getFixtureList().isEmpty()) {
-      Gdx.app.postRunnable(() -> {
-        if (this != null && body != null) {
-          Box2dWorld.getInstance().destroyBody(body);
-          body = null;
-          AudioService.getInstance().playEnemyDie();
-        }
-      });
-      new ThreadForTransparency(this).start();
-//      rewardPointCount.set(rewardPointCount.get() + enemy.getRewardPoint());
-//      killCount.set(killCount.get() + 1);
+      handleDeath();
     }
-
-//    ((TextureRegionDrawable) getDrawable()).setRegion(
-//        new TextureRegion(animation.getKeyFrame(stateTime += delta, false)));
+    if (needDispose){
+      remove();
+      skeleton = null;
+      state = null;
+    }
     super.act(delta);
+  }
+
+  private void handleDeath() {
+    Gdx.app.postRunnable(() -> {
+      if (body != null) {
+        Box2dWorld.getInstance().destroyBody(body);
+        body = null;
+        AudioService.getInstance().playEnemyDie();
+      }
+    });
+    new ThreadForTransparency().start();
+    MyGame.getInstance().getGameZone().getEnemyService().getKillCount().incrementAndGet();
+    MyGame.getInstance().getGameZone().getEnemyService().getRewardPointCount().addAndGet(this.getRewardPoint());
   }
 
   private void updateEnemyPos() {
@@ -201,19 +205,19 @@ public class Enemy extends Image {
 
   class ThreadForTransparency extends Thread {
 
-    final Enemy enemy;
 
-    ThreadForTransparency(Enemy enemy) {
-      this.enemy = enemy;
+    ThreadForTransparency() {
+      setDaemon(true);
     }
 
     @SneakyThrows
     @Override
     public void run() {
-      while (enemy.getTransparency() > 0.5f) {
-        enemy.setTransparency(enemy.getTransparency() - 0.05f);
+      while (skeleton.getColor().a > 0.5f) {
+        skeleton.getColor().a = skeleton.getColor().a - 0.05f;
         Thread.sleep(100);
       }
+      needDispose = true;
     }
   }
 }

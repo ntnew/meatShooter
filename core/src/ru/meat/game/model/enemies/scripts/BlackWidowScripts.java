@@ -55,14 +55,14 @@ public class BlackWidowScripts {
         float cos = catetPrilezjaschiy / gip;
         enemy.setSpeedY(sin * enemy.getSpeed());
         enemy.setSpeedX(cos * enemy.getSpeed());
-        synchronized (enemy.getBody()) {
+
           Gdx.app.postRunnable(() -> {
             if (enemy.getBody() != null && enemy.getBody().isActive()) {
               enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
                   enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
             }
           });
-        }
+
       }
       return true;
     });

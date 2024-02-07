@@ -13,7 +13,7 @@ import ru.meat.game.gui.GUI;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.enemies.EnemyBodyUserData;
-import ru.meat.game.model.weapons.BulletBodyUserData;
+import ru.meat.game.model.weapons.bullets.BulletBodyUserData;
 import ru.meat.game.model.weapons.BulletType;
 import ru.meat.game.model.weapons.explosions.ExplosionBodyUserData;
 import ru.meat.game.model.weapons.explosions.ExplosionsService;

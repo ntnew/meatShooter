@@ -103,7 +103,7 @@ public class ExplosionsService {
 
   public void createAcidExplosion(FloatPair pos) {
     new Thread(() ->
-        MyGame.getInstance().getGameZone().getThirdStage()
-            .addExplosion(new AcidExplosion(pos, MathUtils.random(0, 359), TimeUtils.millis(), 0.001f))).start();
+        MyGame.getInstance().getGameZone().getStage()
+            .addBlood(new AcidExplosion(pos, MathUtils.random(0, 359), TimeUtils.millis(), 0.8f))).start();
   }
 }

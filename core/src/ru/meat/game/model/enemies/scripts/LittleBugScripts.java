@@ -41,10 +41,8 @@ public class LittleBugScripts {
       enemy.setSpeedX(cos * enemy.getSpeed());
       Gdx.app.postRunnable(() -> {
         if (enemy.getBody() != null) {
-          synchronized (enemy.getBody()) {
-            enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
-                enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
-          }
+          enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
+              enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
         }
       });
       return true;

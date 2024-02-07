@@ -19,4 +19,9 @@ public class BloodSpot extends Image {
     this.setRotation(MathUtils.random(0, 359));
     this.setColor(1, 1, 1, MathUtils.random(0.6f, 1));
   }
+
+  @Override
+  public void act(float delta) {
+//    super.act(delta);
+  }
 }

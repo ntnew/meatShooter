@@ -108,8 +108,8 @@ public class MyGame extends Game {
   }
 
   public void addActor(Actor actor) {
-    synchronized (stage) {
+
       stage.addActor(actor);
-    }
+
   }
 }

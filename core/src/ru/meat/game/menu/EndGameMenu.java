@@ -101,11 +101,12 @@ public class EndGameMenu implements Screen {
   }
 
   private void createButtons() {
-
     againButton = createButton(MyGame.getInstance().getTextButtonStyle(), "Again", new ClickListener() {
       @Override
       public void clicked(InputEvent event, float x, float y) {
-        MyGame.getInstance().setScreen(new DeathMatch(selectedMap));
+        DeathMatch deathMatch = new DeathMatch(selectedMap);
+        MyGame.getInstance().setScreen(deathMatch);
+        MyGame.getInstance().setGameZone(deathMatch);
         AudioService.getInstance().initSteps();
         AudioService.getInstance().smoothStopMusic();
       }

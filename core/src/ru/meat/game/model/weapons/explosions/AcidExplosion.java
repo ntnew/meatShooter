@@ -6,8 +6,7 @@ import ru.meat.game.model.FloatPair;
 public class AcidExplosion extends Explosion{
 
 
-  public AcidExplosion(FloatPair pos, float angle, Long bornDate,
-      float scale) {
+  public AcidExplosion(FloatPair pos, float angle, Long bornDate, float scale) {
     super(pos, angle, bornDate, scale, ExplosionsService.getInstance().getAcidExplosionAnimation());
   }
 

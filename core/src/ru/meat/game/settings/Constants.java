@@ -29,7 +29,7 @@ public class Constants {
   /**
    * Скорость бега игрока
    */
-  public static float PLAYER_MOVE_SPEED = 4f;
+  public static float PLAYER_MOVE_SPEED = 1f;
 
   public static boolean DEBUG = false;
 

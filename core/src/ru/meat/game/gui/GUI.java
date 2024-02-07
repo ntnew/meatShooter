@@ -11,17 +11,13 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Data;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.model.player.PlayerService;
 
 @Data
 public class GUI {
@@ -35,65 +31,33 @@ public class GUI {
     return instance;
   }
 
-  private SpriteBatch batch;
+  private Stage stage;
 
-  /**
-   * спрайт хп бара
-   */
-  private Sprite hpSprite;
   private OrthographicCamera camera;
 
-  /**
-   * текстуры хп бара
-   */
-  private final List<Texture> hpTextures = new ArrayList<>();
-
   private Cursor cursor;
-  private Sprite damageScreen;
-  private Float damageScreenAlpha;
-  private Long damageScreenTransparentCounter;
 
+  private DamageScreen damageScreen;
   private Joystick joystick;
 
-  private Sprite button;
-
-  /**
-   * Значение максимального хп, для подсчёта оставшегося процента хп
-   */
-  private double fullHp;
+  private Image button;
 
   public GUI() {
-    for (int i = 0; i < 51; i++) {
-      hpTextures.add(LoaderManager.getInstance().get("gui/hpBar/" + i + ".png"));
-    }
-    hpTextures.forEach(t -> t.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear));
-
     //init camera
     camera = new OrthographicCamera();
-    camera.zoom = MAIN_ZOOM * GUI_ZOOM;
+    camera.zoom = MAIN_ZOOM;
     camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
+    camera.update();
 
-    batch = new SpriteBatch();
-    batch.setProjectionMatrix(camera.combined);
+    stage = new Stage(new ScreenViewport(camera));
 
     //init hp sprite
-    hpSprite = new Sprite(getActualTexture(null));
-    hpSprite.setPosition(camera.viewportWidth / 2 * MAIN_ZOOM * GUI_ZOOM - hpSprite.getWidth() / 2,
-        camera.viewportHeight * MAIN_ZOOM * GUI_ZOOM - hpSprite.getHeight());
-    hpSprite.flip(false, true);
+    stage.addActor(new HPItem(stage));
 
     //init damage red screen sprite
-    damageScreen = new Sprite((Texture) LoaderManager.getInstance().get("gui/damageScreen.png"));
-    damageScreen.setScale(Gdx.graphics.getWidth() / damageScreen.getWidth() * MAIN_ZOOM * GUI_ZOOM,
-        Gdx.graphics.getHeight() / damageScreen.getHeight() * MAIN_ZOOM * GUI_ZOOM);
-    damageScreen.setPosition(camera.viewportWidth / 2 * MAIN_ZOOM * GUI_ZOOM - damageScreen.getWidth() / 2,
-        camera.viewportHeight / 2 * MAIN_ZOOM * GUI_ZOOM - damageScreen.getHeight() / 2);
-    damageScreenAlpha = 0f;
-    damageScreen.setAlpha(damageScreenAlpha);
-    if (damageScreenTransparentCounter == null) {
-      damageScreenTransparentCounter = TimeUtils.millis();
-    }
+    damageScreen = new DamageScreen();
+    stage.addActor(damageScreen);
 
     //init левый джойстик
     if (MOBILE) {
@@ -105,17 +69,20 @@ public class GUI {
   private void createChangeWeaponButton() {
     Texture texture = LoaderManager.getInstance().get("gui/changeWeaponButton.png");
     texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
-    button = new Sprite(texture);
-    button.setPosition(camera.viewportWidth * MAIN_ZOOM * GUI_ZOOM - button.getWidth() - 50,
-        camera.viewportHeight * MAIN_ZOOM * GUI_ZOOM - button.getHeight() - 50);
-    button.setScale(1.5f);
+    button = new Image(texture);
+    button.setPosition(camera.viewportWidth,
+        camera.viewportHeight);
+    button.setScale(1.2f);
+    stage.addActor(button);
+    StringBuffer buffer;
+    StringBuilder builder;
   }
 
   /**
    * Создать левый и правый контроллеры джойстика
    */
   private void createJoysticks() {
-    this.joystick = new Joystick(camera.viewportWidth * MAIN_ZOOM * GUI_ZOOM);
+    this.joystick = new Joystick(stage);
   }
 
 
@@ -123,48 +90,8 @@ public class GUI {
    * Рисовать интерфейс, вызывается в рендере
    */
   public void draw() {
-    handleDamageScreenTransparency();
-
-    batch.begin();
-    hpSprite.setTexture(getActualTexture(PlayerService.getInstance().getPlayer().getHp()));
-    hpSprite.draw(batch);
-    damageScreen.draw(batch);
-    if (MOBILE) {
-      joystick.draw(batch);
-      button.draw(batch);
-    }
-    batch.end();
-  }
-
-  /**
-   * Обработать прозрачность красного экрана
-   */
-  private void handleDamageScreenTransparency() {
-    if (damageScreenAlpha != 0 && TimeUtils.timeSinceMillis(damageScreenTransparentCounter) > 100) {
-      damageScreenAlpha = damageScreenAlpha - 0.005f;
-    }
-    if (damageScreenAlpha < 0) {
-      damageScreenAlpha = 0f;
-    }
-    damageScreen.setAlpha(damageScreenAlpha);
-  }
-
-  /**
-   * Посчитать сколько процентов хп осталось и выдать нужную текстуру хпБара
-   *
-   * @param hp оставшиеся хп
-   */
-  private Texture getActualTexture(Double hp) {
-    if (hp == null) {
-      return hpTextures.get(0);
-    }
-    int i = Integer.parseInt(
-        BigDecimal.valueOf((100 - hp / (fullHp / 100)) / 2).setScale(0, RoundingMode.HALF_DOWN).toString());
-    if (i < hpTextures.size()) {
-      return hpTextures.get(i);
-    } else {
-      return hpTextures.get(hpTextures.size() - 1);
-    }
+    stage.act();
+    stage.draw();
   }
 
   /**
@@ -209,18 +136,11 @@ public class GUI {
     LoaderManager.getInstance().load("gui/changeWeaponButton.png", Texture.class, TEXTURE_PARAMETERS);
   }
 
-  public void initFullHp() {
-    this.fullHp = PlayerService.getInstance().getPlayer().getHp();
-  }
-
   /**
    * Обработать удар по игроку, сделать красным экран
    */
   public void handleHit() {
-    damageScreenAlpha = damageScreenAlpha + 0.5f;
-    if (damageScreenAlpha > 1) {
-      damageScreenAlpha = 1f;
-    }
+    damageScreen.handleHit();
   }
 
   public Float handleLeftJoystickTouch(int i) {

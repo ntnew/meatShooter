@@ -10,11 +10,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Cursor.SystemCursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.PerformanceCounter;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -24,11 +22,8 @@ import ru.meat.game.MyGame;
 import ru.meat.game.gui.GUI;
 import ru.meat.game.menu.EndGameMenu;
 import ru.meat.game.model.maps.Map;
-import ru.meat.game.model.player.Player;
 import ru.meat.game.model.player.PlayerService;
-import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.service.AudioService;
-import ru.meat.game.service.BulletService;
 import ru.meat.game.service.EnemyService;
 import ru.meat.game.service.FaderService;
 import ru.meat.game.service.MapService;
@@ -51,7 +46,6 @@ public abstract class GameZone implements Screen {
   protected SkeletonRenderer renderer;
   private boolean started = false;
 
-  private long comparatorTime = 0;
 
   private ThreadForZoom threadForZoom;
 
@@ -67,6 +61,8 @@ public abstract class GameZone implements Screen {
   private final Map map;
 
   public GameZone(int map) {
+    Box2dWorld.dispose();
+    Box2dWorld.getInstance();
     //создание камеры
     camera = new OrthographicCamera();
     camera.zoom = MAIN_ZOOM;
@@ -74,14 +70,11 @@ public abstract class GameZone implements Screen {
     camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0f);
     camera.update();
 
-    GUI.getInstance().initFullHp();
     GUI.getInstance().setAimCursor();
 
     beginDate = LocalDateTime.now();
 
     enemyService = new EnemyService();
-
-    spriteBatch = new SpriteBatch();
 
     renderer = new SkeletonRenderer();
     renderer.setPremultipliedAlpha(true);
@@ -110,13 +103,11 @@ public abstract class GameZone implements Screen {
   public void render(float delta) {
     main.start();
 
-   System.out.println("time: " + main.time.value * 1000 + " : load: " + main.load.value * 1000);
+    System.out.println("time: " + main.time.value * 1000 + " : load: " + main.load.value * 1000);
 
     //1
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     AudioService.getInstance().playGameMusic();
-
-    sortEnemies();
 
     //0,003
 
@@ -126,11 +117,6 @@ public abstract class GameZone implements Screen {
     secondStage.act();
     thirdStage.act();
 
-//2 занимает около  10-15%
-//    PlayerService.getInstance().updateState();
-    BulletService.getInstance().updateBullets();
-
-
     if (MOBILE) {
       PlayerService.getInstance().handleMobileTouch(camera);
     } else {
@@ -138,42 +124,26 @@ public abstract class GameZone implements Screen {
       PlayerService.getInstance().handleCameraTransform(camera);
     }
 
-
-//0,1-0,9 от 2.4
-
-//3 занимает около 35%
     handleWorldBounds();
 
     renderSpec(delta);
 
-//1,24 от 3,5 и 0,434 от 1,2
-
     //рисовать текстуры
-
     //4 около 50%
 
-
+    secondary.start();
+    System.out.println("secondary time: " + secondary.time.value * 1000 + " : load: " + secondary.load.value * 1000);
 
     stage.draw();
     secondStage.draw();
     thirdStage.draw();
 
-
-    secondary.start();
-    System.out.println("secondary time: " + secondary.time.value * 1000 + " : load: " + secondary.load.value * 1000);
-
-    BulletService.getInstance().drawBullets(camera);
-
     secondary.stop();
     secondary.tick();
-//0,4 от 1.4  и 2 от 3.8
-
-//5 статически, не увеличивается
 
     Box2dWorld.getInstance().render();
 
     GUI.getInstance().draw();
-//0,2 от 3 и  до 0.3 от 1.2
 
 //6 до конца 0.006, тут норм
     //Нарисовать осветление экрана при старте
@@ -183,6 +153,7 @@ public abstract class GameZone implements Screen {
 
     if (PlayerService.getInstance().getPlayer().isDead()) {
       if (threadForZoom == null) {
+        secondStage.changeGroups();
         threadForZoom = new ThreadForZoom();
         threadForZoom.setDaemon(true);
         threadForZoom.start();
@@ -196,16 +167,6 @@ public abstract class GameZone implements Screen {
 
     main.stop();
     main.tick();
-  }
-
-  /**
-   * Остортировать врагов, чтобы сначала рисовались трупы
-   */
-  private void sortEnemies() {
-    if (TimeUtils.timeSinceMillis(comparatorTime) > 2000) {
-      comparatorTime = TimeUtils.millis();
-      enemyService.sortEnemies();
-    }
   }
 
   /**
@@ -234,6 +195,7 @@ public abstract class GameZone implements Screen {
   public void hide() {
 
   }
+
   @Override
   public void dispose() {
     Box2dWorld.dispose();
@@ -251,21 +213,19 @@ public abstract class GameZone implements Screen {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     new Thread(() -> RpgStatsService.getInstance().increaseExp(enemyService.getRewardPointCount().get())).start();
 
-    PlayerService.endGameSession();
+    PlayerService.dispose();
     AudioService.getInstance().smoothStopMusic();
 
-    enemyService.clearEnemiesBodies();
     MyGame.getInstance().setScreen(
         new EndGameMenu(enemyService.getRewardPointCount().get(),
             this.map.getMapPos(),
             beginDate,
             enemyService.getKillCount().get()));
 
+    stage.dispose();
+    secondStage.dispose();
+    thirdStage.dispose();
     Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
-
-    Box2dWorld.dispose();
-    BulletService.dispose();
-//    ExplosionsService.getInstance().dispose();
   }
 
 
@@ -274,7 +234,7 @@ public abstract class GameZone implements Screen {
    */
   private void handleWorldBounds() {
     //TODO сделать потокобезопасным
-    new Thread(() -> {
+//    new Thread(() -> {
       float camX = camera.position.x;
       float camY = camera.position.y;
 
@@ -304,7 +264,7 @@ public abstract class GameZone implements Screen {
 
         Box2dWorld.getInstance().getCameraBox2D().position.set(camX2, camY2, 0);
       }
-    }).start();
+//    }).start();
   }
 
   class ThreadForZoom extends Thread {

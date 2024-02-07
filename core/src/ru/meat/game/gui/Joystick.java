@@ -1,26 +1,21 @@
 package ru.meat.game.gui;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import lombok.Data;
 import ru.meat.game.utils.GDXUtils;
 
 @Data
 public class Joystick {
+
   private JoystickController left;
 
   private JoystickController right;
 
-  public Joystick(float screenWidth) {
+  public Joystick(Stage stage) {
+    left = new JoystickController(stage, true);
 
-    left = new JoystickController(0);
-
-    right = new JoystickController(screenWidth);
-  }
-
-  public void draw(SpriteBatch batch) {
-    left.draw(batch);
-    right.draw(batch);
+    right = new JoystickController(stage, false);
   }
 
   public boolean isLeftControllerTouched(Vector3 point) {

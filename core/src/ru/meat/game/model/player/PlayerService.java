@@ -8,17 +8,13 @@ import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.esotericsoftware.spine.SkeletonRenderer;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.gui.GUI;
-import ru.meat.game.model.bodyData.BodyUserData;
 import ru.meat.game.model.weapons.Weapon;
 import ru.meat.game.model.weapons.WeaponEnum;
 import ru.meat.game.service.AudioService;
@@ -286,7 +282,7 @@ public class PlayerService {
     return player.getBody().getPosition().y;
   }
 
-  public static void endGameSession() {
+  public static void dispose() {
     instance.getPlayer().setDead(true);
     instance = null;
   }

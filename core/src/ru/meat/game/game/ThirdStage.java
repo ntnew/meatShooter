@@ -12,8 +12,6 @@ public class ThirdStage extends Stage {
   private final Group bleedsGroup = new Group();
   private final Group explosionsGroup = new Group();
 
-  private final Group guiGroup = new Group();
-
   public ThirdStage(OrthographicCamera camera) {
     super(new ScreenViewport(camera));
 
@@ -23,20 +21,14 @@ public class ThirdStage extends Stage {
   }
 
   public void addBullet(Actor actor) {
-    synchronized (this) {
       bulletsGroup.addActor(actor);
-    }
   }
 
   public void addBleeding(Actor actor) {
-    synchronized (this) {
       bleedsGroup.addActor(actor);
-    }
   }
 
   public void addExplosion(Actor actor) {
-    synchronized (this) {
       explosionsGroup.addActor(actor);
-    }
   }
 }

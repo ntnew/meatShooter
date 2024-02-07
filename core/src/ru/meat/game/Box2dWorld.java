@@ -50,8 +50,10 @@ public class Box2dWorld {
 
 
   public static void dispose() {
-    instance.getWorld().dispose();
-    instance = null;
+    if (instance != null && instance.getWorld() != null) {
+      instance.getWorld().dispose();
+      instance = null;
+    }
   }
 
   public void render() {
@@ -62,20 +64,14 @@ public class Box2dWorld {
   }
 
   public void update() {
-    synchronized (world) {
-      world.step(1 / 60f, 1, 1);
-    }
+    world.step(1 / 60f, 1, 1);
   }
 
   public void destroyBody(Body body) {
-    synchronized (world) {
-      world.destroyBody(body);
-    }
+    world.destroyBody(body);
   }
 
   public Body createBody(BodyDef def) {
-    synchronized (world) {
-      return world.createBody(def);
-    }
+    return world.createBody(def);
   }
 }

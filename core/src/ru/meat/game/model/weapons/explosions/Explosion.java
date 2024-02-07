@@ -26,11 +26,6 @@ public class Explosion extends Image {
   protected Long bornDate;
 
   /**
-   * Множитель размера текстуры
-   */
-  protected float scale;
-
-  /**
    * Время анимации
    */
   protected float stateTime;
@@ -42,11 +37,10 @@ public class Explosion extends Image {
     this.pos = pos;
     this.angle = angle;
     this.bornDate = bornDate;
-    this.scale = scale;
 
     setPosition(pos.getX() - this.getDrawable().getMinWidth() / 2, pos.getY() - this.getDrawable().getMinHeight() / 2);
-    scaleBy(scale);
     setOrigin(this.getDrawable().getMinWidth() / 2, this.getDrawable().getMinHeight() / 2);
+    setScale(scale);
     setRotation(angle);
   }
 }

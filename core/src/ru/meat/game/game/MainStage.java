@@ -13,23 +13,28 @@ import lombok.Data;
 public class MainStage extends Stage {
 
   private final Group mapGroup = new Group();
+
   private final Group bloodGroup = new Group();
+
+  private final Group bulletsGroup = new Group();
+
 
   public MainStage(OrthographicCamera camera) {
     super(new ScreenViewport(camera));
     this.addActor(mapGroup);
     this.addActor(bloodGroup);
+    this.addActor(bulletsGroup);
   }
 
   public void addMap(Actor actor) {
-    synchronized (this) {
       mapGroup.addActor(actor);
-    }
   }
 
   public void addBlood(Actor actor) {
-    synchronized (this) {
       bloodGroup.addActor(actor);
-    }
+  }
+
+  public void addBullet(Actor actor) {
+      bulletsGroup.addActor(actor);
   }
 }

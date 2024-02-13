@@ -190,18 +190,18 @@ public class Player extends Actor {
   @Override
   public void draw(Batch batch, float parentAlpha) {
     if (!this.isDead) {
-      drawFeetSprite((PolygonSpriteBatch) batch);
+      drawFeetSprite( batch);
     }
-    drawTopSprite((PolygonSpriteBatch) batch);
+    drawTopSprite(batch);
   }
 
-  private void drawFeetSprite(PolygonSpriteBatch polyBatch) {
+  private void drawFeetSprite(Batch polyBatch) {
     this.feetSkeleton.setPosition(body.getPosition().x * WORLD_TO_VIEW, body.getPosition().y * WORLD_TO_VIEW);
     this.feetSkeleton.getRootBone().setRotation(feetRotationAngle);
     MyGame.getInstance().getGameZone().getRenderer().draw(polyBatch, this.feetSkeleton);
   }
 
-  private void drawTopSprite(PolygonSpriteBatch polyBatch) {
+  private void drawTopSprite(Batch polyBatch) {
     this.topSkeleton.setPosition(body.getPosition().x * WORLD_TO_VIEW, body.getPosition().y * WORLD_TO_VIEW);
     this.topSkeleton.getRootBone().setRotation(modelFrontAngle);
     MyGame.getInstance().getGameZone().getRenderer().draw(polyBatch, this.topSkeleton);

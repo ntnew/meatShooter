@@ -4,7 +4,6 @@ import static ru.meat.game.settings.Constants.MENU_ZOOM;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -108,8 +107,6 @@ public class MyGame extends Game {
   }
 
   public void addActor(Actor actor) {
-
       stage.addActor(actor);
-
   }
 }

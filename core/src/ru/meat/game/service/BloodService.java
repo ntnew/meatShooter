@@ -5,23 +5,19 @@ import static ru.meat.game.settings.Constants.MOBILE;
 import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.MathUtils;
-import java.util.ArrayList;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import lombok.Data;
 import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
+import ru.meat.game.model.Bleeding;
 import ru.meat.game.model.BloodSpot;
 import ru.meat.game.model.FloatPair;
-import ru.meat.game.model.Bleeding;
+import ru.meat.game.utils.AniLoadUtil;
 
 @Data
 public class BloodService {
@@ -37,9 +33,9 @@ public class BloodService {
       "blood/spot/6.png",
       "blood/spot/7.png");
 
-  private static final String bleedAniPath = "blood/ani1/b";
+  private static final String bleedAniPath = "blood/ani1/bloodBlow1.png";
 
-  private Animation<Texture> bleedAnimation;
+  private Animation<TextureRegion> bleedAnimation;
 
   public final float bloodDiffusion = 230 / MAIN_ZOOM;
   private static BloodService instance;
@@ -69,13 +65,11 @@ public class BloodService {
     littleBloodPngName.forEach(x -> LoaderManager.getInstance().load(x, Texture.class, TEXTURE_PARAMETERS));
     bigBloodPngName.forEach(x -> LoaderManager.getInstance().load(x, Texture.class, TEXTURE_PARAMETERS));
 
-    for (int i = 0; i < 8; i++) {
-      LoaderManager.getInstance().load(bleedAniPath + i + ".png", Texture.class, TEXTURE_PARAMETERS);
-    }
+    LoaderManager.getInstance().load(bleedAniPath, Texture.class, TEXTURE_PARAMETERS);
   }
 
   public void createBleeding(float x, float y) {
-    new Thread(() -> MyGame.getInstance().getGameZone().getThirdStage()
+    new Thread(() -> MyGame.getInstance().getGameZone().getSecondStage()
         .addBleeding(new Bleeding(bleedAnimation, new FloatPair(x * WORLD_TO_VIEW, y * WORLD_TO_VIEW)))).start();
   }
 
@@ -83,14 +77,7 @@ public class BloodService {
    * Загрузить анимацию кровотечения от попадания пули
    */
   private void initializeBleedingAnimation() {
-    Texture[] bleedTextures = new Texture[8];
-    for (int i = 0; i < 8; i++) {
-      bleedTextures[i] = LoaderManager.getInstance().get(bleedAniPath + i + ".png");
-    }
-    for (Texture bleedTexture : bleedTextures) {
-      bleedTexture.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.MipMapLinearNearest);
-    }
-    bleedAnimation = new Animation<>(0.06f, bleedTextures);
+    bleedAnimation = AniLoadUtil.getAniFromResources(bleedAniPath, 0.06f, 4, 2);
   }
 
   /**

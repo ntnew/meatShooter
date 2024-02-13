@@ -2,37 +2,25 @@ package ru.meat.game.service;
 
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
-import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import lombok.Data;
 import ru.meat.game.Box2dWorld;
 import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
-import ru.meat.game.model.FloatPair;
-import ru.meat.game.model.weapons.bullets.Bullet;
 import ru.meat.game.model.weapons.bullets.BulletBodyUserData;
 import ru.meat.game.model.weapons.BulletType;
 import ru.meat.game.model.weapons.bullets.CommonBullet;
 import ru.meat.game.model.weapons.bullets.EnemyAcidBullet;
-import ru.meat.game.model.weapons.explosions.ExplosionsService;
 import ru.meat.game.settings.Filters;
+import ru.meat.game.utils.AniLoadUtil;
 import ru.meat.game.utils.GDXUtils;
 import ru.meat.game.settings.Constants;
 
@@ -41,7 +29,9 @@ public class BulletService {
 
   private static BulletService instance;
 
-  private Animation<Texture> acidBulletAnimation;
+  private final static String widowAttackResourcePath ="ani/widowAttack/fly/flyall.png";
+  private static final int FRAME_COLS = 6, FRAME_ROWS = 3;
+  private Animation<TextureRegion> acidBulletAnimation;
 
   public static BulletService getInstance() {
     if (instance == null) {
@@ -51,20 +41,19 @@ public class BulletService {
   }
 
   public BulletService() {
+    loadWidowBulletAni();
+  }
 
-    Texture[] l = new Texture[19];
-
-    for (int i = 0; i < 19; i++) {
-      l[i] = LoaderManager.getInstance().get("ani/widowAttack/fly/" + i + ".png");
-    }
-    acidBulletAnimation = new Animation<>(0.025f, l);
+  private void loadWidowBulletAni() {
+    acidBulletAnimation = AniLoadUtil.getAniFromResources(widowAttackResourcePath,
+        0.020f, FRAME_COLS, FRAME_ROWS);
   }
 
 
   public static void initResources() {
-    for (int i = 0; i < 19; i++) {
-      LoaderManager.getInstance().load("ani/widowAttack/fly/" + i + ".png", Texture.class, TEXTURE_PARAMETERS);
-    }
+    LoaderManager.getInstance().load("Bullet1.png", Texture.class, TEXTURE_PARAMETERS);
+    LoaderManager.getInstance().load("GBullet.png", Texture.class, TEXTURE_PARAMETERS);
+    LoaderManager.getInstance().load(widowAttackResourcePath, Texture.class, TEXTURE_PARAMETERS);
   }
 
   /**
@@ -145,7 +134,7 @@ public class BulletService {
         (toY - fromY) * bulletSpeed * MAIN_ZOOM);
     //создать спрайт текстуры
 
-    Bullet bullet = new EnemyAcidBullet(bulletBody, bulletScale);
-    MyGame.getInstance().getGameZone().getThirdStage().addBullet(bullet);
+//    Bullet bullet = ;
+    MyGame.getInstance().getGameZone().getSecondStage().addBullet(new EnemyAcidBullet(bulletBody, bulletScale));
   }
 }

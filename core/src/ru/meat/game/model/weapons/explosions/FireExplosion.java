@@ -20,8 +20,8 @@ public class FireExplosion extends Explosion {
   private final static long explosionLifeTime = 600;
   private final Body body;
 
-  public FireExplosion(FloatPair pos, Long bornDate, float scale, Body body) {
-    super(pos, MathUtils.random(0, 359), bornDate, scale, ExplosionsService.getInstance().getFireExplosionAnimation());
+  public FireExplosion(FloatPair pos, Body body) {
+    super(pos, MathUtils.random(0, 359), 4, ExplosionsService.getInstance().getFireExplosionAnimation());
     this.body = body;
   }
 
@@ -42,7 +42,7 @@ public class FireExplosion extends Explosion {
     }
 
     ((TextureRegionDrawable) getDrawable()).setRegion(
-            ExplosionsService.getInstance().getFireExplosionAnimation().getKeyFrame(stateTime += delta, false));
+        ExplosionsService.getInstance().getFireExplosionAnimation().getKeyFrame(stateTime += delta, false));
     super.act(delta);
   }
 }

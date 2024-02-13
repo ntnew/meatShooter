@@ -40,7 +40,7 @@ public class BlackWidowScripts {
           Gdx.app.postRunnable(() ->
               BulletService.getInstance().createEnemyBullet(
                   enemy.getBody().getPosition().x, enemy.getBody().getPosition().y,
-                  playerPos.getX(), playerPos.getY(), 0.2f, 40, 40 / MAIN_ZOOM, BulletType.ENEMY_COMMON, 0.25f
+                  playerPos.getX(), playerPos.getY(), 0.2f, 40, 40 / MAIN_ZOOM, BulletType.ENEMY_COMMON, 0.4f
               ));
         }
       }
@@ -56,12 +56,12 @@ public class BlackWidowScripts {
         enemy.setSpeedY(sin * enemy.getSpeed());
         enemy.setSpeedX(cos * enemy.getSpeed());
 
-          Gdx.app.postRunnable(() -> {
-            if (enemy.getBody() != null && enemy.getBody().isActive()) {
-              enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
-                  enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
-            }
-          });
+        Gdx.app.postRunnable(() -> {
+          if (enemy.getBody() != null && enemy.getBody().isActive()) {
+            enemy.getBody().setTransform(enemy.getBody().getPosition().x + enemy.getSpeedX(),
+                enemy.getSpeedY() + enemy.getBody().getPosition().y, 0);
+          }
+        });
 
       }
       return true;

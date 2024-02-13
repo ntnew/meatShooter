@@ -50,10 +50,7 @@ public class MapSelectorMenu implements Screen {
 
   @Override
   public void show() {
-
     LoaderManager.getInstance().load(Maps.getNameByPos(selectedMap).getName(), Texture.class, TEXTURE_PARAMETERS);
-    LoaderManager.getInstance().load("Bullet1.png", Texture.class, TEXTURE_PARAMETERS);
-    LoaderManager.getInstance().load("GBullet.png", Texture.class, TEXTURE_PARAMETERS);
     ExplosionsService.initResources();
     BulletService.initResources();
     EnemiesAnimation.loadResources();

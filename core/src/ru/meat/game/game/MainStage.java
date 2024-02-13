@@ -1,7 +1,7 @@
 package ru.meat.game.game;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.CpuSpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,6 +21,7 @@ public class MainStage extends Stage {
 
   public MainStage(OrthographicCamera camera) {
     super(new ScreenViewport(camera));
+    this.getBatch().enableBlending();
     this.addActor(mapGroup);
     this.addActor(bloodGroup);
     this.addActor(bulletsGroup);

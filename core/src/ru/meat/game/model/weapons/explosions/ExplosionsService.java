@@ -4,45 +4,33 @@ import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.TEXTURE_PARAMETERS;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import lombok.Data;
-import ru.meat.game.Box2dWorld;
 import ru.meat.game.MyGame;
 import ru.meat.game.loader.LoaderManager;
 import ru.meat.game.model.FloatPair;
 import ru.meat.game.service.AudioService;
 import ru.meat.game.settings.Filters;
+import ru.meat.game.utils.AniLoadUtil;
 import ru.meat.game.utils.GDXUtils;
 
 @Data
 public class ExplosionsService {
 
-  private Texture fireAnimationSheet;
-
   private Animation<TextureRegion> fireExplosionAnimation;
-
 
   private Animation<TextureRegion> acidExplosionAnimation;
 
   private static final int FRAME_COLS = 8, FRAME_ROWS = 6;
 
-
   private static ExplosionsService instance;
-
 
   public static ExplosionsService getInstance() {
     if (instance == null) {
@@ -52,22 +40,10 @@ public class ExplosionsService {
   }
 
   public ExplosionsService() {
-    fireAnimationSheet = LoaderManager.getInstance().get("ani/explosion.png");
-    fireAnimationSheet.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.MipMapLinearLinear);
 
-    TextureRegion[][] tmp = TextureRegion.split(fireAnimationSheet,
-        fireAnimationSheet.getWidth() / FRAME_COLS,
-        fireAnimationSheet.getHeight() / FRAME_ROWS);
-
-    TextureRegion[] frames = new TextureRegion[FRAME_COLS * FRAME_ROWS];
-    int index = 0;
-    for (int i = 0; i < FRAME_ROWS; i++) {
-      for (int j = 0; j < FRAME_COLS; j++) {
-        frames[index++] = tmp[i][j];
-      }
-    }
-
-    fireExplosionAnimation = new Animation<>(0.01f, frames);
+    fireExplosionAnimation = AniLoadUtil.getAniFromResources("ani/explosion.png", 0.01f,
+        FRAME_COLS,
+        FRAME_ROWS);
 
     TextureRegion[] l = new TextureRegion[10];
 
@@ -96,14 +72,14 @@ public class ExplosionsService {
       Body body = GDXUtils.createCircleForModel(12 / MAIN_ZOOM, 100, explosionBodyUserData, pos.getX(), pos.getY(),
           true);
       body.getFixtureList().get(0).setFilterData(Filters.getPlayerBulletFilter());
-      MyGame.getInstance().getGameZone().getThirdStage()
-          .addExplosion(new FireExplosion(pos, TimeUtils.millis(), 4, body));
+      MyGame.getInstance().getGameZone().getSecondStage()
+          .addExplosion(new FireExplosion(pos, body));
     });
   }
 
   public void createAcidExplosion(FloatPair pos) {
     new Thread(() ->
         MyGame.getInstance().getGameZone().getStage()
-            .addBlood(new AcidExplosion(pos, MathUtils.random(0, 359), TimeUtils.millis(), 0.8f))).start();
+            .addBlood(new AcidExplosion(pos))).start();
   }
 }

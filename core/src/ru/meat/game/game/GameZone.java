@@ -10,6 +10,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Cursor.SystemCursor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.PerformanceCounter;
@@ -53,8 +54,6 @@ public abstract class GameZone implements Screen {
 
   protected SecondStage secondStage;
 
-  protected ThirdStage thirdStage;
-
   PerformanceCounter main = new PerformanceCounter("Main");
   PerformanceCounter secondary = new PerformanceCounter("secondary");
 
@@ -85,12 +84,12 @@ public abstract class GameZone implements Screen {
 
     this.stage = new MainStage(camera);
     this.map = MapService.initMap(map);
-    stage.addMap(this.map);
 
     this.secondStage = new SecondStage(camera);
+    this.stage.addMap(this.map);
+
     this.secondStage.addPlayer(PlayerService.getInstance().getPlayer());
 
-    this.thirdStage = new ThirdStage(camera);
     Gdx.input.setInputProcessor(new MyInputProcessor(this));
   }
 
@@ -115,7 +114,6 @@ public abstract class GameZone implements Screen {
 
     stage.act();
     secondStage.act();
-    thirdStage.act();
 
     if (MOBILE) {
       PlayerService.getInstance().handleMobileTouch(camera);
@@ -136,7 +134,6 @@ public abstract class GameZone implements Screen {
 
     stage.draw();
     secondStage.draw();
-    thirdStage.draw();
 
     secondary.stop();
     secondary.tick();
@@ -167,6 +164,8 @@ public abstract class GameZone implements Screen {
 
     main.stop();
     main.tick();
+
+
   }
 
   /**
@@ -224,7 +223,6 @@ public abstract class GameZone implements Screen {
 
     stage.dispose();
     secondStage.dispose();
-    thirdStage.dispose();
     Gdx.graphics.setSystemCursor(SystemCursor.Arrow);
   }
 

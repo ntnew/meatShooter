@@ -213,7 +213,7 @@ public class Enemy extends Image {
     @SneakyThrows
     @Override
     public void run() {
-      while (skeleton.getColor().a > 0.5f) {
+      while (skeleton.getColor().a > 0.05f) {
         skeleton.getColor().a = skeleton.getColor().a - 0.05f;
         Thread.sleep(100);
       }

@@ -3,15 +3,10 @@ package ru.meat.game.game;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.SpriteCache;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import lombok.Data;
 import ru.meat.game.MyGame;
@@ -105,31 +100,35 @@ public class MainStage extends Stage {
         }
       }
       if (rightRect.x + rightRect.getWidth() < camRect.getX() + camRect.getWidth()) {
-        mapGroup.addActor(MapService.initMap(1, rightRect.getX() + rightRect.getWidth(), rightRect.getY()));
+        mapGroup.addActor(MapService.initMap(rightRect.getX() + rightRect.getWidth(), rightRect.getY()));
         mapGroup.addActor(
-            MapService.initMap(1, rightRect.getX() + rightRect.getWidth(), rightRect.getY() + rightRect.getHeight()));
+            MapService.initMap(rightRect.getX() + rightRect.getWidth(), rightRect.getY() + rightRect.getHeight()));
         mapGroup.addActor(
-            MapService.initMap(1, rightRect.getX() + rightRect.getWidth(), rightRect.getY() - rightRect.getHeight()));
+            MapService.initMap(rightRect.getX() + rightRect.getWidth(), rightRect.getY() - rightRect.getHeight()));
       }
 
       if (topRect.y + topRect.getHeight() < camRect.getY() + camRect.getHeight()) {
-        mapGroup.addActor(MapService.initMap(1, topRect.getX(), topRect.getY() + topRect.getHeight()));
-        mapGroup.addActor(MapService.initMap(1, topRect.getX() + topRect.getWidth(), topRect.getY() + topRect.getHeight()));
-        mapGroup.addActor(MapService.initMap(1, topRect.getX() - topRect.getWidth(), topRect.getY() + topRect.getHeight()));
+        mapGroup.addActor(MapService.initMap(topRect.getX(), topRect.getY() + topRect.getHeight()));
+        mapGroup.addActor(
+            MapService.initMap(topRect.getX() + topRect.getWidth(), topRect.getY() + topRect.getHeight()));
+        mapGroup.addActor(
+            MapService.initMap(topRect.getX() - topRect.getWidth(), topRect.getY() + topRect.getHeight()));
       }
 
-      if (leftRect.x  > camRect.getX()) {
-        mapGroup.addActor(MapService.initMap(1, leftRect.getX() - leftRect.getWidth(), leftRect.getY()));
+      if (leftRect.x > camRect.getX()) {
+        mapGroup.addActor(MapService.initMap(leftRect.getX() - leftRect.getWidth(), leftRect.getY()));
         mapGroup.addActor(
-            MapService.initMap(1, leftRect.getX() - leftRect.getWidth(), leftRect.getY() + leftRect.getHeight()));
+            MapService.initMap(leftRect.getX() - leftRect.getWidth(), leftRect.getY() + leftRect.getHeight()));
         mapGroup.addActor(
-            MapService.initMap(1, leftRect.getX() - leftRect.getWidth(), leftRect.getY() - leftRect.getHeight()));
+            MapService.initMap(leftRect.getX() - leftRect.getWidth(), leftRect.getY() - leftRect.getHeight()));
       }
 
-      if (downRect.y  > camRect.getY()) {
-        mapGroup.addActor(MapService.initMap(1, downRect.getX(), downRect.getY() - downRect.getHeight()));
-        mapGroup.addActor(MapService.initMap(1, downRect.getX() + downRect.getWidth(), downRect.getY() - downRect.getHeight()));
-        mapGroup.addActor(MapService.initMap(1, downRect.getX() - downRect.getWidth(), downRect.getY() - downRect.getHeight()));
+      if (downRect.y > camRect.getY()) {
+        mapGroup.addActor(MapService.initMap(downRect.getX(), downRect.getY() - downRect.getHeight()));
+        mapGroup.addActor(
+            MapService.initMap(downRect.getX() + downRect.getWidth(), downRect.getY() - downRect.getHeight()));
+        mapGroup.addActor(
+            MapService.initMap(downRect.getX() - downRect.getWidth(), downRect.getY() - downRect.getHeight()));
       }
     }
   }

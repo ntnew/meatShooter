@@ -27,7 +27,7 @@ public class MapService {
     return new Map(FloatPair.create(0f, 0f), getMap());
   }
 
-  public static Map initMap(int mapPos, float x, float y) {
+  public static Map initMap(float x, float y) {
     return new Map(FloatPair.create(x, y), getMap());
   }
 }

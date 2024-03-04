@@ -18,13 +18,13 @@ public class LittleBugScripts {
       if (userData.isNeedAttack()) {
         if (!enemy.getStatus().equals(EnemyStatus.ATTACK)) {
           enemy.setStatus(EnemyStatus.ATTACK);
-          enemy.getState().setAnimation(0, "attack", false);
-          enemy.getState().addAnimation(0, "walk", true, 0);
+          enemy.getAnimationState().setAnimation(0, "attack", false);
+          enemy.getAnimationState().addAnimation(0, "walk", true, 0);
         }
         userData.setNeedAttack(false);
       } else {
-        if (!enemy.getStatus().equals(EnemyStatus.MOVE) && enemy.getState().getTracks().isEmpty()) {
-          enemy.getState().setAnimation(0, "walk", true);
+        if (!enemy.getStatus().equals(EnemyStatus.MOVE) && enemy.getAnimationState().getTracks().isEmpty()) {
+          enemy.getAnimationState().setAnimation(0, "walk", true);
         }
         enemy.setStatus(EnemyStatus.MOVE);
       }

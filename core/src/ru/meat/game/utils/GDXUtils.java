@@ -4,6 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -74,6 +75,10 @@ public class GDXUtils {
    */
   public static float calcGipotenuza(float x1, float y1, float x2, float y2) {
     return calcGipotenuza(x1 - x2, y1 - y2);
+  }
+
+  public static float calcGipotenuza(Vector2 v1, Vector2 v2) {
+    return calcGipotenuza(v1.x - v2.x, v1.y - v2.y);
   }
 
   public static float calcGipotenuza(float catet1, float catet2) {

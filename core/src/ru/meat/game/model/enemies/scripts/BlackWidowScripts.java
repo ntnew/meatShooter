@@ -25,14 +25,14 @@ public class BlackWidowScripts {
       if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 4000 && !enemy.getStatus().equals(EnemyStatus.ATTACK)) {
         enemy.setActionCounter(TimeUtils.millis());
         enemy.setStatus(EnemyStatus.ATTACK);
-        enemy.getState().setAnimation(0, "attack", false);
+        enemy.getAnimationState().setAnimation(0, "attack", false);
         enemy.setNeedCreateBullet(true);
         enemy.setTimestampFromAttackBegin(TimeUtils.millis());
       } else if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 1000 && enemy.getStatus()
           .equals(EnemyStatus.ATTACK)) {
         enemy.setActionCounter(TimeUtils.millis());
         enemy.setStatus(EnemyStatus.MOVE);
-        enemy.getState().setAnimation(0, "walk", true);
+        enemy.getAnimationState().setAnimation(0, "walk", true);
       }
       if (enemy.getNeedCreateBullet() && TimeUtils.timeSinceMillis(enemy.getTimestampFromAttackBegin()) > 300) {
         enemy.setNeedCreateBullet(false);

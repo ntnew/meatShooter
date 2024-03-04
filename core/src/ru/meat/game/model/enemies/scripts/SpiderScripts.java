@@ -28,8 +28,8 @@ public class SpiderScripts {
       if (userData.isNeedAttack()) {
         if (!enemy.getStatus().equals(EnemyStatus.ATTACK)) {
           enemy.setStatus(EnemyStatus.ATTACK);
-          enemy.getState().setAnimation(0, "attack", false);
-          enemy.getState().addAnimation(0, "walk", true, 0);
+          enemy.getAnimationState().setAnimation(0, "attack", false);
+          enemy.getAnimationState().addAnimation(0, "walk", true, 0);
         }
         userData.setNeedAttack(false);
       }
@@ -41,8 +41,8 @@ public class SpiderScripts {
           && !userData.isNeedAttack()) {
         enemy.setActionCounter(TimeUtils.millis());
         enemy.setStatus(EnemyStatus.MOVE);
-        if (!enemy.getStatus().equals(EnemyStatus.MOVE) && enemy.getState().getTracks().isEmpty()) {
-          enemy.getState().setAnimation(0, "walk", true);
+        if (!enemy.getStatus().equals(EnemyStatus.MOVE) && enemy.getAnimationState().getTracks().isEmpty()) {
+          enemy.getAnimationState().setAnimation(0, "walk", true);
         }
       } else if (TimeUtils.timeSinceMillis(enemy.getActionCounter()) > 2000 && !enemy.getStatus()
           .equals(EnemyStatus.IDLE)) {
@@ -51,6 +51,7 @@ public class SpiderScripts {
       }
 
       if (enemy.getStatus().equals(EnemyStatus.MOVE)) {
+        //todo заменить на утильный класс
         float catetPrilezjaschiy = floatPair.getX() - enemy.getBody().getPosition().x;
         float catetProtivo = floatPair.getY() - enemy.getBody().getPosition().y;
         float gip = GDXUtils.calcGipotenuza(catetPrilezjaschiy, catetProtivo);

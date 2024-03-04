@@ -51,7 +51,7 @@ public class MyGame extends Game {
     Gdx.graphics.setWindowedMode(Settings.getInstance().SCREEN_WIDTH, Settings.getInstance().SCREEN_HEIGHT);
     initCam();
 
-//   Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+   Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
 // fullscreen
 
     font = new BitmapFont();

@@ -190,7 +190,7 @@ public class Player extends Actor {
   @Override
   public void draw(Batch batch, float parentAlpha) {
     if (!this.isDead) {
-      drawFeetSprite( batch);
+      drawFeetSprite(batch);
     }
     drawTopSprite(batch);
   }

@@ -20,7 +20,6 @@ public class PlayerControlHandlerThread extends Thread {
       PlayerService.getInstance().handleMoveKey();
       handleMouse();
     }
-    System.out.println("ВЫШЕЛ");
   }
 
   private void sleep() {

@@ -43,8 +43,7 @@ public class PlayerService {
   private Long weaponChangeLock = 0L;
 
   public PlayerService() {
-    player = new Player(Gdx.graphics.getWidth() / 2f * MAIN_ZOOM,
-        Gdx.graphics.getHeight() / 2f * MAIN_ZOOM);
+    player = new Player(0, 0);
 
     finalSpeed = calcSpeed();
   }

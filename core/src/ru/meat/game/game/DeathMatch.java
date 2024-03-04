@@ -3,12 +3,13 @@ package ru.meat.game.game;
 import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
-import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.SnapshotArray;
-import java.sql.Array;
+import com.badlogic.gdx.utils.TimeUtils;
 import java.util.ArrayList;
+import ru.meat.game.MyGame;
 import ru.meat.game.model.EnemyStatus;
 import ru.meat.game.model.enemies.Enemy;
 import ru.meat.game.model.enemies.EnemyFactory;
@@ -20,9 +21,17 @@ public class DeathMatch extends GameZone {
     super(map);
   }
 
+  private long complexityTimestamp = TimeUtils.millis();
+  private int enemyCount = 30;
+  private final int enemyCountAddStep = 15;
+  private final int increaseComplexityEvery = 60000;
   @Override
   protected void renderSpec(float delta) {
     createMoreEnemies();
+  }
+
+  private boolean isEmpty(Object[] el){
+    return el== null || el.length == 0;
   }
 
   private void createMoreEnemies() {
@@ -30,45 +39,49 @@ public class DeathMatch extends GameZone {
     SnapshotArray<Actor> children = getSecondStage().getEnemiesGroup().getChildren();
 
     children.forEach(objects::add);
-    if (objects.stream().filter(x -> ((Enemy) x).getStatus() != EnemyStatus.DIED).count() < 30) {
+    // Добавлять врагов каждые 1 минуты
+    if (TimeUtils.timeSinceMillis(complexityTimestamp) > increaseComplexityEvery) {
+      complexityTimestamp = TimeUtils.millis();
+      enemyCount += enemyCountAddStep;
+
+    }
+
+    if (objects.stream().filter(x -> ((Enemy) x).getStatus() != EnemyStatus.DIED).count() < enemyCount) {
       // Инициализация начальной позиции
+      OrthographicCamera camera = MyGame.getInstance().getGameZone().getCamera();
+
       float xBound1 = PlayerService.getInstance().getBodyPosX() * WORLD_TO_VIEW;
       float xBound2 = PlayerService.getInstance().getBodyPosX() * WORLD_TO_VIEW;
       float yBound1 = PlayerService.getInstance().getBodyPosY() * WORLD_TO_VIEW;
       float yBound2 = PlayerService.getInstance().getBodyPosY() * WORLD_TO_VIEW;
-      float deltaByY = Gdx.graphics.getHeight() * MAIN_ZOOM;
-      float deltaByX = Gdx.graphics.getWidth() * MAIN_ZOOM;
+      float deltaByY = camera.viewportHeight * MAIN_ZOOM;
+      float deltaByX = camera.viewportWidth * MAIN_ZOOM;
 
       //рандомизация позиции появления врагов
       int random = MathUtils.random(1, 4);
       if (random == 1) {
-        xBound1 = xBound1 - deltaByX / 2 - 100;
-        xBound2 = xBound2 - deltaByX / 2 - 80;
+        xBound1 = xBound1 - deltaByX - 100;
+        xBound2 = xBound2 - deltaByX  - 80;
         yBound1 = yBound1 - deltaByY;
         yBound2 = yBound2 + deltaByY;
       } else if (random == 2) {
-        xBound1 = xBound1 + deltaByX / 2 + 80;
-        xBound2 = xBound2 + deltaByX / 2 + 100;
+        xBound1 = xBound1 + deltaByX  + 80;
+        xBound2 = xBound2 + deltaByX + 100;
         yBound1 = yBound1 - deltaByY;
         yBound2 = yBound2 + deltaByY;
       } else if (random == 3) {
         xBound1 = xBound1 - deltaByX;
         xBound2 = xBound2 + deltaByX;
-        yBound1 = yBound1 + deltaByY / 2 + 80;
-        yBound2 = yBound2 + deltaByY / 2 + 100;
+        yBound1 = yBound1 + deltaByY  + 80;
+        yBound2 = yBound2 + deltaByY  + 100;
       } else if (random == 4) {
         xBound1 = xBound1 - deltaByX;
         xBound2 = xBound2 + deltaByX;
-        yBound1 = yBound1 - deltaByY / 2 - 100;
-        yBound2 = yBound2 - deltaByY / 2 - 80;
+        yBound1 = yBound1 - deltaByY - 100;
+        yBound2 = yBound2 - deltaByY  - 80;
       }
 //      Создание врага
       int random1 = MathUtils.random(0, 100);
-
-//      enemyService.getEnemies().add(
-//            EnemyFactory.createScorpionBoss(
-//                500,
-//               500));
 
       if (random1 > 30) {
         enemyService.addEnemy(

@@ -1,15 +1,10 @@
 package ru.meat.game.model.enemies;
 
-import static ru.meat.game.settings.Constants.MAIN_ZOOM;
 import static ru.meat.game.settings.Constants.WORLD_TO_VIEW;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.esotericsoftware.spine.AnimationState;
-import com.esotericsoftware.spine.Skeleton;
-import java.util.concurrent.TimeUnit;
+import com.esotericsoftware.spine.utils.SkeletonActor;
 import java.util.function.BiFunction;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -22,38 +17,12 @@ import ru.meat.game.model.player.PlayerService;
 import ru.meat.game.service.AudioService;
 
 @Data
-public class Enemy extends Image {
+public class Enemy extends SkeletonActor {
 
   private Body body;
 
-  private AnimationState state;
-
-  private Skeleton skeleton;
-
   private float actionPing;
   private Long actionCounter;
-
-  /**
-   * Радиус модельки бокс2д
-   */
-  private float radius;
-
-  /**
-   * Направление
-   */
-  private FloatPair destination;
-
-  /**
-   * Направление
-   */
-  private FloatPair floatDestination;
-
-
-  /**
-   * скорость поворота
-   */
-  private FloatPair turnSpeed = new FloatPair(1f * MAIN_ZOOM, 1f * MAIN_ZOOM);
-
 
   /**
    * Здоровье
@@ -74,21 +43,6 @@ public class Enemy extends Image {
    */
   private float speedY;
   /**
-   * Позиции
-   */
-  private volatile Float posX;
-  private volatile Float posY;
-
-  /**
-   * Урон врага
-   */
-  private int attack;
-  /**
-   * Скорость атаки секунд длится одна атака
-   */
-  private Double attackSpeed;
-
-  /**
    * Статус действия модельки
    */
   private EnemyStatus status;
@@ -106,7 +60,7 @@ public class Enemy extends Image {
   /**
    * Прозрачность
    */
-  private float transparency;
+  private float transparency = 1;
 
   private Boolean needCreateBullet = false;
   private Long timestampFromAttackBegin;
@@ -115,59 +69,48 @@ public class Enemy extends Image {
 
   private Boolean needDispose = false;
 
-  public Enemy(float posX, float posY, int hp, float speed, float actionPing, FloatPair playerCoord) {
+  public Enemy(int hp, float speed, float actionPing, Body body) {
     this.actionPing = actionPing;
     this.hp = hp;
     this.speed = speed;
     this.speedX = 0;
     this.speedY = 0;
-    this.posX = posX;
-    this.posY = posY;
-
-    this.transparency = 1;
+    this.body = body;
 
     this.status = EnemyStatus.IDLE;
     this.animationAngle = 0;
-
-    if (playerCoord != null) {
-      this.destination = playerCoord;
-    } else {
-      this.destination = new FloatPair(posX, posY);
-      this.floatDestination = new FloatPair(posX, posY);
-    }
+    setRenderer(MyGame.getInstance().getGameZone().getRenderer());
   }
 
   @Override
   public void act(float delta) {
-    state.apply(skeleton);
-    skeleton.updateWorldTransform();
-
     if (!status.equals(EnemyStatus.IDLE)) {
-      state.update(Gdx.graphics.getDeltaTime());
+      getAnimationState().update(Gdx.graphics.getDeltaTime());
     }
 
     if (hp <= 0 && !status.equals(EnemyStatus.DIED)) {
       status = EnemyStatus.DIED;
       Gdx.app.postRunnable(() -> body.setActive(false));
-      state.setAnimation(0, "dead", false);
+      getAnimationState().setAnimation(0, "dead", false);
     }
 
     if (!status.equals(EnemyStatus.DIED) && body != null) {
       body.setAwake(true);
       updateEnemyHp();
-      updateEnemyPos();
       enemyScript.apply(this,
           new FloatPair(PlayerService.getInstance().getBodyPosX(), PlayerService.getInstance().getBodyPosY()));
-      skeleton.setPosition(posX * WORLD_TO_VIEW, posY * WORLD_TO_VIEW);
+      setPosition( body.getPosition().x * WORLD_TO_VIEW, body.getPosition().y * WORLD_TO_VIEW);
     } else if (body != null && !body.getFixtureList().isEmpty()) {
       handleDeath();
     }
+
     if (needDispose){
       remove();
-      skeleton = null;
-      state = null;
+      setSkeleton(null);
+      setAnimationState(null);
+    } else {
+      super.act(delta);
     }
-    super.act(delta);
   }
 
   private void handleDeath() {
@@ -183,11 +126,6 @@ public class Enemy extends Image {
     MyGame.getInstance().getGameZone().getEnemyService().getRewardPointCount().addAndGet(this.getRewardPoint());
   }
 
-  private void updateEnemyPos() {
-    posX = body.getPosition().x;
-    posY = body.getPosition().y;
-  }
-
   private void updateEnemyHp() {
     if (body.getFixtureList().get(0).getUserData() instanceof BodyUserData) {
       BodyUserData userData = (BodyUserData) body.getFixtureList().get(0).getUserData();
@@ -196,11 +134,6 @@ public class Enemy extends Image {
         userData.setDamage(0);
       }
     }
-  }
-
-  @Override
-  public void draw(Batch batch, float parentAlpha) {
-    MyGame.getInstance().getGameZone().getRenderer().draw(batch, skeleton);
   }
 
   class ThreadForTransparency extends Thread {
@@ -213,8 +146,8 @@ public class Enemy extends Image {
     @SneakyThrows
     @Override
     public void run() {
-      while (skeleton.getColor().a > 0.05f) {
-        skeleton.getColor().a = skeleton.getColor().a - 0.05f;
+      while (getSkeleton().getColor().a > 0.05f) {
+        getSkeleton().getColor().a = getSkeleton().getColor().a - 0.05f;
         Thread.sleep(100);
       }
       needDispose = true;

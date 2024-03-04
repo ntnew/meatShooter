@@ -23,6 +23,5 @@ public class BloodSpot extends Image {
 
   @Override
   public void act(float delta) {
-//    super.act(delta);
   }
 }
